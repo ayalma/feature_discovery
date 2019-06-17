@@ -1,12 +1,17 @@
 import 'package:feature_discovery/feature_discovery.dart';
 import 'package:flutter/material.dart';
-
-void main() => runApp(MyApp());
+import 'package:flutter/scheduler.dart';
 
 final feature1 = "FEATURE_1";
 final feature2 = "FEATURE_2";
 final feature3 = "FEATURE_3";
 final feature4 = "FEATURE_4";
+
+void main() {
+  timeDilation = 1.0;
+  runApp(MyApp());
+}
+
 
 class MyApp extends StatelessWidget {
   @override
@@ -41,8 +46,8 @@ class _MyHomePageState extends State<MyHomePage> {
             featureId: feature1,
             icon: Icons.menu,
             color: Colors.green,
-            title: 'The Title',
-            description: 'The Description',
+            title: 'Just how you want it',
+            description: 'Tap the menu icon to switch account, change setting & more.',
             child: IconButton(
               icon: Icon(Icons.menu),
               onPressed: () {},
@@ -53,8 +58,8 @@ class _MyHomePageState extends State<MyHomePage> {
               featureId: feature2,
               icon: Icons.search,
               color: Colors.green,
-              title: 'The Title',
-              description: 'The Description',
+              title: 'Search your compounds',
+              description: 'Tap the magnifying glass to quickly scan your compounds',
               child: IconButton(
                 icon: Icon(Icons.search),
                 onPressed: () {},
@@ -67,8 +72,8 @@ class _MyHomePageState extends State<MyHomePage> {
           featureId: feature3,
           icon: Icons.menu,
           color: Colors.green,
-          title: 'The Title',
-          description: 'The Description',
+          title: 'FAB feature',
+          description: 'This is FAB and it does stuff.',
           child: FloatingActionButton(
             onPressed: () {},
             tooltip: 'Increment',
@@ -141,14 +146,19 @@ class _ContentState extends State<Content> {
         Positioned(
           top: 200.0,
           right: 0.0,
-          child: DescribedFeatureOverlay(
-            featureId: feature4,
-            icon: Icons.drive_eta,
-            color: Colors.green,
-            title: 'The Title',
-            description: 'The Description',
-            child: FractionalTranslation(
-              translation: const Offset(-.5, -0.5),
+          child: FractionalTranslation(
+            translation: const Offset(-.5, -0.5),
+            child: DescribedFeatureOverlay(
+              featureId: feature4,
+              icon: Icons.drive_eta,
+              color: Colors.green,
+              doAction:(f){
+                print('ha ha ha ');
+                f();
+
+              },
+              title: 'Find the fastest route',
+              description: 'Get car, walking, cycling or public transit directions to this place.',
               child: FloatingActionButton(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.blue,
