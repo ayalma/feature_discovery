@@ -104,9 +104,109 @@ class DescribedFeatureOverlay extends StatefulWidget {
       _DescribedFeatureOverlayState();
 }
 
-class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> {
+class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
+    with TickerProviderStateMixin {
   Size screenSize;
   bool showOverlay = false;
+  _OverlayState state = _OverlayState.closed;
+  double transitionPercent = 1.0;
+
+  AnimationController openController;
+  AnimationController activationController;
+  AnimationController dismissController;
+  AnimationController pulseController;
+
+  @override
+  void initState() {
+    super.initState();
+    initAnimationControllers();
+    openController.forward();
+  }
+
+  void initAnimationControllers() {
+    openController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
+          ..addListener(
+            () {
+              setState(() {
+                transitionPercent = openController.value;
+              });
+            },
+          )
+          ..addStatusListener(
+            (AnimationStatus status) {
+              if (status == AnimationStatus.forward) {
+                setState(() {
+                  state = _OverlayState.opening;
+                });
+              } else if (status == AnimationStatus.completed) {
+                pulseController.forward(from: 0.0);
+              }
+            },
+          );
+
+    pulseController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 1000))
+          ..addListener(
+            () {
+              setState(() {
+                transitionPercent = pulseController.value;
+              });
+            },
+          )
+          ..addStatusListener(
+            (AnimationStatus status) {
+              if (status == AnimationStatus.forward) {
+                setState(() {
+                  state = _OverlayState.pulsing;
+                });
+              } else if (status == AnimationStatus.completed) {
+                pulseController.forward(from: 0.0);
+              }
+            },
+          );
+    activationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
+          ..addListener(
+            () {
+              setState(() {
+                transitionPercent = activationController.value;
+              });
+            },
+          )
+          ..addStatusListener(
+            (AnimationStatus status) {
+              if (status == AnimationStatus.forward) {
+                setState(() {
+                  state = _OverlayState.activating;
+                });
+              } else if (status == AnimationStatus.completed) {
+                FeatureDiscovery.markStepComplete(context, widget.featureId);
+              }
+            },
+          );
+
+    dismissController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
+          ..addListener(
+            () {
+              setState(() {
+                transitionPercent = dismissController.value;
+              });
+            },
+          )
+          ..addStatusListener(
+            (AnimationStatus status) {
+              if (status == AnimationStatus.forward) {
+                setState(() {
+                  state = _OverlayState.dismissing;
+                });
+              } else if (status == AnimationStatus.completed) {
+                FeatureDiscovery.dismiss(context);
+              }
+            },
+          );
+  }
 
   @override
   void didChangeDependencies() {
@@ -120,14 +220,19 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> {
     setState(() {
       showOverlay = activeStep == widget.featureId;
     });
+    if (activeStep == widget.featureId) {
+      openController.forward(from: 0.0);
+    }
   }
 
   void activate() {
-    FeatureDiscovery.markStepComplete(context, widget.featureId);
+    pulseController.stop();
+    activationController.forward(from: 0.0);
   }
 
   void dismiss() {
-    FeatureDiscovery.dismiss(context);
+    pulseController.stop();
+    dismissController.forward(from: 0.0);
   }
 
   Widget _buildOverlay(Offset anchor) {
@@ -142,23 +247,30 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> {
           ),
         ),
         _Background(
-          state: _OverlayState.opening,
-          transitionPercent: 1.0,
+          state: state,
+          transitionPercent: transitionPercent,
           anchor: anchor,
           color: widget.color,
           screenSize: screenSize,
         ),
         _Content(
-          state: _OverlayState.opening,
-          transitionPercent: 1.0,
+          state: state,
+          transitionPercent: transitionPercent,
           anchor: anchor,
           screenSize: screenSize,
           touchTargetRadius: 44.0,
           touchTargetToContentPadding: 20.0,
+          title: widget.title,
+          description: widget.description,
+        ),
+        _Pulse(
+          state: state,
+          transitionPercent: transitionPercent,
+          anchor: anchor,
         ),
         _TouchTarget(
-          state: _OverlayState.opening,
-          transitionPercent: 1.0,
+          state: state,
+          transitionPercent: transitionPercent,
           anchor: anchor,
           icon: widget.icon,
           color: widget.color,
@@ -207,29 +319,142 @@ class _Background extends StatelessWidget {
     return position.dx < (screenSize.width / 2.0);
   }
 
-  @override
-  Widget build(BuildContext context) {
+  double radius() {
     final isBackgroundCentered = isCloseToTopOrBottom(anchor);
     final backgroundRadius =
         screenSize.width * (isBackgroundCentered ? 1.0 : 0.75);
+    switch (state) {
+      case _OverlayState.opening:
+        return backgroundRadius * transitionPercent;
+      case _OverlayState.activating:
+        return backgroundRadius + transitionPercent * 40.0;
+      case _OverlayState.dismissing:
+        return backgroundRadius * (1 - transitionPercent);
+      default:
+        return backgroundRadius;
+    }
+  }
 
-    final backgroundPosition = isBackgroundCentered
-        ? anchor
-        : new Offset(
-            screenSize.width / 2.0 +
-                (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
-            anchor.dy +
-                (isOnTopHalfOfScreen(anchor)
-                    ? -(screenSize.width / 2) + 40.0
-                    : (screenSize.width / 20.0) - 40.0));
+  Offset backgroundPosition() {
+    final isBackgroundCentered = isCloseToTopOrBottom(anchor);
+
+    if (isBackgroundCentered) {
+      return anchor;
+    } else {
+      final startingBackgroundPosition = anchor;
+      final endingBackgroundPosition = Offset(
+          screenSize.width / 2.0 +
+              (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
+          anchor.dy +
+              (isOnTopHalfOfScreen(anchor)
+                  ? -(screenSize.width / 2) + 40.0
+                  : (screenSize.width / 20.0) - 40.0));
+
+      switch (state) {
+        case _OverlayState.opening:
+          return Offset.lerp(startingBackgroundPosition,
+              endingBackgroundPosition, transitionPercent);
+        case _OverlayState.activating:
+          return endingBackgroundPosition;
+        case _OverlayState.dismissing:
+          return Offset.lerp(endingBackgroundPosition,
+              startingBackgroundPosition, transitionPercent);
+        default:
+          return endingBackgroundPosition;
+      }
+    }
+  }
+
+  double backgroundOpacity() {
+    switch (state) {
+      case _OverlayState.opening:
+        return 0.96 * transitionPercent;
+
+      case _OverlayState.activating:
+        return 0.96 * (1 - transitionPercent);
+      case _OverlayState.dismissing:
+        return 0.96 * (1 - transitionPercent);
+      default:
+        return 0.96;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (state == _OverlayState.closed) {
+      return Container();
+    }
 
     return CenterAbout(
-      position: backgroundPosition,
+      position: backgroundPosition(),
       child: Container(
-        width: 2 * backgroundRadius,
-        height: 2 * backgroundRadius,
+        width: 2 * radius(),
+        height: 2 * radius(),
         decoration: BoxDecoration(
-            shape: BoxShape.circle, color: color.withOpacity(0.96)),
+            shape: BoxShape.circle,
+            color: color.withOpacity(backgroundOpacity())),
+      ),
+    );
+  }
+}
+
+class _Pulse extends StatelessWidget {
+  final _OverlayState state;
+  final double transitionPercent;
+  final Offset anchor;
+
+  const _Pulse({
+    this.state,
+    this.transitionPercent,
+    this.anchor,
+  });
+
+  double radius() {
+    switch (state) {
+      case _OverlayState.pulsing:
+        double expandedPercent;
+        if (transitionPercent >= 0.3 && transitionPercent <= 0.8) {
+          expandedPercent = (transitionPercent - 0.3) / 0.5;
+        } else {
+          expandedPercent = 0.0;
+        }
+        return 44.0 + (35.0 * expandedPercent);
+      case _OverlayState.dismissing:
+      case _OverlayState.activating:
+        return (44.0 + 35.0) * (1.0 - transitionPercent);
+      default:
+        return 0.0;
+    }
+  }
+
+  double opacity() {
+    switch (state) {
+      case _OverlayState.pulsing:
+        final percentOpaque =
+            1.0 - ((transitionPercent.clamp(0.3, 0.8) - 0.3) / 0.5);
+        return (percentOpaque * 0.75).clamp(0.0, 1.0);
+      case _OverlayState.activating:
+      case _OverlayState.dismissing:
+        return ((1.0 - transitionPercent) * 0.5).clamp(0.0, 1.0);
+      default:
+        return 0.0;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (state == _OverlayState.closed) {
+      return Container();
+    }
+    return CenterAbout(
+      position: anchor,
+      child: Container(
+        width: radius() * 2,
+        height: radius() * 2,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withOpacity(opacity()),
+        ),
       ),
     );
   }
@@ -252,14 +477,38 @@ class _TouchTarget extends StatelessWidget {
     this.transitionPercent,
   });
 
+  double radius() {
+    switch (state) {
+      case _OverlayState.closed:
+        return 0.0;
+      case _OverlayState.opening:
+        return 44.0 * transitionPercent;
+      case _OverlayState.pulsing:
+        double expandedPercent;
+        if (transitionPercent < 0.3) {
+          expandedPercent = transitionPercent / 0.3;
+        } else if (transitionPercent < 0.6) {
+          expandedPercent = 1.0 - ((transitionPercent - 0.3) / 0.3);
+        } else {
+          expandedPercent = 0.0;
+        }
+        return 44.0 + (20.0 * expandedPercent);
+      case _OverlayState.activating:
+        return 44.0 * (1 - transitionPercent);
+      case _OverlayState.dismissing:
+        return 44.0 * (1 - transitionPercent);
+      default:
+        return 44.0;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final touchTargetRadius = 44.0;
     return CenterAbout(
       position: anchor,
       child: Container(
-        height: 2 * touchTargetRadius,
-        width: 2 * touchTargetRadius,
+        height: 2 * radius(),
+        width: 2 * radius(),
         child: RawMaterialButton(
           fillColor: Colors.white,
           shape: CircleBorder(),
@@ -320,6 +569,21 @@ class _Content extends StatelessWidget {
     }
   }
 
+  double opacity() {
+    switch (state) {
+      case _OverlayState.closed:
+        return 0.0;
+      case _OverlayState.opening:
+        return transitionPercent;
+      case _OverlayState.activating:
+        return 1.0 - transitionPercent;
+      case _OverlayState.dismissing:
+        return 1.0 - transitionPercent;
+      default:
+        return 1.0;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final contentOrientation = getContentOrientation(anchor);
@@ -335,31 +599,34 @@ class _Content extends StatelessWidget {
       top: contentY,
       child: FractionalTranslation(
         translation: Offset(0.0, contentFractionalOffset),
-        child: Material(
-          color: Colors.transparent,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 40.0, right: 40.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      color: Colors.white,
+        child: Opacity(
+          opacity: opacity(),
+          child: Material(
+            color: Colors.transparent,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 40.0, right: 40.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                ),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    color: Colors.white.withOpacity(0.9),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      color: Colors.white.withOpacity(0.9),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
