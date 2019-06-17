@@ -1,3 +1,4 @@
+import 'package:feature_discovery/feature_discovery.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
@@ -51,10 +52,19 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
         body: Content(),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          tooltip: 'Increment',
-          child: Icon(Icons.add),
+        floatingActionButton: AnchoredOverlay(
+          showOverlay: true,
+          overlayBuilder: (BuildContext context, Offset anchor) {
+            return CenterAbout(
+              position: anchor,
+              child: Text('Hello?'),
+            );
+          },
+          child: FloatingActionButton(
+            onPressed: () {},
+            tooltip: 'Increment',
+            child: Icon(Icons.add),
+          ),
         ),
       ),
     );
@@ -135,98 +145,5 @@ class _ContentState extends State<Content> {
         ),
       ],
     );
-  }
-}
-
-class CenterAbout extends StatelessWidget {
-  final Offset position;
-  final Widget child;
-
-  const CenterAbout({Key key, this.position, this.child}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: position.dy,
-      left: position.dx,
-      child: new FractionalTranslation(
-        translation: const Offset(-0.5, -0.5),
-        child: child,
-      ),
-    );
-  }
-}
-
-class OverlayBuilder extends StatefulWidget {
-  final bool showOverlay;
-  final Function(BuildContext context) overlayBuilder;
-  final Widget child;
-
-  const OverlayBuilder(
-      {Key key, this.showOverlay = false, this.overlayBuilder, this.child})
-      : super(key: key);
-
-  @override
-  _OverlayBuilderState createState() => _OverlayBuilderState();
-}
-
-class _OverlayBuilderState extends State<OverlayBuilder> {
-  OverlayEntry overlayEntry;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.showOverlay) {
-      showOverlay();
-    }
-  }
-
-  @override
-  void didUpdateWidget(OverlayBuilder oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    syncWidgetAndOverlay();
-  }
-
-  @override
-  void reassemble() {
-    super.reassemble();
-    syncWidgetAndOverlay();
-  }
-
-  @override
-  void dispose() {
-    if (isShowingOverlay()) {
-      hideOverlay();
-    }
-    super.dispose();
-  }
-
-  bool isShowingOverlay() => overlayEntry != null;
-
-  void showOverlay() {
-    overlayEntry = OverlayEntry(
-      builder: widget.overlayBuilder,
-    );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Overlay.of(context).insert(overlayEntry);
-    });
-  }
-
-  void hideOverlay() {
-    overlayEntry.remove();
-    overlayEntry = null;
-  }
-
-  void syncWidgetAndOverlay() {
-    if (isShowingOverlay() && !widget.showOverlay) {
-      hideOverlay();
-    } else if (!isShowingOverlay() && widget.showOverlay) {
-      showOverlay();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
   }
 }
