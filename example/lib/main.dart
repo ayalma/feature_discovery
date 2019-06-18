@@ -6,12 +6,12 @@ final feature1 = "FEATURE_1";
 final feature2 = "FEATURE_2";
 final feature3 = "FEATURE_3";
 final feature4 = "FEATURE_4";
+final feature5 = "FEATURE_5";
 
 void main() {
   timeDilation = 1.0;
   runApp(MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   @override
@@ -47,7 +47,8 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: Icons.menu,
             color: Colors.green,
             title: 'Just how you want it',
-            description: 'Tap the menu icon to switch account, change setting & more.',
+            description:
+                'Tap the menu icon to switch account, change setting & more.',
             child: IconButton(
               icon: Icon(Icons.menu),
               onPressed: () {},
@@ -59,7 +60,8 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icons.search,
               color: Colors.green,
               title: 'Search your compounds',
-              description: 'Tap the magnifying glass to quickly scan your compounds',
+              description:
+                  'Tap the magnifying glass to quickly scan your compounds',
               child: IconButton(
                 icon: Icon(Icons.search),
                 onPressed: () {},
@@ -133,12 +135,26 @@ class _ContentState extends State<Content> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16.0),
-              child: RaisedButton(
-                child: Text('Do Feature Discavery'),
-                onPressed: () {
-                  FeatureDiscovery.discoverFeatures(
-                    context, [feature1, feature2, feature3, feature4],);
+              child: DescribedFeatureOverlay(
+                featureId: feature5,
+                icon: Icons.drive_eta,
+                color: Colors.green,
+                doAction: (f) {
+                  print('ha ha ha ');
+                  f();
                 },
+                title: 'ويژگی ها را کشف کنید',
+                description:
+                    'با استفاده از این دکمه ویژگی ها برنامه را کشف کنید',
+                child: RaisedButton(
+                  child: Text('Do Feature Discavery'),
+                  onPressed: () {
+                    FeatureDiscovery.discoverFeatures(
+                      context,
+                      [feature1, feature2, feature3, feature4, feature5],
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -152,13 +168,13 @@ class _ContentState extends State<Content> {
               featureId: feature4,
               icon: Icons.drive_eta,
               color: Colors.green,
-              doAction:(f){
+              doAction: (f) {
                 print('ha ha ha ');
                 f();
-
               },
               title: 'Find the fastest route',
-              description: 'Get car, walking, cycling or public transit directions to this place.',
+              description:
+                  'Get car, walking, cycling or public transit directions to this place.',
               child: FloatingActionButton(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.blue,
@@ -174,5 +190,3 @@ class _ContentState extends State<Content> {
     );
   }
 }
-
-

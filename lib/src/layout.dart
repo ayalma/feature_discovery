@@ -95,7 +95,7 @@ class _OverlayBuilderState extends State<OverlayBuilder> {
 
   bool isShowingOverlay() => overlayEntry != null;
 
-  void showOverlay()  {
+  void showOverlay() {
     overlayEntry = OverlayEntry(
       builder: widget.overlayBuilder,
     );
@@ -123,9 +123,9 @@ class _OverlayBuilderState extends State<OverlayBuilder> {
 
   @override
   Widget build(BuildContext context) {
-   WidgetsBinding.instance.addPostFrameCallback((_){
-     buildOverlay();
-   });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      buildOverlay();
+    });
     return widget.child;
   }
 }

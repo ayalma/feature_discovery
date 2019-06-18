@@ -90,7 +90,6 @@ class DescribedFeatureOverlay extends StatefulWidget {
   final Function(VoidCallback onActionComplated) doAction;
   final Widget child;
 
-
   const DescribedFeatureOverlay(
       {Key key,
       this.featureId,
@@ -98,7 +97,8 @@ class DescribedFeatureOverlay extends StatefulWidget {
       this.color,
       this.title,
       this.description,
-      this.child, this.doAction})
+      this.child,
+      this.doAction})
       : super(key: key);
 
   @override
@@ -167,33 +167,32 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
               }
             },
           );
-    activationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
-          ..addListener(
-            () {
-              setState(() {
-                transitionPercent = activationController.value;
+    activationController = AnimationController(
+        vsync: this, duration: Duration(milliseconds: 250))
+      ..addListener(
+        () {
+          setState(() {
+            transitionPercent = activationController.value;
+          });
+        },
+      )
+      ..addStatusListener(
+        (AnimationStatus status) {
+          if (status == AnimationStatus.forward) {
+            setState(() {
+              state = _OverlayState.activating;
+            });
+          } else if (status == AnimationStatus.completed) {
+            if (widget.doAction == null) {
+              FeatureDiscovery.markStepComplete(context, widget.featureId);
+            } else {
+              widget.doAction(() {
+                FeatureDiscovery.markStepComplete(context, widget.featureId);
               });
-            },
-          )
-          ..addStatusListener(
-            (AnimationStatus status) {
-              if (status == AnimationStatus.forward) {
-                setState(() {
-                  state = _OverlayState.activating;
-                });
-              } else if (status == AnimationStatus.completed) {
-                if(widget.doAction == null) {
-                  FeatureDiscovery.markStepComplete(context, widget.featureId);
-                }
-                else{
-                  widget.doAction((){
-                    FeatureDiscovery.markStepComplete(context, widget.featureId);
-                  });
-                }
-              }
-            },
-          );
+            }
+          }
+        },
+      );
 
     dismissController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 250))
@@ -334,7 +333,8 @@ class _Background extends StatelessWidget {
         screenSize.width * (isBackgroundCentered ? 1.0 : 0.75);
     switch (state) {
       case _OverlayState.opening:
-        final adjustedPercent = const Interval(0.0,0.8,curve: Curves.easeOut).transform(transitionPercent);
+        final adjustedPercent = const Interval(0.0, 0.8, curve: Curves.easeOut)
+            .transform(transitionPercent);
         return backgroundRadius * adjustedPercent;
       case _OverlayState.activating:
         return backgroundRadius + transitionPercent * 40.0;
@@ -362,7 +362,9 @@ class _Background extends StatelessWidget {
 
       switch (state) {
         case _OverlayState.opening:
-          final adjustedPercent = const Interval(0.0,0.8,curve: Curves.easeOut).transform(transitionPercent);
+          final adjustedPercent =
+              const Interval(0.0, 0.8, curve: Curves.easeOut)
+                  .transform(transitionPercent);
           return Offset.lerp(startingBackgroundPosition,
               endingBackgroundPosition, adjustedPercent);
         case _OverlayState.activating:
@@ -379,15 +381,18 @@ class _Background extends StatelessWidget {
   double backgroundOpacity() {
     switch (state) {
       case _OverlayState.opening:
-        final adjustedPercent = const Interval(0.0,0.3,curve: Curves.easeOut).transform(transitionPercent);
+        final adjustedPercent = const Interval(0.0, 0.3, curve: Curves.easeOut)
+            .transform(transitionPercent);
         return 0.96 * adjustedPercent;
 
       case _OverlayState.activating:
-        final adjustedPercent = const Interval(0.1,0.6,curve: Curves.easeOut).transform(transitionPercent);
+        final adjustedPercent = const Interval(0.1, 0.6, curve: Curves.easeOut)
+            .transform(transitionPercent);
 
         return 0.96 * (1 - adjustedPercent);
       case _OverlayState.dismissing:
-        final adjustedPercent = const Interval(0.2,1.0,curve: Curves.easeOut).transform(transitionPercent);
+        final adjustedPercent = const Interval(0.2, 1.0, curve: Curves.easeOut)
+            .transform(transitionPercent);
         return 0.96 * (1 - adjustedPercent);
       default:
         return 0.96;
@@ -436,7 +441,7 @@ class _Pulse extends StatelessWidget {
         return 44.0 + (35.0 * expandedPercent);
       case _OverlayState.dismissing:
       case _OverlayState.activating:
-        return 0.0;//(44.0 + 35.0) * (1.0 - transitionPercent);
+        return 0.0; //(44.0 + 35.0) * (1.0 - transitionPercent);
       default:
         return 0.0;
     }
@@ -450,7 +455,7 @@ class _Pulse extends StatelessWidget {
         return (percentOpaque * 0.75).clamp(0.0, 1.0);
       case _OverlayState.activating:
       case _OverlayState.dismissing:
-        return 0.0;//((1.0 - transitionPercent) * 0.5).clamp(0.0, 1.0);
+        return 0.0; //((1.0 - transitionPercent) * 0.5).clamp(0.0, 1.0);
       default:
         return 0.0;
     }
@@ -492,17 +497,18 @@ class _TouchTarget extends StatelessWidget {
     this.transitionPercent,
   });
 
-  double opacity(){
-    switch(state)
-    {
+  double opacity() {
+    switch (state) {
       case _OverlayState.opening:
-        return  const Interval(0.0, 0.3,curve: Curves.easeOut).transform(transitionPercent);
+        return const Interval(0.0, 0.3, curve: Curves.easeOut)
+            .transform(transitionPercent);
       case _OverlayState.activating:
       case _OverlayState.dismissing:
-        return 1.0 - const Interval(0.7, 1.0,curve: Curves.easeOut).transform(transitionPercent);
+        return 1.0 -
+            const Interval(0.7, 1.0, curve: Curves.easeOut)
+                .transform(transitionPercent);
       default:
         return 1.0;
-
     }
   }
 
@@ -605,12 +611,14 @@ class _Content extends StatelessWidget {
       case _OverlayState.closed:
         return 0.0;
       case _OverlayState.opening:
-        final adjustedPercent = const Interval(0.6,1.0,curve: Curves.easeOut).transform(transitionPercent);
+        final adjustedPercent = const Interval(0.6, 1.0, curve: Curves.easeOut)
+            .transform(transitionPercent);
 
         return adjustedPercent;
       case _OverlayState.activating:
       case _OverlayState.dismissing:
-        final adjustedPercent = const Interval(0.0,0.4,curve: Curves.easeOut).transform(transitionPercent);
+        final adjustedPercent = const Interval(0.0, 0.4, curve: Curves.easeOut)
+            .transform(transitionPercent);
         return 1.0 - adjustedPercent;
       default:
         return 1.0;
