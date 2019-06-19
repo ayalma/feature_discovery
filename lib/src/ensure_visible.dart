@@ -24,23 +24,18 @@ class EnsureVisible extends StatefulWidget {
 
   @override
   EnsureVisibleState createState() => EnsureVisibleState();
+
+  static void ensureVisible(BuildContext context) {
+    EnsureVisibleState state =
+        context.ancestorStateOfType(TypeMatcher<EnsureVisibleState>())
+            as EnsureVisibleState;
+
+    state.ensureVisible();
+  }
 }
 
 class EnsureVisibleState extends State<EnsureVisible> {
-  @override
-  void initState() {
-    super.initState();
-    //  widget.focusNode.addListener(_ensureVisible);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    //  widget.focusNode.removeListener(_ensureVisible);
-  }
-
-   ensureVisible()  {
-
+  ensureVisible() {
     final RenderObject object = context.findRenderObject();
     final RenderAbstractViewport viewport = RenderAbstractViewport.of(object);
     assert(viewport != null);

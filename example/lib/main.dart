@@ -177,9 +177,9 @@ class _ContentState extends State<Content> {
                       done();
                     });
                   },
-                  title: 'ويژگی ها را کشف کنید',
+                  title: 'Discover Featurs',
                   description:
-                      'با استفاده از این دکمه ویژگی ها برنامه را کشف کنید',
+                      'Find all available feature in this application with this button.',
                   child: EnsureVisible(
                     key: ensureKey,
                     child: RaisedButton(
@@ -187,7 +187,14 @@ class _ContentState extends State<Content> {
                       onPressed: () {
                         FeatureDiscovery.discoverFeatures(
                           context,
-                          [feature1, feature2, feature3, feature4,feature6, feature5],
+                          [
+                            feature1,
+                            feature2,
+                            feature3,
+                            feature4,
+                            feature6,
+                            feature5
+                          ],
                         );
                       },
                     ),
