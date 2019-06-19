@@ -7,6 +7,7 @@ final feature2 = "FEATURE_2";
 final feature3 = "FEATURE_3";
 final feature4 = "FEATURE_4";
 final feature5 = "FEATURE_5";
+final feature6 = "FEATURE_6";
 
 void main() {
   timeDilation = 1.0;
@@ -93,71 +94,136 @@ class Content extends StatefulWidget {
 }
 
 class _ContentState extends State<Content> {
+  GlobalKey<EnsureVisibleState> ensureKey;
+  GlobalKey<EnsureVisibleState> ensureKey2;
+
+  @override
+  void initState() {
+    ensureKey = GlobalKey<EnsureVisibleState>();
+    ensureKey2 = GlobalKey<EnsureVisibleState>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FeatureDiscovery.discoverFeatures(
+        context,
+        [feature1, feature2, feature3, feature4, feature6, feature5],
+      );
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Column(
-          children: <Widget>[
-            Image.network(
-              'https://www.balboaisland.com/wp-content/uploads/dish-republic-balboa-island-newport-beach-ca-496x303.jpg',
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: 200.0,
-            ),
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(16.0),
-              color: Colors.blue,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Text(
-                      'DISH REPUBLIC',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24.0,
+        SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              Image.network(
+                'https://www.balboaisland.com/wp-content/uploads/dish-republic-balboa-island-newport-beach-ca-496x303.jpg',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: 200.0,
+              ),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(16.0),
+                color: Colors.blue,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Text(
+                        'DISH REPUBLIC',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24.0,
+                        ),
                       ),
                     ),
-                  ),
-                  Text(
-                    'Eat',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.0,
+                    Text(
+                      'Eat',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                height: 600.0,
+                color: Colors.orangeAccent,
+              ),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                child: DescribedFeatureOverlay(
+                  featureId: feature5,
+                  icon: Icons.drive_eta,
+                  color: Colors.green,
+                  doAction: (f) {
+                    print('ha ha ha ');
+                    f();
+                  },
+                  prepareAction: (done) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      ensureKey.currentState.ensureVisible();
+                      done();
+                    });
+                  },
+                  title: 'ويژگی ها را کشف کنید',
+                  description:
+                      'با استفاده از این دکمه ویژگی ها برنامه را کشف کنید',
+                  child: EnsureVisible(
+                    key: ensureKey,
+                    child: RaisedButton(
+                      child: Text('Do Feature Discavery'),
+                      onPressed: () {
+                        FeatureDiscovery.discoverFeatures(
+                          context,
+                          [feature1, feature2, feature3, feature4,feature6, feature5],
+                        );
+                      },
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              child: DescribedFeatureOverlay(
-                featureId: feature5,
+              Container(
+                height: 1500,
+                color: Colors.blueAccent,
+              ),
+              DescribedFeatureOverlay(
+                featureId: feature6,
                 icon: Icons.drive_eta,
                 color: Colors.green,
                 doAction: (f) {
                   print('ha ha ha ');
                   f();
                 },
-                title: 'ويژگی ها را کشف کنید',
+                prepareAction: (done) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    ensureKey2.currentState.ensureVisible();
+                    done();
+                  });
+                },
+                title: 'Test text',
                 description:
-                    'با استفاده از این دکمه ویژگی ها برنامه را کشف کنید',
-                child: RaisedButton(
-                  child: Text('Do Feature Discavery'),
-                  onPressed: () {
-                    FeatureDiscovery.discoverFeatures(
-                      context,
-                      [feature1, feature2, feature3, feature4, feature5],
-                    );
-                  },
+                    'This text is just for test and we dont care about it at all.',
+                child: EnsureVisible(
+                  key: ensureKey2,
+                  child: Text(
+                    'Custom text',
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         Positioned(
           top: 200.0,

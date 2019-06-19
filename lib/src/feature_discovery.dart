@@ -88,6 +88,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
   final String title;
   final String description;
   final Function(VoidCallback onActionComplated) doAction;
+  final Function(VoidCallback onActionComplated) prepareAction;
   final Widget child;
 
   const DescribedFeatureOverlay(
@@ -98,7 +99,8 @@ class DescribedFeatureOverlay extends StatefulWidget {
       this.title,
       this.description,
       this.child,
-      this.doAction})
+      this.doAction,
+      this.prepareAction})
       : super(key: key);
 
   @override
@@ -225,11 +227,23 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
   void showOverlayIfActiveStep() {
     String activeStep = FeatureDiscovery.activeStep(context);
-    setState(() {
-      showOverlay = activeStep == widget.featureId;
-    });
-    if (activeStep == widget.featureId) {
-      openController.forward(from: 0.0);
+
+    if (widget.prepareAction != null && activeStep == widget.featureId) {
+      widget.prepareAction(() {
+        setState(() {
+          showOverlay = activeStep == widget.featureId;
+        });
+        if (activeStep == widget.featureId) {
+          openController.forward(from: 0.0);
+        }
+      });
+    } else {
+      setState(() {
+        showOverlay = activeStep == widget.featureId;
+      });
+      if (activeStep == widget.featureId) {
+        openController.forward(from: 0.0);
+      }
     }
   }
 
