@@ -4,6 +4,16 @@ A flutter package that implements material design feature discovery
 
 ## Getting Started
 
+
+For installing this lib add below line to you'r dependency section in pubspec.yaml
+```
+    dependencies:
+      feature_discovery: ^0.3.0
+
+```
+
+
+
 This project is a starting point for a Dart
 [package](https://flutter.dev/developing-packages/),
 a library module containing code that can be shared easily across
