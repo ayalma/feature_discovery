@@ -51,6 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     featureId: feature7,
                     icon: Icons.print,
                     color: Colors.purple,
+                    contentLocation: ContentOrientation.below,
                     title: 'Just how you want it',
                     description:
                         'Tap the menu icon to switch account, change setting & more.Tap the menu icon to switch account, change setting & more.',
@@ -247,6 +248,8 @@ class _ContentState extends State<Content> {
                   ),
                 ),
               ),
+
+              Container(height: 300,color: Colors.red,),
             ],
           ),
         ),

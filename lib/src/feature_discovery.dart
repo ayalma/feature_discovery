@@ -92,6 +92,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
   final Function(VoidCallback onActionComplated) doAction;
   final Function(VoidCallback onActionComplated) prepareAction;
   final Widget child;
+  final ContentOrientation contentLocation;
 
   const DescribedFeatureOverlay(
       {Key key,
@@ -102,7 +103,8 @@ class DescribedFeatureOverlay extends StatefulWidget {
       this.description,
       this.child,
       this.doAction,
-      this.prepareAction})
+      this.prepareAction,
+      this.contentLocation = ContentOrientation.trivial})
       : super(key: key);
 
   @override
@@ -278,6 +280,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           anchor: anchor,
           color: widget.color,
           screenSize: screenSize,
+          orientation: widget.contentLocation,
         ),
         _Content(
           state: state,
@@ -289,6 +292,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           touchTargetToContentPadding: 20.0,
           title: widget.title,
           description: widget.description,
+          orientation: widget.contentLocation,
         ),
         _Pulse(
           state: state,
@@ -325,6 +329,7 @@ class _Background extends StatelessWidget {
   final Offset anchor;
   final Color color;
   final Size screenSize;
+  final ContentOrientation orientation;
 
   const _Background({
     this.anchor,
@@ -332,12 +337,10 @@ class _Background extends StatelessWidget {
     this.screenSize,
     this.state,
     this.transitionPercent,
+    this.orientation,
   });
 
   bool isCloseToTopOrBottom(Offset position) {
-    //  print(
-    //    'dy : ${position.dy} , dx : ${position.dx} , h : ${screenSize.height} , w : ${screenSize.width}');
-
     return position.dy <= 88.0 || (screenSize.height - position.dy) <= 88.0;
   }
 
@@ -352,7 +355,7 @@ class _Background extends StatelessWidget {
   double radius() {
     final isBackgroundCentered = isCloseToTopOrBottom(anchor);
     final backgroundRadius = Math.min(screenSize.width, screenSize.height) *
-        (isBackgroundCentered ? 1.0 : 0.75);
+        (isBackgroundCentered ? 1.0 : 0.7);
     switch (state) {
       case _OverlayState.opening:
         final adjustedPercent = const Interval(0.0, 0.8, curve: Curves.easeOut)
@@ -375,12 +378,28 @@ class _Background extends StatelessWidget {
       return anchor;
     } else {
       final startingBackgroundPosition = anchor;
-      final endingBackgroundPosition = Offset(
-          width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
-          anchor.dy +
-              (isOnTopHalfOfScreen(anchor)
-                  ? -(width / 2) + 40.0
-                  : (width / 20.0) - 40.0));
+
+      var endingBackgroundPosition;
+      switch (orientation) {
+        case ContentOrientation.trivial:
+          endingBackgroundPosition = Offset(
+              width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
+              anchor.dy +
+                  (isOnTopHalfOfScreen(anchor)
+                      ? -(width / 2.0) + 40.0
+                      : (width / 2.0) - 40.0));
+          break;
+        case ContentOrientation.above:
+          endingBackgroundPosition = Offset(
+              width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
+              anchor.dy - (width / 2.0) + 40.0);
+          break;
+        case ContentOrientation.below:
+          endingBackgroundPosition = Offset(
+              width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
+              anchor.dy + (width / 2.0) - 40.0);
+          break;
+      }
 
       switch (state) {
         case _OverlayState.opening:
@@ -592,6 +611,7 @@ class _Content extends StatelessWidget {
   final String title;
   final String description;
   final double statusBarHeight;
+  final ContentOrientation orientation;
 
   const _Content(
       {Key key,
@@ -603,7 +623,8 @@ class _Content extends StatelessWidget {
       this.description,
       this.state,
       this.transitionPercent,
-      this.statusBarHeight})
+      this.statusBarHeight,
+      this.orientation})
       : super(key: key);
 
   bool isCloseToTopOrBottom(Offset position) {
@@ -689,10 +710,23 @@ class _Content extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final contentOrientation = getContentOrientation(anchor);
-    final contentOffsetMultiplier =
-        contentOrientation == DescribedFeatureContentOrientation.below
-            ? 1.0
-            : -1.0;
+    var contentOffsetMultiplier;
+
+    switch (orientation) {
+      case ContentOrientation.trivial:
+        contentOffsetMultiplier =
+            contentOrientation == DescribedFeatureContentOrientation.below
+                ? 1.0
+                : -1.0;
+        break;
+      case ContentOrientation.above:
+        contentOffsetMultiplier = -1.0;
+        break;
+      case ContentOrientation.below:
+        contentOffsetMultiplier = 1.0;
+        break;
+    }
+
     final width = Math.min(screenSize.width, screenSize.height);
 
     final contentY =
@@ -778,4 +812,10 @@ enum _OverlayState {
   pulsing,
   activating,
   dismissing,
+}
+
+enum ContentOrientation {
+  above,
+  below,
+  trivial,
 }
