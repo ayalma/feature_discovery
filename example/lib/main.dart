@@ -8,6 +8,7 @@ final feature3 = "FEATURE_3";
 final feature4 = "FEATURE_4";
 final feature5 = "FEATURE_5";
 final feature6 = "FEATURE_6";
+final feature7 = "FEATURE_7";
 
 void main() {
   timeDilation = 1.0;
@@ -43,6 +44,23 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
+          bottom: PreferredSize(
+            child: Column(
+              children: <Widget>[
+                DescribedFeatureOverlay(
+                    featureId: feature7,
+                    icon: Icons.print,
+                    color: Colors.purple,
+                    title: 'Just how you want it',
+                    description:
+                        'Tap the menu icon to switch account, change setting & more.Tap the menu icon to switch account, change setting & more.',
+                    child: IconButton(
+                      icon: Icon(Icons.print),
+                    ))
+              ],
+            ),
+            preferredSize: Size.fromHeight(80),
+          ),
           leading: DescribedFeatureOverlay(
             featureId: feature1,
             icon: Icons.menu,
@@ -105,7 +123,7 @@ class _ContentState extends State<Content> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FeatureDiscovery.discoverFeatures(
         context,
-        [feature1, feature2, feature3, feature4, feature6, feature5],
+        [feature7, feature1, feature2, feature3, feature4, feature6, feature5],
       );
     });
     super.initState();

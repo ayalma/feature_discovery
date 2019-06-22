@@ -1,3 +1,5 @@
+import 'dart:math' as Math;
+
 import 'package:feature_discovery/src/layout.dart';
 import 'package:flutter/material.dart';
 
@@ -111,6 +113,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
 class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     with TickerProviderStateMixin {
   Size screenSize;
+  double statusBarHeight;
   bool showOverlay = false;
   _OverlayState state = _OverlayState.closed;
   double transitionPercent = 1.0;
@@ -222,6 +225,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   void didChangeDependencies() {
     super.didChangeDependencies();
     screenSize = MediaQuery.of(context).size;
+    statusBarHeight = MediaQuery.of(context).viewInsets.top;
     showOverlayIfActiveStep();
   }
 
@@ -280,6 +284,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           transitionPercent: transitionPercent,
           anchor: anchor,
           screenSize: screenSize,
+          statusBarHeight: statusBarHeight,
           touchTargetRadius: 44.0,
           touchTargetToContentPadding: 20.0,
           title: widget.title,
@@ -330,6 +335,9 @@ class _Background extends StatelessWidget {
   });
 
   bool isCloseToTopOrBottom(Offset position) {
+    //  print(
+    //    'dy : ${position.dy} , dx : ${position.dx} , h : ${screenSize.height} , w : ${screenSize.width}');
+
     return position.dy <= 88.0 || (screenSize.height - position.dy) <= 88.0;
   }
 
@@ -343,8 +351,8 @@ class _Background extends StatelessWidget {
 
   double radius() {
     final isBackgroundCentered = isCloseToTopOrBottom(anchor);
-    final backgroundRadius =
-        screenSize.width * (isBackgroundCentered ? 1.0 : 0.75);
+    final backgroundRadius = Math.min(screenSize.width, screenSize.height) *
+        (isBackgroundCentered ? 1.0 : 0.75);
     switch (state) {
       case _OverlayState.opening:
         final adjustedPercent = const Interval(0.0, 0.8, curve: Curves.easeOut)
@@ -360,6 +368,7 @@ class _Background extends StatelessWidget {
   }
 
   Offset backgroundPosition() {
+    final width = Math.min(screenSize.width, screenSize.height);
     final isBackgroundCentered = isCloseToTopOrBottom(anchor);
 
     if (isBackgroundCentered) {
@@ -367,12 +376,11 @@ class _Background extends StatelessWidget {
     } else {
       final startingBackgroundPosition = anchor;
       final endingBackgroundPosition = Offset(
-          screenSize.width / 2.0 +
-              (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
+          width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
           anchor.dy +
               (isOnTopHalfOfScreen(anchor)
-                  ? -(screenSize.width / 2) + 40.0
-                  : (screenSize.width / 20.0) - 40.0));
+                  ? -(width / 2) + 40.0
+                  : (width / 20.0) - 40.0));
 
       switch (state) {
         case _OverlayState.opening:
@@ -583,6 +591,7 @@ class _Content extends StatelessWidget {
   final double touchTargetToContentPadding;
   final String title;
   final String description;
+  final double statusBarHeight;
 
   const _Content(
       {Key key,
@@ -593,7 +602,8 @@ class _Content extends StatelessWidget {
       this.title,
       this.description,
       this.state,
-      this.transitionPercent})
+      this.transitionPercent,
+      this.statusBarHeight})
       : super(key: key);
 
   bool isCloseToTopOrBottom(Offset position) {
@@ -602,6 +612,10 @@ class _Content extends StatelessWidget {
 
   bool isOnTopHalfOfScreen(Offset position) {
     return position.dy < (screenSize.height / 2.0);
+  }
+
+  bool isOnLeftHalfOfScreen(Offset position) {
+    return position.dx < (screenSize.width / 2.0);
   }
 
   DescribedFeatureContentOrientation getContentOrientation(Offset position) {
@@ -639,6 +653,39 @@ class _Content extends StatelessWidget {
     }
   }
 
+  Offset centerPosition() {
+    final width = Math.min(screenSize.width, screenSize.height);
+    final isBackgroundCentered = isCloseToTopOrBottom(anchor);
+
+    if (isBackgroundCentered) {
+      return anchor;
+    } else {
+      final startingBackgroundPosition = anchor;
+      final endingBackgroundPosition = Offset(
+          width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
+          anchor.dy +
+              (isOnTopHalfOfScreen(anchor)
+                  ? -(width / 2) + 40.0
+                  : (width / 20.0) - 40.0));
+
+      switch (state) {
+        case _OverlayState.opening:
+          final adjustedPercent =
+              const Interval(0.0, 0.8, curve: Curves.easeOut)
+                  .transform(transitionPercent);
+          return Offset.lerp(startingBackgroundPosition,
+              endingBackgroundPosition, adjustedPercent);
+        case _OverlayState.activating:
+          return endingBackgroundPosition;
+        case _OverlayState.dismissing:
+          return Offset.lerp(endingBackgroundPosition,
+              startingBackgroundPosition, transitionPercent);
+        default:
+          return endingBackgroundPosition;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final contentOrientation = getContentOrientation(anchor);
@@ -646,18 +693,24 @@ class _Content extends StatelessWidget {
         contentOrientation == DescribedFeatureContentOrientation.below
             ? 1.0
             : -1.0;
+    final width = Math.min(screenSize.width, screenSize.height);
+
     final contentY =
         anchor.dy + contentOffsetMultiplier * (touchTargetRadius + 20);
+
     final contentFractionalOffset = contentOffsetMultiplier.clamp(-1.0, 0.0);
 
+    final dx = centerPosition().dx - width;
+    final contentX = (dx.isNegative) ? 0.0 : dx;
     return Positioned(
       top: contentY,
+      left: contentX,
       child: FractionalTranslation(
         translation: Offset(0.0, contentFractionalOffset),
         child: Opacity(
           opacity: opacity(),
           child: Container(
-            width: screenSize.width,
+            width: width,
             child: Material(
               color: Colors.transparent,
               child: Padding(
