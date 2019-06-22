@@ -132,6 +132,15 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     openController.forward();
   }
 
+  @override
+  void dispose() {
+    openController.dispose();
+    activationController.dispose();
+    dismissController.dispose();
+    pulseController.dispose();
+    super.dispose();
+  }
+
   void initAnimationControllers() {
     openController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 250))
