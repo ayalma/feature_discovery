@@ -23,6 +23,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
+      builder: (context, child) {
+        return FeatureDiscovery(
+          child: child,
+        );
+      },
       home: MyHomePage(title: 'Flutter Feature Discavery'),
     );
   }
@@ -40,67 +45,66 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return FeatureDiscovery(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-          bottom: PreferredSize(
-            child: Column(
-              children: <Widget>[
-                DescribedFeatureOverlay(
-                    featureId: feature7,
-                    icon: Icons.print,
-                    color: Colors.purple,
-                    contentLocation: ContentOrientation.below,
-                    title: 'Just how you want it',
-                    description:
-                        'Tap the menu icon to switch account, change setting & more.Tap the menu icon to switch account, change setting & more.',
-                    child: IconButton(
-                      icon: Icon(Icons.print),
-                    ))
-              ],
-            ),
-            preferredSize: Size.fromHeight(80),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        bottom: PreferredSize(
+          child: Column(
+            children: <Widget>[
+              DescribedFeatureOverlay(
+                featureId: feature7,
+                icon: Icons.print,
+                color: Colors.purple,
+                contentLocation: ContentOrientation.below,
+                title: 'Just how you want it',
+                description:
+                    'Tap the menu icon to switch account, change setting & more.Tap the menu icon to switch account, change setting & more.',
+                child: IconButton(
+                  icon: Icon(Icons.print),
+                ),
+              ),
+            ],
           ),
-          leading: DescribedFeatureOverlay(
-            featureId: feature1,
-            icon: Icons.menu,
+          preferredSize: Size.fromHeight(80),
+        ),
+        leading: DescribedFeatureOverlay(
+          featureId: feature1,
+          icon: Icons.menu,
+          color: Colors.green,
+          title: 'Just how you want it',
+          description:
+              'Tap the menu icon to switch account, change setting & more.',
+          child: IconButton(
+            icon: Icon(Icons.menu),
+            onPressed: () {},
+          ),
+        ),
+        actions: <Widget>[
+          DescribedFeatureOverlay(
+            featureId: feature2,
+            icon: Icons.search,
             color: Colors.green,
-            title: 'Just how you want it',
+            title: 'Search your compounds',
             description:
-                'Tap the menu icon to switch account, change setting & more.',
+                'Tap the magnifying glass to quickly scan your compounds',
             child: IconButton(
-              icon: Icon(Icons.menu),
+              icon: Icon(Icons.search),
               onPressed: () {},
             ),
           ),
-          actions: <Widget>[
-            DescribedFeatureOverlay(
-              featureId: feature2,
-              icon: Icons.search,
-              color: Colors.green,
-              title: 'Search your compounds',
-              description:
-                  'Tap the magnifying glass to quickly scan your compounds',
-              child: IconButton(
-                icon: Icon(Icons.search),
-                onPressed: () {},
-              ),
-            ),
-          ],
-        ),
-        body: Content(),
-        floatingActionButton: DescribedFeatureOverlay(
-          featureId: feature3,
-          icon: Icons.menu,
-          color: Colors.green,
-          title: 'FAB feature',
-          description: 'This is FAB and it does stuff.',
-          child: FloatingActionButton(
-            onPressed: () {},
-            tooltip: 'Increment',
-            child: Icon(Icons.add),
-          ),
+        ],
+      ),
+      body: Content(),
+      floatingActionButton: DescribedFeatureOverlay(
+        featureId: feature3,
+        icon: Icons.menu,
+        color: Colors.green,
+        title: 'FAB feature',
+        description: 'This is FAB and it does stuff.',
+        child: FloatingActionButton(
+          onPressed: () {},
+          tooltip: 'Increment',
+          child: Icon(Icons.add),
         ),
       ),
     );
@@ -248,8 +252,10 @@ class _ContentState extends State<Content> {
                   ),
                 ),
               ),
-
-              Container(height: 300,color: Colors.red,),
+              Container(
+                height: 300,
+                color: Colors.red,
+              ),
             ],
           ),
         ),
