@@ -8,7 +8,7 @@ A flutter package that implements material design feature discovery
 For installing this lib add below line to you'r dependency section in pubspec.yaml
 ```
     dependencies:
-      feature_discovery: ^0.4.0
+      feature_discovery: ^0.4.1
 
 ```
 
@@ -37,7 +37,7 @@ return MaterialApp(
 ### Note :
  Adding feature discovery at this point make it available to all pages
  
-Then wrap you'r desired widget with ``` DescribedFeatureOverlay ``` widget
+Then wrap you'r desired widget with ```DescribedFeatureOverlay``` widget
 like that :
 ```
    DescribedFeatureOverlay(
@@ -69,17 +69,17 @@ Then in initState method of you'r widget call
 ### Note 
 
 #### contentLocation :
-    we use this property for placing the content text in proper position when 
+   we use this property for placing the content text in proper position when 
     lib can't do it (because of text width and height measurement  issue in flutter )
     
-    ContentOrientation.below : move content to  below of target
-    ContentOrientation.above : move content to above of target
-    ContentOrientation.trivial : let lib decide
+   ContentOrientation.below : move content to  below of target
+   ContentOrientation.above : move content to above of target
+   ContentOrientation.trivial : let lib decide
     
 ## Bonus 
 
-    When you'r desired target is in scrollable content and is hidden when the feature discovery runs
-    you can use ``` EnsureVisible ``` widget like that
+   When you'r desired target is in scrollable content and is hidden when the feature discovery runs
+    you can use ```EnsureVisible``` widget like that
     
     ```
        var  ensureKey2 = GlobalKey<EnsureVisibleState>();
@@ -109,7 +109,7 @@ Then in initState method of you'r widget call
                   ),
     
     ```
-## Thank you [mattcarroll](https://medium.com/@mattcarroll) for your awesome video about feature discovery
+## Thank you [mattcarroll](https://medium.com/@mattcarroll) for you'r awesome video about feature discovery
  
 
 This project is a starting point for a Dart
