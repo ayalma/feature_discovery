@@ -81,7 +81,7 @@ Then in initState method of you'r widget call
    When you'r desired target is in scrollable content and is hidden when the feature discovery runs
     you can use ```EnsureVisible``` widget like that
     
-    ```
+   ```
        var  ensureKey2 = GlobalKey<EnsureVisibleState>();
        DescribedFeatureOverlay(
                     featureId: 'id',
@@ -108,7 +108,7 @@ Then in initState method of you'r widget call
                     ),
                   ),
     
-    ```
+   ```
 ## Thank you [mattcarroll](https://medium.com/@mattcarroll) for you'r awesome video about feature discovery
  
 
