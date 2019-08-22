@@ -12,12 +12,15 @@ class FeatureDiscovery extends StatefulWidget {
         .activeStepId;
   }
 
-  static void discoverFeatures(BuildContext context, List<String> steps) {
+  /// Steps are the featureIds of the overlays.
+  /// Though they can be placed in any [Iterable], it is recommended to pass them as a [Set], as they have to be unique
+  static void discoverFeatures(BuildContext context, Iterable<String> steps) {
+    assert(steps.toSet().length == steps.length, "Feature ids must be unique"); 
     _FeatureDiscoveryState state =
         context.ancestorStateOfType(TypeMatcher<_FeatureDiscoveryState>())
             as _FeatureDiscoveryState;
 
-    state.discoverFeatures(steps);
+    state.discoverFeatures(steps.toList());
   }
 
   static void markStepComplete(BuildContext context, String stepId) {
@@ -63,11 +66,7 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> {
     }
   }
 
-  void dismiss() {
-    setState(() {
-      _cleanupAfterSteps();
-    });
-  }
+  void dismiss() => setState(() => _cleanupAfterSteps());
 
   void _cleanupAfterSteps() {
     steps = null;
@@ -84,32 +83,41 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> {
 }
 
 class DescribedFeatureOverlay extends StatefulWidget {
+  /// This id must be unique among all the [DescribedFeatureOverlay]s widgets.
   final String featureId;
   final IconData icon;
+  /// If null, default to [ThemeData.primaryColor]
   final Color color;
   final String title;
   final String description;
-  final Function(VoidCallback onActionComplated) doAction;
-  final Function(VoidCallback onActionComplated) prepareAction;
+  final Function(VoidCallback onActionCompleted) doAction;
+  /// Called just before the FeatureOverlay is displayed.
+  /// The function parameter is actually the callback that triggers the display of the overlay.
+  /// If not null, the callback MUST be called in order for the overlay to be displayed.
+  final Function(VoidCallback onActionCompleted) prepareAction;
   final Widget child;
   final ContentOrientation contentLocation;
 
-  const DescribedFeatureOverlay(
-      {Key key,
-      this.featureId,
-      this.icon,
-      this.color,
-      this.title,
-      this.description,
-      this.child,
-      this.doAction,
-      this.prepareAction,
-      this.contentLocation = ContentOrientation.trivial})
-      : super(key: key);
+  const DescribedFeatureOverlay({
+    Key key,
+    @required this.featureId,
+    @required this.icon,
+    this.color,
+    this.title,
+    this.description,
+    @required this.child,
+    this.doAction,
+    this.prepareAction,
+    this.contentLocation = ContentOrientation.trivial
+  }) : 
+    assert(featureId != null),
+    assert(icon != null),
+    assert(child != null),
+    assert(contentLocation != null),
+    super(key: key);
 
   @override
-  _DescribedFeatureOverlayState createState() =>
-      _DescribedFeatureOverlayState();
+  _DescribedFeatureOverlayState createState() => _DescribedFeatureOverlayState();
 }
 
 class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
@@ -144,90 +152,55 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   void initAnimationControllers() {
     openController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 250))
-          ..addListener(
-            () {
-              setState(() {
-                transitionPercent = openController.value;
-              });
-            },
-          )
+          ..addListener(() => setState(() => transitionPercent = openController.value))
           ..addStatusListener(
             (AnimationStatus status) {
-              if (status == AnimationStatus.forward) {
-                setState(() {
-                  state = _OverlayState.opening;
-                });
-              } else if (status == AnimationStatus.completed) {
-                pulseController.forward(from: 0.0);
-              }
+              if (status == AnimationStatus.forward) setState(() => state = _OverlayState.opening);
+              else if (status == AnimationStatus.completed) pulseController.forward(from: 0.0);
             },
           );
 
     pulseController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 1000))
-          ..addListener(
-            () {
-              setState(() {
-                transitionPercent = pulseController.value;
-              });
-            },
-          )
+          ..addListener(() => setState(() => transitionPercent = pulseController.value))
           ..addStatusListener(
             (AnimationStatus status) {
-              if (status == AnimationStatus.forward) {
-                setState(() {
-                  state = _OverlayState.pulsing;
-                });
-              } else if (status == AnimationStatus.completed) {
+              if (status == AnimationStatus.forward)
+                setState(() => state = _OverlayState.pulsing);
+              else if (status == AnimationStatus.completed)
                 pulseController.forward(from: 0.0);
-              }
             },
           );
     activationController = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 250))
-      ..addListener(
-        () {
-          setState(() {
-            transitionPercent = activationController.value;
-          });
-        },
-      )
+      vsync: this,
+      duration: Duration(milliseconds: 250)
+    )
+      ..addListener(() => setState(() => transitionPercent = activationController.value))
       ..addStatusListener(
         (AnimationStatus status) {
-          if (status == AnimationStatus.forward) {
-            setState(() {
-              state = _OverlayState.activating;
-            });
-          } else if (status == AnimationStatus.completed) {
-            if (widget.doAction == null) {
-              FeatureDiscovery.markStepComplete(context, widget.featureId);
-            } else {
-              widget.doAction(() {
-                FeatureDiscovery.markStepComplete(context, widget.featureId);
-              });
-            }
+          switch (status) {
+            case AnimationStatus.forward:
+              setState(() => state = _OverlayState.activating);
+              break;
+            case AnimationStatus.completed:
+              void Function() callback = 
+                () => FeatureDiscovery.markStepComplete(context, widget.featureId);
+              widget.doAction == null ? callback() : widget.doAction(callback);
+              break;
+            default: break;
           }
         },
       );
 
     dismissController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 250))
-          ..addListener(
-            () {
-              setState(() {
-                transitionPercent = dismissController.value;
-              });
-            },
-          )
+          ..addListener(() => setState(() => transitionPercent = dismissController.value))
           ..addStatusListener(
             (AnimationStatus status) {
-              if (status == AnimationStatus.forward) {
-                setState(() {
-                  state = _OverlayState.dismissing;
-                });
-              } else if (status == AnimationStatus.completed) {
+              if (status == AnimationStatus.forward)
+                setState(() => state = _OverlayState.dismissing);
+              else if (status == AnimationStatus.completed)
                 FeatureDiscovery.dismiss(context);
-              }
             },
           );
   }
@@ -243,23 +216,13 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   void showOverlayIfActiveStep() {
     String activeStep = FeatureDiscovery.activeStep(context);
 
-    if (widget.prepareAction != null && activeStep == widget.featureId) {
-      widget.prepareAction(() {
-        setState(() {
-          showOverlay = activeStep == widget.featureId;
-        });
-        if (activeStep == widget.featureId) {
-          openController.forward(from: 0.0);
-        }
-      });
-    } else {
-      setState(() {
-        showOverlay = activeStep == widget.featureId;
-      });
-      if (activeStep == widget.featureId) {
-        openController.forward(from: 0.0);
-      }
-    }
+    void Function() callback = () {
+      setState(() => showOverlay = activeStep == widget.featureId);
+      if (activeStep == widget.featureId) openController.forward(from: 0.0);
+    };
+    if (widget.prepareAction != null && activeStep == widget.featureId)
+      widget.prepareAction(callback);
+    else callback();
   }
 
   void activate() {
@@ -287,7 +250,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           state: state,
           transitionPercent: transitionPercent,
           anchor: anchor,
-          color: widget.color,
+          color: widget.color ?? Theme.of(context).primaryColor,
           screenSize: screenSize,
           orientation: widget.contentLocation,
         ),
@@ -296,9 +259,11 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           transitionPercent: transitionPercent,
           anchor: anchor,
           screenSize: screenSize,
-          statusBarHeight: statusBarHeight,
+          // this parameter is not used
+          // statusBarHeight: statusBarHeight,
           touchTargetRadius: 44.0,
-          touchTargetToContentPadding: 20.0,
+          // this parameter is not used
+          // touchTargetToContentPadding: 20.0,
           title: widget.title,
           description: widget.description,
           orientation: widget.contentLocation,
@@ -313,7 +278,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           transitionPercent: transitionPercent,
           anchor: anchor,
           icon: widget.icon,
-          color: widget.color,
+          color: widget.color ?? Theme.of(context).primaryColor,
           onPressed: activate,
         ),
       ],
@@ -341,13 +306,21 @@ class _Background extends StatelessWidget {
   final ContentOrientation orientation;
 
   const _Background({
-    this.anchor,
-    this.color,
-    this.screenSize,
-    this.state,
-    this.transitionPercent,
-    this.orientation,
-  });
+    Key key,
+    @required this.anchor,
+    @required this.color,
+    @required this.screenSize,
+    @required this.state,
+    @required this.transitionPercent,
+    @required this.orientation,
+  }) : 
+    assert(anchor != null),
+    assert(color != null),
+    assert(screenSize != null),
+    assert(state != null),
+    assert(transitionPercent != null),
+    assert(orientation != null),
+    super(key: key);
 
   bool isCloseToTopOrBottom(Offset position) {
     return position.dy <= 88.0 || (screenSize.height - position.dy) <= 88.0;
@@ -474,10 +447,15 @@ class _Pulse extends StatelessWidget {
   final Offset anchor;
 
   const _Pulse({
-    this.state,
-    this.transitionPercent,
-    this.anchor,
-  });
+    Key key,
+    @required this.state,
+    @required this.transitionPercent,
+    @required this.anchor,
+  }) : 
+    assert(state != null),
+    assert(transitionPercent != null),
+    assert(anchor != null),
+    super(key: key);
 
   double radius() {
     switch (state) {
@@ -513,20 +491,19 @@ class _Pulse extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (state == _OverlayState.closed) {
-      return Container();
-    }
-    return CenterAbout(
-      position: anchor,
-      child: Container(
-        width: radius() * 2,
-        height: radius() * 2,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white.withOpacity(opacity()),
+    return state == _OverlayState.closed
+      ? Container()
+      : CenterAbout(
+        position: anchor,
+        child: Container(
+          width: radius() * 2,
+          height: radius() * 2,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white.withOpacity(opacity()),
+          ),
         ),
-      ),
-    );
+      );
   }
 }
 
@@ -539,13 +516,22 @@ class _TouchTarget extends StatelessWidget {
   final VoidCallback onPressed;
 
   const _TouchTarget({
-    this.anchor,
-    this.icon,
-    this.color,
-    this.onPressed,
-    this.state,
-    this.transitionPercent,
-  });
+    Key key,
+    @required this.anchor,
+    @required this.icon,
+    // The two parameters below can technically be null, so assertions are not made for them,
+    // but they are annotated as required to not forget them during development
+    // (as this is an internal widget and those parameters should always be specified)
+    @required this.color,
+    @required this.onPressed,
+    @required this.state,
+    @required this.transitionPercent,
+  }) : 
+    assert(anchor != null),
+    assert(icon != null),
+    assert(state != null),
+    assert(transitionPercent != null),
+    super(key: key);
 
   double opacity() {
     switch (state) {
@@ -597,7 +583,7 @@ class _TouchTarget extends StatelessWidget {
           opacity: opacity(),
           child: RawMaterialButton(
             fillColor: Colors.white,
-            shape: CircleBorder(),
+            shape: const CircleBorder(),
             child: Icon(
               icon,
               color: color,
@@ -616,25 +602,36 @@ class _Content extends StatelessWidget {
   final Offset anchor;
   final Size screenSize;
   final double touchTargetRadius;
-  final double touchTargetToContentPadding;
+  // this parameter is not used
+  // final double touchTargetToContentPadding;
   final String title;
   final String description;
-  final double statusBarHeight;
+  // not used
+  // final double statusBarHeight;
   final ContentOrientation orientation;
 
   const _Content(
       {Key key,
-      this.anchor,
-      this.screenSize,
-      this.touchTargetRadius,
-      this.touchTargetToContentPadding,
-      this.title,
-      this.description,
-      this.state,
-      this.transitionPercent,
-      this.statusBarHeight,
-      this.orientation})
-      : super(key: key);
+      @required this.anchor,
+      @required this.screenSize,
+      @required this.touchTargetRadius,
+      //this.touchTargetToContentPadding,
+      @required this.title,
+      @required this.description,
+      @required this.state,
+      @required this.transitionPercent,
+      //this.statusBarHeight,
+      @required this.orientation
+    }) : 
+      assert(anchor != null),
+      assert(screenSize != null),
+      assert(touchTargetRadius != null),
+      assert(title != null),
+      assert(description != null),
+      assert(state != null),
+      assert(transitionPercent != null),
+      assert(orientation != null),
+      super(key: key);
 
   bool isCloseToTopOrBottom(Offset position) {
     return position.dy <= 88.0 || (screenSize.height - position.dy) <= 88.0;
@@ -649,19 +646,14 @@ class _Content extends StatelessWidget {
   }
 
   DescribedFeatureContentOrientation getContentOrientation(Offset position) {
-    if (isCloseToTopOrBottom(position)) {
-      if (isOnTopHalfOfScreen(position)) {
-        return DescribedFeatureContentOrientation.below;
-      } else {
-        return DescribedFeatureContentOrientation.above;
-      }
-    } else {
-      if (isOnTopHalfOfScreen(position)) {
-        return DescribedFeatureContentOrientation.above;
-      } else {
-        return DescribedFeatureContentOrientation.below;
-      }
-    }
+    if (isCloseToTopOrBottom(position)) return 
+      isOnTopHalfOfScreen(position)
+        ? DescribedFeatureContentOrientation.below
+        : DescribedFeatureContentOrientation.above;
+    else return 
+      isOnTopHalfOfScreen(position)
+        ? DescribedFeatureContentOrientation.above
+        : DescribedFeatureContentOrientation.below;
   }
 
   double opacity() {
@@ -687,9 +679,8 @@ class _Content extends StatelessWidget {
     final width = Math.min(screenSize.width, screenSize.height);
     final isBackgroundCentered = isCloseToTopOrBottom(anchor);
 
-    if (isBackgroundCentered) {
-      return anchor;
-    } else {
+    if (isBackgroundCentered) return anchor;
+    else {
       final startingBackgroundPosition = anchor;
       final endingBackgroundPosition = Offset(
           width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
@@ -761,23 +752,27 @@ class _Content extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          color: Colors.white,
+                    title == null
+                      ? const SizedBox(height: 0)
+                      : Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                    ),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        color: Colors.white.withOpacity(0.9),
+                    description == null
+                      ? const SizedBox(height: 0)
+                      : Text(
+                        description,
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -799,15 +794,13 @@ class _InheritedFeatureDiscovery extends InheritedWidget {
   })  : assert(child != null),
         super(key: key, child: child);
 
-  static _InheritedFeatureDiscovery of(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(_InheritedFeatureDiscovery)
-        as _InheritedFeatureDiscovery;
-  }
+  static _InheritedFeatureDiscovery of(BuildContext context)
+    => context.inheritFromWidgetOfExactType(_InheritedFeatureDiscovery)
+      as _InheritedFeatureDiscovery;
 
   @override
-  bool updateShouldNotify(_InheritedFeatureDiscovery old) {
-    return old.activeStepId != activeStepId;
-  }
+  bool updateShouldNotify(_InheritedFeatureDiscovery old)
+    => old.activeStepId != activeStepId;
 }
 
 enum DescribedFeatureContentOrientation {

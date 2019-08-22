@@ -12,7 +12,7 @@ For installing this lib add below line to you'r dependency section in pubspec.ya
 
 ```
 
-Then run  ```flutter pub get``` to retrieve package
+Then run ```flutter pub get``` to retrieve package
 
 
 ## Using
@@ -40,18 +40,27 @@ return MaterialApp(
 Then wrap you'r desired widget with ```DescribedFeatureOverlay``` widget
 like that :
 ```
-   DescribedFeatureOverlay(
-                featureId: 'featureId1',
-                icon: Icons.print,
-                color: Colors.purple,
-                contentLocation: ContentOrientation.below, // look at note 
-                title: 'Just how you want it',
-                description:
-                    'Tap the menu icon to switch account, change setting & more.Tap the menu icon to switch account, change setting & more.',
-                child: IconButton(
-                  icon: Icon(Icons.print),
-                ),
-              ),
+  void Function() onPressed = () => print("IconButton pressed !");
+  DescribedFeatureOverlay(
+    featureId: 'featureId1', // unique id that identifies this overlay
+    icon: Icons.print,
+    color: Colors.purple,
+    contentLocation: ContentOrientation.below, // look at note 
+    title: 'Just how you want it',
+    description: 'Tap the menu icon to switch account, change setting & more.',
+    doAction: (callback) { // action executed on tap on the icon target
+      onPressed();
+      callback();
+    }
+    prepareAction: (callback) { // action executed just before the overlay appears
+      print("The overlay is about to be displayed");
+      callback();
+    },
+    child: IconButton(
+      icon: Icon(Icons.print),
+      onPressed: onPressed
+    ),
+  );
 ``` 
 
 Then in initState method of you'r widget call 
@@ -61,7 +70,7 @@ Then in initState method of you'r widget call
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FeatureDiscovery.discoverFeatures(
         context,
-        ['featureId1'],
+        ['featureId1'], // ids of your different overlays
       );
     });
 

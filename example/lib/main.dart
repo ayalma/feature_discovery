@@ -2,13 +2,13 @@ import 'package:feature_discovery/feature_discovery.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-final feature1 = "FEATURE_1";
-final feature2 = "FEATURE_2";
-final feature3 = "FEATURE_3";
-final feature4 = "FEATURE_4";
-final feature5 = "FEATURE_5";
-final feature6 = "FEATURE_6";
-final feature7 = "FEATURE_7";
+const String feature1 = "FEATURE_1";
+const String feature2 = "FEATURE_2";
+const String feature3 = "FEATURE_3";
+const String feature4 = "FEATURE_4";
+const String feature5 = "FEATURE_5";
+const String feature6 = "FEATURE_6";
+const String feature7 = "FEATURE_7";
 
 void main() {
   timeDilation = 1.0;
@@ -45,6 +45,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
+    void Function() action = () => print("IconButton pressed !");
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -57,10 +58,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 color: Colors.purple,
                 contentLocation: ContentOrientation.below,
                 title: 'Just how you want it',
-                description:
-                    'Tap the menu icon to switch account, change setting & more.Tap the menu icon to switch account, change setting & more.',
+                description: 'Tap the menu icon to switch account, change setting & more.',
+                doAction: (callback) {
+                  action();
+                  callback();
+                },
+                prepareAction: (callback) { // action executed just before the overlay appears
+                  print("The overlay is about to be displayed");
+                  callback();
+                },
                 child: IconButton(
                   icon: Icon(Icons.print),
+                  onPressed: action,
                 ),
               ),
             ],
@@ -128,7 +137,7 @@ class _ContentState extends State<Content> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FeatureDiscovery.discoverFeatures(
         context,
-        [feature7, feature1, feature2, feature3, feature4, feature6, feature5],
+        const {feature7, feature1, feature2, feature3, feature4, feature6, feature5},
       );
     });
     super.initState();
@@ -210,14 +219,14 @@ class _ContentState extends State<Content> {
                       onPressed: () {
                         FeatureDiscovery.discoverFeatures(
                           context,
-                          [
+                          const {
                             feature1,
                             feature2,
                             feature3,
                             feature4,
                             feature6,
                             feature5
-                          ],
+                          },
                         );
                       },
                     ),
