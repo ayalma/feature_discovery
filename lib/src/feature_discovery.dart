@@ -97,6 +97,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
   final Function(VoidCallback onActionCompleted) prepareAction;
   final Widget child;
   final ContentOrientation contentLocation;
+  final bool enablePulsingAnimation;
 
   const DescribedFeatureOverlay({
     Key key,
@@ -108,12 +109,14 @@ class DescribedFeatureOverlay extends StatefulWidget {
     @required this.child,
     this.doAction,
     this.prepareAction,
-    this.contentLocation = ContentOrientation.trivial
+    this.contentLocation = ContentOrientation.trivial,
+    this.enablePulsingAnimation = true
   }) : 
     assert(featureId != null),
     assert(icon != null),
     assert(child != null),
     assert(contentLocation != null),
+    assert(enablePulsingAnimation != null),
     super(key: key);
 
   @override
@@ -145,7 +148,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     openController.dispose();
     activationController.dispose();
     dismissController.dispose();
-    pulseController.dispose();
+    pulseController?.dispose();
     super.dispose();
   }
 
@@ -156,21 +159,23 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           ..addStatusListener(
             (AnimationStatus status) {
               if (status == AnimationStatus.forward) setState(() => state = _OverlayState.opening);
-              else if (status == AnimationStatus.completed) pulseController.forward(from: 0.0);
+              else if (status == AnimationStatus.completed) pulseController?.forward(from: 0.0);
             },
           );
 
-    pulseController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 1000))
-          ..addListener(() => setState(() => transitionPercent = pulseController.value))
-          ..addStatusListener(
-            (AnimationStatus status) {
-              if (status == AnimationStatus.forward)
-                setState(() => state = _OverlayState.pulsing);
-              else if (status == AnimationStatus.completed)
-                pulseController.forward(from: 0.0);
-            },
-          );
+    if (widget.enablePulsingAnimation) {
+      pulseController =
+          AnimationController(vsync: this, duration: Duration(milliseconds: 1000))
+            ..addListener(() => setState(() => transitionPercent = pulseController.value))
+            ..addStatusListener(
+              (AnimationStatus status) {
+                if (status == AnimationStatus.forward)
+                  setState(() => state = _OverlayState.pulsing);
+                else if (status == AnimationStatus.completed)
+                  pulseController.forward(from: 0.0);
+              },
+            );
+    }
     activationController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 250)
@@ -226,12 +231,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   }
 
   void activate() {
-    pulseController.stop();
+    pulseController?.stop();
     activationController.forward(from: 0.0);
   }
 
   void dismiss() {
-    pulseController.stop();
+    pulseController?.stop();
     dismissController.forward(from: 0.0);
   }
 
@@ -556,13 +561,11 @@ class _TouchTarget extends StatelessWidget {
         return 20.0 + 24.0 * transitionPercent;
       case _OverlayState.pulsing:
         double expandedPercent;
-        if (transitionPercent < 0.3) {
+        if (transitionPercent < 0.3)
           expandedPercent = transitionPercent / 0.3;
-        } else if (transitionPercent < 0.6) {
+        else if (transitionPercent < 0.6)
           expandedPercent = 1.0 - ((transitionPercent - 0.3) / 0.3);
-        } else {
-          expandedPercent = 0.0;
-        }
+        else expandedPercent = 0.0;
         return 44.0 + (20.0 * expandedPercent);
       case _OverlayState.activating:
       case _OverlayState.dismissing:
@@ -604,7 +607,9 @@ class _Content extends StatelessWidget {
   final double touchTargetRadius;
   // this parameter is not used
   // final double touchTargetToContentPadding;
+  /// Can be null
   final String title;
+  /// Can be null
   final String description;
   // not used
   // final double statusBarHeight;
@@ -626,8 +631,6 @@ class _Content extends StatelessWidget {
       assert(anchor != null),
       assert(screenSize != null),
       assert(touchTargetRadius != null),
-      assert(title != null),
-      assert(description != null),
       assert(state != null),
       assert(transitionPercent != null),
       assert(orientation != null),
@@ -663,7 +666,6 @@ class _Content extends StatelessWidget {
       case _OverlayState.opening:
         final adjustedPercent = const Interval(0.6, 1.0, curve: Curves.easeOut)
             .transform(transitionPercent);
-
         return adjustedPercent;
       case _OverlayState.activating:
       case _OverlayState.dismissing:
@@ -754,24 +756,18 @@ class _Content extends StatelessWidget {
                   children: <Widget>[
                     title == null
                       ? const SizedBox(height: 0)
-                      : Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: 20.0,
-                            color: Colors.white,
-                          ),
-                        ),
+                      : Text(
+                        title,
+                        style: Theme.of(context).textTheme.title
+                          .copyWith(color: Colors.white)
                       ),
+                    const SizedBox(height: 8.0),
                     description == null
                       ? const SizedBox(height: 0)
                       : Text(
                         description,
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          color: Colors.white.withOpacity(0.9),
-                        ),
+                        style: Theme.of(context).textTheme.body1
+                          .copyWith(color: Colors.white.withOpacity(0.9)),
                       ),
                   ],
                 ),

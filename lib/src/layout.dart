@@ -68,9 +68,7 @@ class _OverlayBuilderState extends State<OverlayBuilder> {
   @override
   void initState() {
     super.initState();
-    if (widget.showOverlay) {
-      showOverlay();
-    }
+    if (widget.showOverlay) showOverlay();
   }
 
   @override
@@ -87,9 +85,7 @@ class _OverlayBuilderState extends State<OverlayBuilder> {
 
   @override
   void dispose() {
-    if (isShowingOverlay()) {
-      hideOverlay();
-    }
+    if (isShowingOverlay()) hideOverlay();
     super.dispose();
   }
 
@@ -110,16 +106,11 @@ class _OverlayBuilderState extends State<OverlayBuilder> {
   }
 
   void syncWidgetAndOverlay() {
-    if (isShowingOverlay() && !widget.showOverlay) {
-      hideOverlay();
-    } else if (!isShowingOverlay() && widget.showOverlay) {
-      showOverlay();
-    }
+    if (isShowingOverlay() && !widget.showOverlay) hideOverlay();
+    else if (!isShowingOverlay() && widget.showOverlay) showOverlay();
   }
 
-  void buildOverlay() async {
-    overlayEntry?.markNeedsBuild();
-  }
+  void buildOverlay() async => overlayEntry?.markNeedsBuild();
 
   @override
   Widget build(BuildContext context) {
