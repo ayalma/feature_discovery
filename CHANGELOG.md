@@ -3,6 +3,7 @@
 * [WARNING] `Theme.of(context)` is now used to determine text styles
 * title and description can now be null
 * added option to disable pulsing animation
+* added [Function] parameter to be called when overlay is dismissed
 * added possibility to pass any iterable containing feature ids to `FeatureDiscovery.discoverFeatures`
 * added the `@required` annotation to parameters that cannot be null
 

@@ -98,6 +98,9 @@ class DescribedFeatureOverlay extends StatefulWidget {
   final Widget child;
   final ContentOrientation contentLocation;
   final bool enablePulsingAnimation;
+  /// Function to execute when the overlay is dismissed (when the user taps outside of it).
+  /// If not null, the callback MUST be called in order for the overlay to be dismissed.
+  final Function(VoidCallback onActionCompleted) onDismissAction;
 
   const DescribedFeatureOverlay({
     Key key,
@@ -110,7 +113,8 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.doAction,
     this.prepareAction,
     this.contentLocation = ContentOrientation.trivial,
-    this.enablePulsingAnimation = true
+    this.enablePulsingAnimation = true,
+    this.onDismissAction
   }) : 
     assert(featureId != null),
     assert(icon != null),
@@ -204,8 +208,10 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
             (AnimationStatus status) {
               if (status == AnimationStatus.forward)
                 setState(() => state = _OverlayState.dismissing);
-              else if (status == AnimationStatus.completed)
-                FeatureDiscovery.dismiss(context);
+              else if (status == AnimationStatus.completed) {
+                void Function() callback = () => FeatureDiscovery.dismiss(context);
+                widget.onDismissAction == null ? callback() : widget.onDismissAction(callback);
+              }
             },
           );
   }
@@ -235,7 +241,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     activationController.forward(from: 0.0);
   }
 
-  void dismiss() {
+  void dismiss() async {
     pulseController?.stop();
     dismissController.forward(from: 0.0);
   }
@@ -526,7 +532,7 @@ class _TouchTarget extends StatelessWidget {
     @required this.icon,
     // The two parameters below can technically be null, so assertions are not made for them,
     // but they are annotated as required to not forget them during development
-    // (as this is an internal widget and those parameters should always be specified)
+    // (as this is an internal widget and those parameters should always be specified, even when null)
     @required this.color,
     @required this.onPressed,
     @required this.state,
