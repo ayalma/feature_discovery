@@ -280,6 +280,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
         widget.prepareAction(show);
       else
         show();
+      return;
     }
 
     if (showOverlay == true) {
