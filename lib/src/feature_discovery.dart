@@ -86,10 +86,17 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// This id must be unique among all the [DescribedFeatureOverlay]s widgets.
   final String featureId;
   final IconData icon;
-  /// If null, default to [ThemeData.primaryColor]
+  @Deprecated("Replaced by backgroundColor")
   final Color color;
+  /// If null, default to [ThemeData.primaryColor]
+  final Color backgroundColor;
+  /// If null, default to current [IconTheme]
+  final Color iconColor;
+  final Color targetColor;
+  final Color textColor;
   final String title;
   final String description;
+  /// Called when the target is pressed.
   final Function(VoidCallback onActionCompleted) doAction;
   /// Called just before the FeatureOverlay is displayed.
   /// The function parameter is actually the callback that triggers the display of the overlay.
@@ -107,6 +114,10 @@ class DescribedFeatureOverlay extends StatefulWidget {
     @required this.featureId,
     @required this.icon,
     this.color,
+    this.backgroundColor,
+    this.iconColor,
+    this.targetColor = Colors.white,
+    this.textColor = Colors.white,
     this.title,
     this.description,
     @required this.child,
@@ -121,6 +132,9 @@ class DescribedFeatureOverlay extends StatefulWidget {
     assert(child != null),
     assert(contentLocation != null),
     assert(enablePulsingAnimation != null),
+    assert(targetColor != null),
+    assert(textColor != null),
+    assert(color == null || backgroundColor == null), // both are the same
     super(key: key);
 
   @override
@@ -261,7 +275,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           state: state,
           transitionPercent: transitionPercent,
           anchor: anchor,
-          color: widget.color ?? Theme.of(context).primaryColor,
+          color: (widget.backgroundColor ?? widget.color) ?? Theme.of(context).primaryColor,
           screenSize: screenSize,
           orientation: widget.contentLocation,
         ),
@@ -278,18 +292,21 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           title: widget.title,
           description: widget.description,
           orientation: widget.contentLocation,
+          textColor: widget.textColor,
         ),
         _Pulse(
           state: state,
           transitionPercent: transitionPercent,
           anchor: anchor,
+          color: widget.targetColor,
         ),
         _TouchTarget(
           state: state,
           transitionPercent: transitionPercent,
           anchor: anchor,
           icon: widget.icon,
-          color: widget.color ?? Theme.of(context).primaryColor,
+          iconColor: widget.iconColor,
+          backgroundColor: widget.targetColor,
           onPressed: activate,
         ),
       ],
@@ -456,16 +473,19 @@ class _Pulse extends StatelessWidget {
   final _OverlayState state;
   final double transitionPercent;
   final Offset anchor;
+  final Color color;
 
   const _Pulse({
     Key key,
     @required this.state,
     @required this.transitionPercent,
     @required this.anchor,
+    @required this.color
   }) : 
     assert(state != null),
     assert(transitionPercent != null),
     assert(anchor != null),
+    assert(color != null),
     super(key: key);
 
   double radius() {
@@ -503,7 +523,7 @@ class _Pulse extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return state == _OverlayState.closed
-      ? Container()
+      ? Container(height: 0, width: 0)
       : CenterAbout(
         position: anchor,
         child: Container(
@@ -511,7 +531,7 @@ class _Pulse extends StatelessWidget {
           height: radius() * 2,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.white.withOpacity(opacity()),
+            color: color.withOpacity(opacity()),
           ),
         ),
       );
@@ -523,7 +543,8 @@ class _TouchTarget extends StatelessWidget {
   final double transitionPercent;
   final Offset anchor;
   final IconData icon;
-  final Color color;
+  final Color iconColor;
+  final Color backgroundColor;
   final VoidCallback onPressed;
 
   const _TouchTarget({
@@ -533,8 +554,9 @@ class _TouchTarget extends StatelessWidget {
     // The two parameters below can technically be null, so assertions are not made for them,
     // but they are annotated as required to not forget them during development
     // (as this is an internal widget and those parameters should always be specified, even when null)
-    @required this.color,
+    @required this.iconColor,
     @required this.onPressed,
+    @required this.backgroundColor,
     @required this.state,
     @required this.transitionPercent,
   }) : 
@@ -542,6 +564,7 @@ class _TouchTarget extends StatelessWidget {
     assert(icon != null),
     assert(state != null),
     assert(transitionPercent != null),
+    assert(backgroundColor != null),
     super(key: key);
 
   double opacity() {
@@ -591,11 +614,11 @@ class _TouchTarget extends StatelessWidget {
         child: Opacity(
           opacity: opacity(),
           child: RawMaterialButton(
-            fillColor: Colors.white,
+            fillColor: backgroundColor,
             shape: const CircleBorder(),
             child: Icon(
               icon,
-              color: color,
+              color: iconColor,
             ),
             onPressed: onPressed,
           ),
@@ -620,6 +643,7 @@ class _Content extends StatelessWidget {
   // not used
   // final double statusBarHeight;
   final ContentOrientation orientation;
+  final Color textColor;
 
   const _Content(
       {Key key,
@@ -632,7 +656,8 @@ class _Content extends StatelessWidget {
       @required this.state,
       @required this.transitionPercent,
       //this.statusBarHeight,
-      @required this.orientation
+      @required this.orientation,
+      @required this.textColor,
     }) : 
       assert(anchor != null),
       assert(screenSize != null),
@@ -640,6 +665,7 @@ class _Content extends StatelessWidget {
       assert(state != null),
       assert(transitionPercent != null),
       assert(orientation != null),
+      assert(textColor != null),
       super(key: key);
 
   bool isCloseToTopOrBottom(Offset position) {
@@ -765,7 +791,7 @@ class _Content extends StatelessWidget {
                       : Text(
                         title,
                         style: Theme.of(context).textTheme.title
-                          .copyWith(color: Colors.white)
+                          .copyWith(color: textColor)
                       ),
                     const SizedBox(height: 8.0),
                     description == null
@@ -773,7 +799,7 @@ class _Content extends StatelessWidget {
                       : Text(
                         description,
                         style: Theme.of(context).textTheme.body1
-                          .copyWith(color: Colors.white.withOpacity(0.9)),
+                          .copyWith(color: textColor.withOpacity(0.9)),
                       ),
                   ],
                 ),

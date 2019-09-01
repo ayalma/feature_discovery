@@ -55,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
               DescribedFeatureOverlay(
                 featureId: feature7,
                 icon: Icons.print,
-                color: Colors.purple,
+                backgroundColor: Colors.purple,
                 contentLocation: ContentOrientation.below,
                 title: 'Just how you want it',
                 description: 'Tap the menu icon to switch account, change setting & more.',
@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
         leading: DescribedFeatureOverlay(
           featureId: feature1,
           icon: Icons.menu,
-          color: Colors.green,
+          backgroundColor: Colors.green,
           title: 'Just how you want it',
           description:
               'Tap the menu icon to switch account, change setting & more.',
@@ -92,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
           DescribedFeatureOverlay(
             featureId: feature2,
             icon: Icons.search,
-            color: Colors.green,
+            backgroundColor: Colors.green,
             title: 'Search your compounds',
             description:
                 'Tap the magnifying glass to quickly scan your compounds',
@@ -107,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: DescribedFeatureOverlay(
         featureId: feature3,
         icon: Icons.menu,
-        color: Colors.green,
+        backgroundColor: Colors.green,
         title: 'FAB feature',
         description: 'This is FAB and it does stuff.',
         child: FloatingActionButton(
@@ -198,7 +198,7 @@ class _ContentState extends State<Content> {
                 child: DescribedFeatureOverlay(
                   featureId: feature5,
                   icon: Icons.drive_eta,
-                  color: Colors.green,
+                  backgroundColor: Colors.green,
                   doAction: (f) {
                     print('ha ha ha ');
                     f();
@@ -240,7 +240,7 @@ class _ContentState extends State<Content> {
               DescribedFeatureOverlay(
                 featureId: feature6,
                 icon: Icons.drive_eta,
-                color: Colors.green,
+                backgroundColor: Colors.green,
                 doAction: (f) {
                   print('ha ha ha ');
                   f();
@@ -276,7 +276,7 @@ class _ContentState extends State<Content> {
             child: DescribedFeatureOverlay(
               featureId: feature4,
               icon: Icons.drive_eta,
-              color: Colors.green,
+              backgroundColor: Colors.green,
               doAction: (f) {
                 print('ha ha ha ');
                 f();
