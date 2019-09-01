@@ -1,6 +1,7 @@
 ## 0.5.0
 
-* Fixed `DescribedFeatureOverlays`'s constantly rebuilding even if they were never displayed.
+* Fixed `DescribedFeatureOverlay`'s constantly rebuilding even if they were never displayed.
+* Fixed `DescribedFeatureOverlay`'s rebuilding after dismissing them.
 * **Warning**: `Theme.of(context)` is now used to determine text styles
 * Title and description can now be null.
 * Added option to disable pulsing animation.
@@ -10,6 +11,7 @@
 * Removed unnecessary files.
 * Formatted `CHANGELOG.md`.
 * Updated the plugin description.
+* Formatted Dart files using `flutter dartfmt`.
 
 ## 0.4.1
 
