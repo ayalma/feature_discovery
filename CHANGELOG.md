@@ -6,6 +6,7 @@
 * Title and description can now be null.
 * Added option to disable pulsing animation.
 * Added parameter that is called when the overlay is dismissed.
+* Added parameters to change text color, target color, and icon color.
 * Added possibility to pass any `Iterable` for the steps to `FeatureDiscovery.discoverFeatures`.
 * Added the `@required` annotation to parameters that cannot be null.
 * Ensured that overlay for each step is only shown once at a time.
