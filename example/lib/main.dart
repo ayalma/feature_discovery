@@ -58,12 +58,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 backgroundColor: Colors.purple,
                 contentLocation: ContentOrientation.below,
                 title: 'Just how you want it',
-                description: 'Tap the menu icon to switch account, change setting & more.',
+                description:
+                    'Tap the menu icon to switch account, change setting & more.',
                 doAction: (callback) {
                   action();
                   callback();
                 },
-                prepareAction: (callback) { // action executed just before the overlay appears
+                prepareAction: (callback) {
+                  // action executed just before the overlay appears
                   print("The overlay is about to be displayed");
                   callback();
                 },
@@ -137,7 +139,15 @@ class _ContentState extends State<Content> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FeatureDiscovery.discoverFeatures(
         context,
-        const {feature7, feature1, feature2, feature3, feature4, feature6, feature5},
+        const {
+          feature7,
+          feature1,
+          feature2,
+          feature3,
+          feature4,
+          feature6,
+          feature5
+        },
       );
     });
     super.initState();

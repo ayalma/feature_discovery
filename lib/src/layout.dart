@@ -106,7 +106,8 @@ class _OverlayBuilderState extends State<OverlayBuilder> {
   }
 
   void syncWidgetAndOverlay() {
-    if (isShowingOverlay() && !widget.showOverlay) hideOverlay();
+    if (isShowingOverlay() && !widget.showOverlay)
+      hideOverlay();
     else if (!isShowingOverlay() && widget.showOverlay) showOverlay();
   }
 
