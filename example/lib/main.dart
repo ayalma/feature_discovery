@@ -210,7 +210,7 @@ class _ContentState extends State<Content> {
                   icon: Icons.drive_eta,
                   backgroundColor: Colors.green,
                   doAction: (f) {
-                    print('ha ha ha ');
+                    print('Tapped tap target.');
                     f();
                   },
                   prepareAction: (done) {
@@ -252,7 +252,7 @@ class _ContentState extends State<Content> {
                 icon: Icons.drive_eta,
                 backgroundColor: Colors.green,
                 doAction: (f) {
-                  print('ha ha ha ');
+                  print('Tapped tap target.');
                   f();
                 },
                 prepareAction: (done) {
@@ -288,7 +288,7 @@ class _ContentState extends State<Content> {
               icon: Icons.drive_eta,
               backgroundColor: Colors.green,
               doAction: (f) {
-                print('ha ha ha ');
+                print('Tapped tap target.');
                 f();
               },
               title: 'Find the fastest route',
