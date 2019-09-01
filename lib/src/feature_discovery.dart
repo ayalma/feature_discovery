@@ -261,7 +261,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
   }
 
   void showOverlayIfActiveStep() {
-    final activeStep = FeatureDiscovery.activeStep(context);
+    final String activeStep = FeatureDiscovery.activeStep(context);
 
     if (activeStep == null) {
       // This condition is met when the feature discovery was dismissed
@@ -401,11 +401,11 @@ class _Background extends StatelessWidget {
   }
 
   double radius() {
-    final isBackgroundCentered = isCloseToTopOrBottom(anchor);
-    final backgroundRadius = Math.min(screenSize.width, screenSize.height) * (isBackgroundCentered ? 1.0 : 0.7);
+    final bool isBackgroundCentered = isCloseToTopOrBottom(anchor);
+    final double backgroundRadius = Math.min(screenSize.width, screenSize.height) * (isBackgroundCentered ? 1.0 : 0.7);
     switch (state) {
       case _OverlayState.opening:
-        final adjustedPercent = const Interval(0.0, 0.8, curve: Curves.easeOut).transform(transitionPercent);
+        final double adjustedPercent = const Interval(0.0, 0.8, curve: Curves.easeOut).transform(transitionPercent);
         return backgroundRadius * adjustedPercent;
       case _OverlayState.activating:
         return backgroundRadius + transitionPercent * 40.0;
@@ -417,15 +417,15 @@ class _Background extends StatelessWidget {
   }
 
   Offset backgroundPosition() {
-    final width = Math.min(screenSize.width, screenSize.height);
-    final isBackgroundCentered = isCloseToTopOrBottom(anchor);
+    final double width = Math.min(screenSize.width, screenSize.height);
+    final bool isBackgroundCentered = isCloseToTopOrBottom(anchor);
 
     if (isBackgroundCentered) {
       return anchor;
     } else {
       final startingBackgroundPosition = anchor;
 
-      var endingBackgroundPosition;
+      Offset endingBackgroundPosition;
       switch (orientation) {
         case ContentOrientation.trivial:
           endingBackgroundPosition =
@@ -441,7 +441,7 @@ class _Background extends StatelessWidget {
 
       switch (state) {
         case _OverlayState.opening:
-          final adjustedPercent = const Interval(0.0, 0.8, curve: Curves.easeOut).transform(transitionPercent);
+          final double adjustedPercent = const Interval(0.0, 0.8, curve: Curves.easeOut).transform(transitionPercent);
           return Offset.lerp(startingBackgroundPosition, endingBackgroundPosition, adjustedPercent);
         case _OverlayState.activating:
           return endingBackgroundPosition;
@@ -456,15 +456,15 @@ class _Background extends StatelessWidget {
   double backgroundOpacity() {
     switch (state) {
       case _OverlayState.opening:
-        final adjustedPercent = const Interval(0.0, 0.3, curve: Curves.easeOut).transform(transitionPercent);
+        final double adjustedPercent = const Interval(0.0, 0.3, curve: Curves.easeOut).transform(transitionPercent);
         return 0.96 * adjustedPercent;
 
       case _OverlayState.activating:
-        final adjustedPercent = const Interval(0.1, 0.6, curve: Curves.easeOut).transform(transitionPercent);
+        final double adjustedPercent = const Interval(0.1, 0.6, curve: Curves.easeOut).transform(transitionPercent);
 
         return 0.96 * (1 - adjustedPercent);
       case _OverlayState.dismissing:
-        final adjustedPercent = const Interval(0.2, 1.0, curve: Curves.easeOut).transform(transitionPercent);
+        final double adjustedPercent = const Interval(0.2, 1.0, curve: Curves.easeOut).transform(transitionPercent);
         return 0.96 * (1 - adjustedPercent);
       default:
         return 0.96;
@@ -494,12 +494,18 @@ class _Pulse extends StatelessWidget {
   final Offset anchor;
   final Color color;
 
-  const _Pulse({Key key, @required this.state, @required this.transitionPercent, @required this.anchor, @required this.color})
-      : assert(state != null),
-        assert(transitionPercent != null),
-        assert(anchor != null),
-        assert(color != null),
-        super(key: key);
+  const _Pulse({
+    Key key, 
+    @required this.state, 
+    @required this.transitionPercent, 
+    @required this.anchor, 
+    @required this.color
+  }) : 
+    assert(state != null),
+    assert(transitionPercent != null),
+    assert(anchor != null),
+    assert(color != null),
+    super(key: key);
 
   double radius() {
     switch (state) {
@@ -522,7 +528,7 @@ class _Pulse extends StatelessWidget {
   double opacity() {
     switch (state) {
       case _OverlayState.pulsing:
-        final percentOpaque = 1.0 - ((transitionPercent.clamp(0.3, 0.8) - 0.3) / 0.5);
+        final double percentOpaque = 1.0 - ((transitionPercent.clamp(0.3, 0.8) - 0.3) / 0.5);
         return (percentOpaque * 0.75).clamp(0.0, 1.0);
       case _OverlayState.activating:
       case _OverlayState.dismissing:
@@ -535,18 +541,18 @@ class _Pulse extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return state == _OverlayState.closed
-        ? Container(height: 0, width: 0)
-        : CenterAbout(
-            position: anchor,
-            child: Container(
-              width: radius() * 2,
-              height: radius() * 2,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color.withOpacity(opacity()),
-              ),
+      ? Container(height: 0, width: 0)
+      : CenterAbout(
+          position: anchor,
+          child: Container(
+            width: radius() * 2,
+            height: radius() * 2,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withOpacity(opacity()),
             ),
-          );
+          ),
+        );
   }
 }
 
@@ -703,11 +709,11 @@ class _Content extends StatelessWidget {
       case _OverlayState.closed:
         return 0.0;
       case _OverlayState.opening:
-        final adjustedPercent = const Interval(0.6, 1.0, curve: Curves.easeOut).transform(transitionPercent);
+        final double adjustedPercent = const Interval(0.6, 1.0, curve: Curves.easeOut).transform(transitionPercent);
         return adjustedPercent;
       case _OverlayState.activating:
       case _OverlayState.dismissing:
-        final adjustedPercent = const Interval(0.0, 0.4, curve: Curves.easeOut).transform(transitionPercent);
+        final double adjustedPercent = const Interval(0.0, 0.4, curve: Curves.easeOut).transform(transitionPercent);
         return 1.0 - adjustedPercent;
       default:
         return 1.0;
@@ -715,19 +721,19 @@ class _Content extends StatelessWidget {
   }
 
   Offset centerPosition() {
-    final width = Math.min(screenSize.width, screenSize.height);
-    final isBackgroundCentered = isCloseToTopOrBottom(anchor);
+    final double width = Math.min(screenSize.width, screenSize.height);
+    final bool isBackgroundCentered = isCloseToTopOrBottom(anchor);
 
     if (isBackgroundCentered)
       return anchor;
     else {
-      final startingBackgroundPosition = anchor;
-      final endingBackgroundPosition =
+      final Offset startingBackgroundPosition = anchor;
+      final Offset endingBackgroundPosition =
           Offset(width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0), anchor.dy + (isOnTopHalfOfScreen(anchor) ? -(width / 2) + 40.0 : (width / 20.0) - 40.0));
 
       switch (state) {
         case _OverlayState.opening:
-          final adjustedPercent = const Interval(0.0, 0.8, curve: Curves.easeOut).transform(transitionPercent);
+          final double adjustedPercent = const Interval(0.0, 0.8, curve: Curves.easeOut).transform(transitionPercent);
           return Offset.lerp(startingBackgroundPosition, endingBackgroundPosition, adjustedPercent);
         case _OverlayState.activating:
           return endingBackgroundPosition;
@@ -741,8 +747,8 @@ class _Content extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final contentOrientation = getContentOrientation(anchor);
-    var contentOffsetMultiplier;
+    final DescribedFeatureContentOrientation contentOrientation = getContentOrientation(anchor);
+    double contentOffsetMultiplier;
 
     switch (orientation) {
       case ContentOrientation.trivial:
@@ -756,14 +762,14 @@ class _Content extends StatelessWidget {
         break;
     }
 
-    final width = Math.min(screenSize.width, screenSize.height);
+    final double width = Math.min(screenSize.width, screenSize.height);
 
-    final contentY = anchor.dy + contentOffsetMultiplier * (touchTargetRadius + 20);
+    final double contentY = anchor.dy + contentOffsetMultiplier * (touchTargetRadius + 20);
 
-    final contentFractionalOffset = contentOffsetMultiplier.clamp(-1.0, 0.0);
+    final double contentFractionalOffset = contentOffsetMultiplier.clamp(-1.0, 0.0);
 
-    final dx = centerPosition().dx - width;
-    final contentX = (dx.isNegative) ? 0.0 : dx;
+    final double dx = centerPosition().dx - width;
+    final double contentX = (dx.isNegative) ? 0.0 : dx;
     return Positioned(
       top: contentY,
       left: contentX,
@@ -783,11 +789,11 @@ class _Content extends StatelessWidget {
                     title == null ? const SizedBox(height: 0) : Text(title, style: Theme.of(context).textTheme.title.copyWith(color: textColor)),
                     const SizedBox(height: 8.0),
                     description == null
-                        ? const SizedBox(height: 0)
-                        : Text(
-                            description,
-                            style: Theme.of(context).textTheme.body1.copyWith(color: textColor.withOpacity(0.9)),
-                          ),
+                      ? const SizedBox(height: 0)
+                      : Text(
+                          description,
+                          style: Theme.of(context).textTheme.body1.copyWith(color: textColor.withOpacity(0.9)),
+                        ),
                   ],
                 ),
               ),
