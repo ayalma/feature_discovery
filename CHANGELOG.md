@@ -1,36 +1,40 @@
 ## 0.5.0
 
-* [WARNING] `Theme.of(context)` is now used to determine text styles
-* title and description can now be null
-* added option to disable pulsing animation
-* added [Function] parameter to be called when overlay is dismissed
-* added possibility to pass any iterable containing feature ids to `FeatureDiscovery.discoverFeatures`
-* added the `@required` annotation to parameters that cannot be null
+* Fixed `DescribedFeatureOverlays`'s constantly rebuilding even if they were never displayed.
+* **Warning**: `Theme.of(context)` is now used to determine text styles
+* Title and description can now be null.
+* Added option to disable pulsing animation.
+* Added parameter that is called when the overlay is dismissed.
+* Added possibility to pass any `Iterable` for the steps to `FeatureDiscovery.discoverFeatures`.
+* Added the `@required` annotation to parameters that cannot be null.
+* Removed unnecessary files.
+* Formatted `CHANGELOG.md`.
+* Updated the plugin description.
 
 ## 0.4.1
 
-fixed animation bug's
+* Fixed animation bugs.
 
 ## 0.4.0
 
-`ContentOrientation` added
+* Added `ContentOrientation`.
 
 ## 0.3.0
 
-consider landscape and portrait orientation in `DescribedFeatureDiscoveryWidget`
+* Consider landscape and portrait orientation in `DescribedFeatureDiscoveryWidget`.
 
 ## 0.2.0
 
-add EnsureVisible widget to scroll to target when we are in scrollable container
+* Add `EnsureVisible` widget to scroll to target when it is in a scrollable container.
 
 ## 0.1.1
 
-applied pub Health suggestions
+* Applied Pub health suggestions.
 
 ## 0.1.0
 
-applied pub Health suggestions
+* Applied Pub health suggestions.
 
 ## 0.0.1
 
-init release.
+* Initial release.

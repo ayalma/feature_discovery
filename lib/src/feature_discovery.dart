@@ -158,7 +158,6 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   void initState() {
     super.initState();
     initAnimationControllers();
-    openController.forward();
   }
 
   @override
@@ -255,7 +254,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     activationController.forward(from: 0.0);
   }
 
-  void dismiss() async {
+  void dismiss() {
     pulseController?.stop();
     dismissController.forward(from: 0.0);
   }
