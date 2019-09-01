@@ -8,10 +8,10 @@
 * Added parameter that is called when the overlay is dismissed.
 * Added possibility to pass any `Iterable` for the steps to `FeatureDiscovery.discoverFeatures`.
 * Added the `@required` annotation to parameters that cannot be null.
+* Ensured that overlay for each step is only shown once at a time.
 * Removed unnecessary files.
-* Formatted `CHANGELOG.md`.
+* Formatted files.
 * Updated the plugin description.
-* Formatted Dart files using `flutter dartfmt`.
 
 ## 0.4.1
 

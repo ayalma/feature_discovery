@@ -14,26 +14,15 @@ class FeatureDiscovery extends StatefulWidget {
   /// Though they can be placed in any [Iterable], it is recommended to pass them as a [Set], as they have to be unique
   static void discoverFeatures(BuildContext context, Iterable<String> steps) {
     assert(steps.toSet().length == steps.length, "Feature ids must be unique");
-    _FeatureDiscoveryState state =
-        context.ancestorStateOfType(TypeMatcher<_FeatureDiscoveryState>())
-            as _FeatureDiscoveryState;
-
-    state.discoverFeatures(steps.toList());
+    _FeatureDiscoveryState.of(context).discoverFeatures(steps.toList());
   }
 
   static void markStepComplete(BuildContext context, String stepId) {
-    _FeatureDiscoveryState state =
-        context.ancestorStateOfType(TypeMatcher<_FeatureDiscoveryState>())
-            as _FeatureDiscoveryState;
-    state.markStepComplete(stepId);
+    _FeatureDiscoveryState.of(context).markStepComplete(stepId);
   }
 
   static dismiss(BuildContext context) {
-    _FeatureDiscoveryState state =
-        context.ancestorStateOfType(TypeMatcher<_FeatureDiscoveryState>())
-            as _FeatureDiscoveryState;
-
-    state.dismiss();
+    _FeatureDiscoveryState.of(context).dismiss();
   }
 
   final Widget child;
@@ -43,8 +32,22 @@ class FeatureDiscovery extends StatefulWidget {
 }
 
 class _FeatureDiscoveryState extends State<FeatureDiscovery> {
+  static _FeatureDiscoveryState of(BuildContext context) => context.ancestorStateOfType(TypeMatcher<_FeatureDiscoveryState>()) as _FeatureDiscoveryState;
+
   List<String> steps;
   int activeStepIndex;
+
+  /// This variable ensures that each discovery step only shows one overlay.
+  ///
+  /// If one widget is placed multiple times in the widget tree, e.g. by
+  /// [DropdownButton], this is necessary to avoid showing duplicate overlays.
+  Map<String, int> assigneesForFeatureIds;
+
+  @override
+  void initState() {
+    assigneesForFeatureIds = {};
+    super.initState();
+  }
 
   void discoverFeatures(List<String> steps) {
     setState(() {
@@ -84,6 +87,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// This id must be unique among all the [DescribedFeatureOverlay]s widgets.
   final String featureId;
   final IconData icon;
+
   @Deprecated("Replaced by backgroundColor")
   final Color color;
 
@@ -112,24 +116,24 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// If not null, the callback MUST be called in order for the overlay to be dismissed.
   final Function(VoidCallback onActionCompleted) onDismissAction;
 
-  const DescribedFeatureOverlay(
-      {Key key,
-      @required this.featureId,
-      @required this.icon,
-      this.color,
-      this.backgroundColor,
-      this.iconColor,
-      this.targetColor = Colors.white,
-      this.textColor = Colors.white,
-      this.title,
-      this.description,
-      @required this.child,
-      this.doAction,
-      this.prepareAction,
-      this.contentLocation = ContentOrientation.trivial,
-      this.enablePulsingAnimation = true,
-      this.onDismissAction})
-      : assert(featureId != null),
+  const DescribedFeatureOverlay({
+    Key key,
+    @required this.featureId,
+    @required this.icon,
+    this.color,
+    this.backgroundColor,
+    this.iconColor,
+    this.targetColor = Colors.white,
+    this.textColor = Colors.white,
+    this.title,
+    this.description,
+    @required this.child,
+    this.doAction,
+    this.prepareAction,
+    this.contentLocation = ContentOrientation.trivial,
+    this.enablePulsingAnimation = true,
+    this.onDismissAction,
+  })  : assert(featureId != null),
         assert(icon != null),
         assert(child != null),
         assert(contentLocation != null),
@@ -137,16 +141,13 @@ class DescribedFeatureOverlay extends StatefulWidget {
         assert(targetColor != null),
         assert(textColor != null),
         assert(color == null || backgroundColor == null),
-        // both are the same
         super(key: key);
 
   @override
-  _DescribedFeatureOverlayState createState() =>
-      _DescribedFeatureOverlayState();
+  _DescribedFeatureOverlayState createState() => _DescribedFeatureOverlayState();
 }
 
-class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
-    with TickerProviderStateMixin {
+class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with TickerProviderStateMixin {
   Size screenSize;
   double statusBarHeight;
   bool showOverlay = false;
@@ -160,8 +161,14 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
   @override
   void initState() {
-    super.initState();
     initAnimationControllers();
+
+    WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+      // This ensures that only the widget that was initialized most recently shows the overlay.
+      _FeatureDiscoveryState.of(context).assigneesForFeatureIds[widget.featureId] = hashCode;
+    });
+
+    super.initState();
   }
 
   @override
@@ -174,37 +181,29 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   }
 
   void initAnimationControllers() {
-    openController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
-          ..addListener(
-              () => setState(() => transitionPercent = openController.value))
-          ..addStatusListener(
-            (AnimationStatus status) {
-              if (status == AnimationStatus.forward)
-                setState(() => state = _OverlayState.opening);
-              else if (status == AnimationStatus.completed)
-                pulseController?.forward(from: 0.0);
-            },
-          );
+    openController = AnimationController(vsync: this, duration: Duration(milliseconds: 250))
+      ..addListener(() => setState(() => transitionPercent = openController.value))
+      ..addStatusListener(
+        (AnimationStatus status) {
+          if (status == AnimationStatus.forward)
+            setState(() => state = _OverlayState.opening);
+          else if (status == AnimationStatus.completed) pulseController?.forward(from: 0.0);
+        },
+      );
 
     if (widget.enablePulsingAnimation) {
-      pulseController = AnimationController(
-          vsync: this, duration: Duration(milliseconds: 1000))
-        ..addListener(
-            () => setState(() => transitionPercent = pulseController.value))
+      pulseController = AnimationController(vsync: this, duration: Duration(milliseconds: 1000))
+        ..addListener(() => setState(() => transitionPercent = pulseController.value))
         ..addStatusListener(
           (AnimationStatus status) {
             if (status == AnimationStatus.forward)
               setState(() => state = _OverlayState.pulsing);
-            else if (status == AnimationStatus.completed)
-              pulseController.forward(from: 0.0);
+            else if (status == AnimationStatus.completed) pulseController.forward(from: 0.0);
           },
         );
     }
-    activationController = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 250))
-      ..addListener(
-          () => setState(() => transitionPercent = activationController.value))
+    activationController = AnimationController(vsync: this, duration: Duration(milliseconds: 250))
+      ..addListener(() => setState(() => transitionPercent = activationController.value))
       ..addStatusListener(
         (AnimationStatus status) {
           switch (status) {
@@ -212,8 +211,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
               setState(() => state = _OverlayState.activating);
               break;
             case AnimationStatus.completed:
-              void Function() callback = () =>
-                  FeatureDiscovery.markStepComplete(context, widget.featureId);
+              void Function() callback = () => FeatureDiscovery.markStepComplete(context, widget.featureId);
               if (widget.doAction == null)
                 callback();
               else
@@ -225,24 +223,21 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         },
       );
 
-    dismissController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
-          ..addListener(
-              () => setState(() => transitionPercent = dismissController.value))
-          ..addStatusListener(
-            (AnimationStatus status) {
-              if (status == AnimationStatus.forward)
-                setState(() => state = _OverlayState.dismissing);
-              else if (status == AnimationStatus.completed) {
-                void Function() callback =
-                    () => FeatureDiscovery.dismiss(context);
-                if (widget.onDismissAction == null)
-                  callback();
-                else
-                  widget.onDismissAction(callback);
-              }
-            },
-          );
+    dismissController = AnimationController(vsync: this, duration: Duration(milliseconds: 250))
+      ..addListener(() => setState(() => transitionPercent = dismissController.value))
+      ..addStatusListener(
+        (AnimationStatus status) {
+          if (status == AnimationStatus.forward)
+            setState(() => state = _OverlayState.dismissing);
+          else if (status == AnimationStatus.completed) {
+            void Function() callback = () => FeatureDiscovery.dismiss(context);
+            if (widget.onDismissAction == null)
+              callback();
+            else
+              widget.onDismissAction(callback);
+          }
+        },
+      );
   }
 
   @override
@@ -253,24 +248,38 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     showOverlayIfActiveStep();
   }
 
+  void show() {
+    openController.forward(from: 0.0);
+    setState(() => showOverlay = true);
+  }
+
   void showOverlayIfActiveStep() {
-    String activeStep = FeatureDiscovery.activeStep(context);
+    final activeStep = FeatureDiscovery.activeStep(context);
 
     if (activeStep == null) {
       // This condition is met when the feature discovery was dismissed
       // and in that case the AnimationController's need to be dismissed as well.
       openController.stop();
       pulseController?.stop();
+    } else if (activeStep == widget.featureId) {
+      // Overlay is already shown. No need to take any actions;
+      if (showOverlay == true) return;
+
+      // This step might be assigned to another widget with the same feature id
+      // and we only want to show the overlay once.
+      if (_FeatureDiscoveryState.of(context).assigneesForFeatureIds[activeStep] != hashCode) return;
+
+      if (widget.prepareAction != null)
+        widget.prepareAction(show);
+      else
+        show();
     }
 
-    void Function() callback = () {
-      setState(() => showOverlay = activeStep == widget.featureId);
-      if (activeStep == widget.featureId) openController.forward(from: 0.0);
-    };
-    if (widget.prepareAction != null && activeStep == widget.featureId)
-      widget.prepareAction(callback);
-    else
-      callback();
+    if (showOverlay == true) {
+      // This can only be reached if activeStep is not equal to the feature id of this widget.
+      // In that case, this overlay needs to be hidden.
+      setState(() => showOverlay = false);
+    }
   }
 
   void activate() {
@@ -298,8 +307,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           state: state,
           transitionPercent: transitionPercent,
           anchor: anchor,
-          color: (widget.backgroundColor ?? widget.color) ??
-              Theme.of(context).primaryColor,
+          color: (widget.backgroundColor ?? widget.color) ?? Theme.of(context).primaryColor,
           screenSize: screenSize,
           orientation: widget.contentLocation,
         ),
@@ -387,12 +395,10 @@ class _Background extends StatelessWidget {
 
   double radius() {
     final isBackgroundCentered = isCloseToTopOrBottom(anchor);
-    final backgroundRadius = Math.min(screenSize.width, screenSize.height) *
-        (isBackgroundCentered ? 1.0 : 0.7);
+    final backgroundRadius = Math.min(screenSize.width, screenSize.height) * (isBackgroundCentered ? 1.0 : 0.7);
     switch (state) {
       case _OverlayState.opening:
-        final adjustedPercent = const Interval(0.0, 0.8, curve: Curves.easeOut)
-            .transform(transitionPercent);
+        final adjustedPercent = const Interval(0.0, 0.8, curve: Curves.easeOut).transform(transitionPercent);
         return backgroundRadius * adjustedPercent;
       case _OverlayState.activating:
         return backgroundRadius + transitionPercent * 40.0;
@@ -415,37 +421,25 @@ class _Background extends StatelessWidget {
       var endingBackgroundPosition;
       switch (orientation) {
         case ContentOrientation.trivial:
-          endingBackgroundPosition = Offset(
-              width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
-              anchor.dy +
-                  (isOnTopHalfOfScreen(anchor)
-                      ? -(width / 2.0) + 40.0
-                      : (width / 2.0) - 40.0));
+          endingBackgroundPosition =
+              Offset(width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0), anchor.dy + (isOnTopHalfOfScreen(anchor) ? -(width / 2.0) + 40.0 : (width / 2.0) - 40.0));
           break;
         case ContentOrientation.above:
-          endingBackgroundPosition = Offset(
-              width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
-              anchor.dy - (width / 2.0) + 40.0);
+          endingBackgroundPosition = Offset(width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0), anchor.dy - (width / 2.0) + 40.0);
           break;
         case ContentOrientation.below:
-          endingBackgroundPosition = Offset(
-              width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
-              anchor.dy + (width / 2.0) - 40.0);
+          endingBackgroundPosition = Offset(width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0), anchor.dy + (width / 2.0) - 40.0);
           break;
       }
 
       switch (state) {
         case _OverlayState.opening:
-          final adjustedPercent =
-              const Interval(0.0, 0.8, curve: Curves.easeOut)
-                  .transform(transitionPercent);
-          return Offset.lerp(startingBackgroundPosition,
-              endingBackgroundPosition, adjustedPercent);
+          final adjustedPercent = const Interval(0.0, 0.8, curve: Curves.easeOut).transform(transitionPercent);
+          return Offset.lerp(startingBackgroundPosition, endingBackgroundPosition, adjustedPercent);
         case _OverlayState.activating:
           return endingBackgroundPosition;
         case _OverlayState.dismissing:
-          return Offset.lerp(endingBackgroundPosition,
-              startingBackgroundPosition, transitionPercent);
+          return Offset.lerp(endingBackgroundPosition, startingBackgroundPosition, transitionPercent);
         default:
           return endingBackgroundPosition;
       }
@@ -455,18 +449,15 @@ class _Background extends StatelessWidget {
   double backgroundOpacity() {
     switch (state) {
       case _OverlayState.opening:
-        final adjustedPercent = const Interval(0.0, 0.3, curve: Curves.easeOut)
-            .transform(transitionPercent);
+        final adjustedPercent = const Interval(0.0, 0.3, curve: Curves.easeOut).transform(transitionPercent);
         return 0.96 * adjustedPercent;
 
       case _OverlayState.activating:
-        final adjustedPercent = const Interval(0.1, 0.6, curve: Curves.easeOut)
-            .transform(transitionPercent);
+        final adjustedPercent = const Interval(0.1, 0.6, curve: Curves.easeOut).transform(transitionPercent);
 
         return 0.96 * (1 - adjustedPercent);
       case _OverlayState.dismissing:
-        final adjustedPercent = const Interval(0.2, 1.0, curve: Curves.easeOut)
-            .transform(transitionPercent);
+        final adjustedPercent = const Interval(0.2, 1.0, curve: Curves.easeOut).transform(transitionPercent);
         return 0.96 * (1 - adjustedPercent);
       default:
         return 0.96;
@@ -484,9 +475,7 @@ class _Background extends StatelessWidget {
       child: Container(
         width: 2 * radius(),
         height: 2 * radius(),
-        decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color.withOpacity(backgroundOpacity())),
+        decoration: BoxDecoration(shape: BoxShape.circle, color: color.withOpacity(backgroundOpacity())),
       ),
     );
   }
@@ -498,12 +487,7 @@ class _Pulse extends StatelessWidget {
   final Offset anchor;
   final Color color;
 
-  const _Pulse(
-      {Key key,
-      @required this.state,
-      @required this.transitionPercent,
-      @required this.anchor,
-      @required this.color})
+  const _Pulse({Key key, @required this.state, @required this.transitionPercent, @required this.anchor, @required this.color})
       : assert(state != null),
         assert(transitionPercent != null),
         assert(anchor != null),
@@ -531,8 +515,7 @@ class _Pulse extends StatelessWidget {
   double opacity() {
     switch (state) {
       case _OverlayState.pulsing:
-        final percentOpaque =
-            1.0 - ((transitionPercent.clamp(0.3, 0.8) - 0.3) / 0.5);
+        final percentOpaque = 1.0 - ((transitionPercent.clamp(0.3, 0.8) - 0.3) / 0.5);
         return (percentOpaque * 0.75).clamp(0.0, 1.0);
       case _OverlayState.activating:
       case _OverlayState.dismissing:
@@ -591,13 +574,10 @@ class _TouchTarget extends StatelessWidget {
   double opacity() {
     switch (state) {
       case _OverlayState.opening:
-        return const Interval(0.0, 0.3, curve: Curves.easeOut)
-            .transform(transitionPercent);
+        return const Interval(0.0, 0.3, curve: Curves.easeOut).transform(transitionPercent);
       case _OverlayState.activating:
       case _OverlayState.dismissing:
-        return 1.0 -
-            const Interval(0.7, 1.0, curve: Curves.easeOut)
-                .transform(transitionPercent);
+        return 1.0 - const Interval(0.7, 1.0, curve: Curves.easeOut).transform(transitionPercent);
       default:
         return 1.0;
     }
@@ -706,13 +686,9 @@ class _Content extends StatelessWidget {
 
   DescribedFeatureContentOrientation getContentOrientation(Offset position) {
     if (isCloseToTopOrBottom(position))
-      return isOnTopHalfOfScreen(position)
-          ? DescribedFeatureContentOrientation.below
-          : DescribedFeatureContentOrientation.above;
+      return isOnTopHalfOfScreen(position) ? DescribedFeatureContentOrientation.below : DescribedFeatureContentOrientation.above;
     else
-      return isOnTopHalfOfScreen(position)
-          ? DescribedFeatureContentOrientation.above
-          : DescribedFeatureContentOrientation.below;
+      return isOnTopHalfOfScreen(position) ? DescribedFeatureContentOrientation.above : DescribedFeatureContentOrientation.below;
   }
 
   double opacity() {
@@ -720,13 +696,11 @@ class _Content extends StatelessWidget {
       case _OverlayState.closed:
         return 0.0;
       case _OverlayState.opening:
-        final adjustedPercent = const Interval(0.6, 1.0, curve: Curves.easeOut)
-            .transform(transitionPercent);
+        final adjustedPercent = const Interval(0.6, 1.0, curve: Curves.easeOut).transform(transitionPercent);
         return adjustedPercent;
       case _OverlayState.activating:
       case _OverlayState.dismissing:
-        final adjustedPercent = const Interval(0.0, 0.4, curve: Curves.easeOut)
-            .transform(transitionPercent);
+        final adjustedPercent = const Interval(0.0, 0.4, curve: Curves.easeOut).transform(transitionPercent);
         return 1.0 - adjustedPercent;
       default:
         return 1.0;
@@ -741,25 +715,17 @@ class _Content extends StatelessWidget {
       return anchor;
     else {
       final startingBackgroundPosition = anchor;
-      final endingBackgroundPosition = Offset(
-          width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
-          anchor.dy +
-              (isOnTopHalfOfScreen(anchor)
-                  ? -(width / 2) + 40.0
-                  : (width / 20.0) - 40.0));
+      final endingBackgroundPosition =
+          Offset(width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0), anchor.dy + (isOnTopHalfOfScreen(anchor) ? -(width / 2) + 40.0 : (width / 20.0) - 40.0));
 
       switch (state) {
         case _OverlayState.opening:
-          final adjustedPercent =
-              const Interval(0.0, 0.8, curve: Curves.easeOut)
-                  .transform(transitionPercent);
-          return Offset.lerp(startingBackgroundPosition,
-              endingBackgroundPosition, adjustedPercent);
+          final adjustedPercent = const Interval(0.0, 0.8, curve: Curves.easeOut).transform(transitionPercent);
+          return Offset.lerp(startingBackgroundPosition, endingBackgroundPosition, adjustedPercent);
         case _OverlayState.activating:
           return endingBackgroundPosition;
         case _OverlayState.dismissing:
-          return Offset.lerp(endingBackgroundPosition,
-              startingBackgroundPosition, transitionPercent);
+          return Offset.lerp(endingBackgroundPosition, startingBackgroundPosition, transitionPercent);
         default:
           return endingBackgroundPosition;
       }
@@ -773,10 +739,7 @@ class _Content extends StatelessWidget {
 
     switch (orientation) {
       case ContentOrientation.trivial:
-        contentOffsetMultiplier =
-            contentOrientation == DescribedFeatureContentOrientation.below
-                ? 1.0
-                : -1.0;
+        contentOffsetMultiplier = contentOrientation == DescribedFeatureContentOrientation.below ? 1.0 : -1.0;
         break;
       case ContentOrientation.above:
         contentOffsetMultiplier = -1.0;
@@ -788,8 +751,7 @@ class _Content extends StatelessWidget {
 
     final width = Math.min(screenSize.width, screenSize.height);
 
-    final contentY =
-        anchor.dy + contentOffsetMultiplier * (touchTargetRadius + 20);
+    final contentY = anchor.dy + contentOffsetMultiplier * (touchTargetRadius + 20);
 
     final contentFractionalOffset = contentOffsetMultiplier.clamp(-1.0, 0.0);
 
@@ -811,22 +773,13 @@ class _Content extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    title == null
-                        ? const SizedBox(height: 0)
-                        : Text(title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .title
-                                .copyWith(color: textColor)),
+                    title == null ? const SizedBox(height: 0) : Text(title, style: Theme.of(context).textTheme.title.copyWith(color: textColor)),
                     const SizedBox(height: 8.0),
                     description == null
                         ? const SizedBox(height: 0)
                         : Text(
                             description,
-                            style: Theme.of(context)
-                                .textTheme
-                                .body1
-                                .copyWith(color: textColor.withOpacity(0.9)),
+                            style: Theme.of(context).textTheme.body1.copyWith(color: textColor.withOpacity(0.9)),
                           ),
                   ],
                 ),
@@ -849,13 +802,10 @@ class _InheritedFeatureDiscovery extends InheritedWidget {
   })  : assert(child != null),
         super(key: key, child: child);
 
-  static _InheritedFeatureDiscovery of(BuildContext context) =>
-      context.inheritFromWidgetOfExactType(_InheritedFeatureDiscovery)
-          as _InheritedFeatureDiscovery;
+  static _InheritedFeatureDiscovery of(BuildContext context) => context.inheritFromWidgetOfExactType(_InheritedFeatureDiscovery) as _InheritedFeatureDiscovery;
 
   @override
-  bool updateShouldNotify(_InheritedFeatureDiscovery old) =>
-      old.activeStepId != activeStepId;
+  bool updateShouldNotify(_InheritedFeatureDiscovery old) => old.activeStepId != activeStepId;
 }
 
 enum DescribedFeatureContentOrientation {
