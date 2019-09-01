@@ -89,10 +89,10 @@ class DescribedFeatureOverlay extends StatefulWidget {
 
   /// The color of the outside layout, behind texts.
   /// This parameter replaces the [color] parameter: you should only specify this one.
-  /// If null, default to [ThemeData.primaryColor]
+  /// If null, defaults to [ThemeData.primaryColor].
   final Color backgroundColor;
 
-  /// If null, default to current [IconTheme]
+  /// If null, defaults to current [IconTheme]
   final Color iconColor;
 
   /// Color of the target, that is the small circle behind the icon.
