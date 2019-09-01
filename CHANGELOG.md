@@ -9,6 +9,7 @@
 * Added the `@required` annotation to parameters that cannot be null.
 * Removed unnecessary files.
 * Formatted `CHANGELOG.md`.
+* Updated the plugin description.
 
 ## 0.4.1
 
