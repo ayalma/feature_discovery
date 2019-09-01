@@ -87,12 +87,18 @@ class DescribedFeatureOverlay extends StatefulWidget {
   @Deprecated("Replaced by backgroundColor")
   final Color color;
 
+  /// The color of the outside layout, behind texts.
+  /// This parameter replaces the [color] parameter: you should only specify this one.
   /// If null, default to [ThemeData.primaryColor]
   final Color backgroundColor;
 
   /// If null, default to current [IconTheme]
   final Color iconColor;
+
+  /// Color of the target, that is the small circle behind the icon.
   final Color targetColor;
+
+  /// Color for title and text
   final Color textColor;
   final String title;
   final String description;
@@ -136,8 +142,8 @@ class DescribedFeatureOverlay extends StatefulWidget {
         assert(enablePulsingAnimation != null),
         assert(targetColor != null),
         assert(textColor != null),
-        assert(color == null || backgroundColor == null),
-        // both are the same
+        assert(color == null || backgroundColor == null, 
+          "[color] parameter has been replaced by [backgroundColor]: as they're the same, you should only specify one"),
         super(key: key);
 
   @override
