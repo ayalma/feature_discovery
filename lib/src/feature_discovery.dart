@@ -146,12 +146,8 @@ class DescribedFeatureOverlay extends StatefulWidget {
         assert(enablePulsingAnimation != null),
         assert(targetColor != null),
         assert(textColor != null),
-<<<<<<< HEAD
-        assert(color == null || backgroundColor == null),
-=======
-        assert(color == null || backgroundColor == null, 
+        assert(color == null || backgroundColor == null,
           "[color] parameter has been replaced by [backgroundColor]: as they're the same, you should only specify one"),
->>>>>>> bb207310eae7a7f3336a45add62be9d4144585e9
         super(key: key);
 
   @override
