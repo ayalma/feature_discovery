@@ -91,9 +91,6 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// This id must be unique among all the [DescribedFeatureOverlay]s widgets.
   final String featureId;
 
-  @Deprecated('Use `backgroundColor` instead.')
-  final Color color;
-
   /// The color of the outside layout, behind texts.
   /// If null, defaults to [ThemeData.primaryColor].
   final Color backgroundColor;
@@ -146,7 +143,6 @@ class DescribedFeatureOverlay extends StatefulWidget {
     Key key,
     @required this.featureId,
     @required this.tapTarget,
-    this.color,
     this.backgroundColor,
     this.targetColor = Colors.white,
     this.textColor = Colors.white,
@@ -165,8 +161,6 @@ class DescribedFeatureOverlay extends StatefulWidget {
         assert(enablePulsingAnimation != null),
         assert(targetColor != null),
         assert(textColor != null),
-        assert(color == null || backgroundColor == null,
-            "[color] parameter has been replaced by [backgroundColor]: as they're the same, you should only specify one"),
         super(key: key);
 
   @override
@@ -177,10 +171,12 @@ class DescribedFeatureOverlay extends StatefulWidget {
 class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     with TickerProviderStateMixin {
   Size screenSize;
-  double statusBarHeight;
-  bool showOverlay = false;
-  _OverlayState state = _OverlayState.closed;
-  double transitionPercent = 1.0;
+
+  bool showOverlay;
+
+  _OverlayState state;
+
+  double transitionProgress;
 
   AnimationController openController;
   AnimationController activationController;
@@ -189,6 +185,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
   @override
   void initState() {
+    showOverlay = false;
+
+    state = _OverlayState.closed;
+
+    transitionProgress = 1;
+
     initAnimationControllers();
     super.initState();
   }
@@ -206,7 +208,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     openController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 250))
           ..addListener(
-              () => setState(() => transitionPercent = openController.value))
+              () => setState(() => transitionProgress = openController.value))
           ..addStatusListener(
             (AnimationStatus status) {
               if (status == AnimationStatus.forward)
@@ -220,7 +222,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       pulseController = AnimationController(
           vsync: this, duration: Duration(milliseconds: 1000))
         ..addListener(
-            () => setState(() => transitionPercent = pulseController.value))
+            () => setState(() => transitionProgress = pulseController.value))
         ..addStatusListener(
           (AnimationStatus status) {
             if (status == AnimationStatus.forward)
@@ -233,7 +235,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     activationController = AnimationController(
         vsync: this, duration: Duration(milliseconds: 250))
       ..addListener(
-          () => setState(() => transitionPercent = activationController.value))
+          () => setState(() => transitionProgress = activationController.value))
       ..addStatusListener(
         (AnimationStatus status) {
           switch (status) {
@@ -249,25 +251,25 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         },
       );
 
-    dismissController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
-          ..addListener(
-              () => setState(() => transitionPercent = dismissController.value))
-          ..addStatusListener(
-            (AnimationStatus status) {
-              if (status == AnimationStatus.forward)
-                setState(() => state = _OverlayState.dismissing);
-              else if (status == AnimationStatus.completed)
-                FeatureDiscovery.dismiss(context);
-            },
-          );
+    dismissController = AnimationController(
+        vsync: this, duration: Duration(milliseconds: 250))
+      ..addListener(
+          () => setState(() => transitionProgress = dismissController.value))
+      ..addStatusListener(
+        (AnimationStatus status) {
+          if (status == AnimationStatus.forward)
+            setState(() => state = _OverlayState.dismissing);
+          else if (status == AnimationStatus.completed)
+            FeatureDiscovery.dismiss(context);
+        },
+      );
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     screenSize = MediaQuery.of(context).size;
-    statusBarHeight = MediaQuery.of(context).viewInsets.top;
+
     showOverlayIfActiveStep();
   }
 
@@ -350,16 +352,15 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         ),
         _Background(
           state: state,
-          transitionPercent: transitionPercent,
+          transitionPercent: transitionProgress,
           anchor: anchor,
-          color: (widget.backgroundColor ?? widget.color) ??
-              Theme.of(context).primaryColor,
+          color: widget.backgroundColor ?? Theme.of(context).primaryColor,
           screenSize: screenSize,
           orientation: widget.contentLocation,
         ),
         _Content(
           state: state,
-          transitionPercent: transitionPercent,
+          transitionPercent: transitionProgress,
           anchor: anchor,
           screenSize: screenSize,
           // this parameter is not used
@@ -374,13 +375,13 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         ),
         _Pulse(
           state: state,
-          transitionPercent: transitionPercent,
+          transitionPercent: transitionProgress,
           anchor: anchor,
           color: widget.targetColor,
         ),
         _TapTarget(
           state: state,
-          transitionPercent: transitionPercent,
+          transitionPercent: transitionProgress,
           anchor: anchor,
           color: widget.targetColor,
           onPressed: activate,
