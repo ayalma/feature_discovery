@@ -7,13 +7,17 @@ class FeatureDiscovery extends StatefulWidget {
   const FeatureDiscovery({Key key, this.child}) : super(key: key);
 
   static String activeStep(BuildContext context) {
-    return _InheritedFeatureDiscovery.of(context).activeStepId;
+    return _InheritedFeatureDiscovery
+        .of(context)
+        .activeStepId;
   }
 
   /// Steps are the featureIds of the overlays.
   /// Though they can be placed in any [Iterable], it is recommended to pass them as a [Set], as they have to be unique
   static void discoverFeatures(BuildContext context, Iterable<String> steps) {
-    assert(steps.toSet().length == steps.length, "Feature ids must be unique");
+    assert(steps
+        .toSet()
+        .length == steps.length, "Feature ids must be unique");
     _FeatureDiscoveryState.of(context).discoverFeatures(steps.toList());
   }
 
@@ -34,7 +38,7 @@ class FeatureDiscovery extends StatefulWidget {
 class _FeatureDiscoveryState extends State<FeatureDiscovery> {
   static _FeatureDiscoveryState of(BuildContext context) =>
       context.ancestorStateOfType(TypeMatcher<_FeatureDiscoveryState>())
-          as _FeatureDiscoveryState;
+      as _FeatureDiscoveryState;
 
   List<String> steps;
   int activeStepIndex;
@@ -110,14 +114,6 @@ class DescribedFeatureOverlay extends StatefulWidget {
   final String title;
   final String description;
 
-  /// Called when the target is pressed.
-  final Function(VoidCallback onActionCompleted) doAction;
-
-  /// Called just before the FeatureOverlay is displayed.
-  /// The function parameter is actually the callback that triggers the display of the overlay.
-  /// If not null, the callback MUST be called in order for the overlay to be displayed.
-  final Function(VoidCallback onActionCompleted) prepareAction;
-
   /// This is usually an [Icon].
   /// The final tap target will already have a tap listener to finish each step.
   ///
@@ -129,9 +125,27 @@ class DescribedFeatureOverlay extends StatefulWidget {
   final ContentOrientation contentLocation;
   final bool enablePulsingAnimation;
 
-  /// Function to execute when the overlay is dismissed (when the user taps outside of it).
-  /// If not null, the callback MUST be called in order for the overlay to be dismissed.
-  final Function(VoidCallback onActionCompleted) onDismissAction;
+  /// Called just before the overlay is displayed.
+  /// This function needs to return a [bool], either from an `async` scope
+  /// or as a [Future].
+  ///
+  /// If this function returns `false`, this step will be marked complete
+  /// and therefore skipped, i.e. it will not be opened.
+  /// When the [Future] finishes and evaluates to `true`, this step will be shown.
+  final Future<bool> Function() onOpen;
+
+  /// Called whenever the user taps outside the overlay area.
+  /// This function needs to return a [bool], either from an `async` scope
+  /// or as a [Future].
+  ///
+  /// If the function returns `false`, nothing happens. If it returns `true`,
+  /// all of the current steps are dismissed.
+  final Future<bool> Function() onDismiss;
+
+  /// Called when the tap target is tapped.
+  /// Whenever the [Future] this function returns is finishes, the feature discovery
+  /// will continue and the next step will call [shouldOpen] after a closing animation.
+  final Future<void> Function() onTargetTap;
 
   const DescribedFeatureOverlay({
     Key key,
@@ -145,12 +159,13 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.title,
     this.description,
     @required this.child,
-    this.doAction,
-    this.prepareAction,
+    this.onTargetTap,
+    this.onDismiss,
+    this.onOpen,
     this.contentLocation = ContentOrientation.trivial,
     this.enablePulsingAnimation = true,
-    this.onDismissAction,
-  })  : assert(featureId != null),
+  })
+      : assert(featureId != null),
         assert(tapTarget != null),
         assert(child != null),
         assert(contentLocation != null),
@@ -158,7 +173,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
         assert(targetColor != null),
         assert(textColor != null),
         assert(color == null || backgroundColor == null,
-            "[color] parameter has been replaced by [backgroundColor]: as they're the same, you should only specify one"),
+        "[color] parameter has been replaced by [backgroundColor]: as they're the same, you should only specify one"),
         super(key: key);
 
   @override
@@ -196,25 +211,25 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
   void initAnimationControllers() {
     openController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
-          ..addListener(
+    AnimationController(vsync: this, duration: Duration(milliseconds: 250))
+      ..addListener(
               () => setState(() => transitionPercent = openController.value))
-          ..addStatusListener(
+      ..addStatusListener(
             (AnimationStatus status) {
-              if (status == AnimationStatus.forward)
-                setState(() => state = _OverlayState.opening);
-              else if (status == AnimationStatus.completed)
-                pulseController?.forward(from: 0.0);
-            },
-          );
+          if (status == AnimationStatus.forward)
+            setState(() => state = _OverlayState.opening);
+          else if (status == AnimationStatus.completed)
+            pulseController?.forward(from: 0.0);
+        },
+      );
 
     if (widget.enablePulsingAnimation) {
       pulseController = AnimationController(
           vsync: this, duration: Duration(milliseconds: 1000))
         ..addListener(
-            () => setState(() => transitionPercent = pulseController.value))
+                () => setState(() => transitionPercent = pulseController.value))
         ..addStatusListener(
-          (AnimationStatus status) {
+              (AnimationStatus status) {
             if (status == AnimationStatus.forward)
               setState(() => state = _OverlayState.pulsing);
             else if (status == AnimationStatus.completed)
@@ -225,9 +240,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     activationController = AnimationController(
         vsync: this, duration: Duration(milliseconds: 250))
       ..addListener(
-          () => setState(() => transitionPercent = activationController.value))
+              () => setState(() => transitionPercent = activationController.value))
       ..addStatusListener(
-        (AnimationStatus status) {
+            (AnimationStatus status) {
           switch (status) {
             case AnimationStatus.forward:
               setState(() => state = _OverlayState.activating);
@@ -247,37 +262,36 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       );
 
     dismissController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
-          ..addListener(
+    AnimationController(vsync: this, duration: Duration(milliseconds: 250))
+      ..addListener(
               () => setState(() => transitionPercent = dismissController.value))
-          ..addStatusListener(
+      ..addStatusListener(
             (AnimationStatus status) {
-              if (status == AnimationStatus.forward)
-                setState(() => state = _OverlayState.dismissing);
-              else if (status == AnimationStatus.completed) {
-                void Function() callback =
-                    () => FeatureDiscovery.dismiss(context);
-                if (widget.onDismissAction == null)
-                  callback();
-                else
-                  widget.onDismissAction(callback);
-              }
-            },
-          );
+          if (status == AnimationStatus.forward)
+            setState(() => state = _OverlayState.dismissing);
+          else if (status == AnimationStatus.completed)
+            FeatureDiscovery.dismiss(context);
+        },
+      );
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    screenSize = MediaQuery.of(context).size;
-    statusBarHeight = MediaQuery.of(context).viewInsets.top;
+    screenSize = MediaQuery
+        .of(context)
+        .size;
+    statusBarHeight = MediaQuery
+        .of(context)
+        .viewInsets
+        .top;
     showOverlayIfActiveStep();
   }
 
   void show() {
     final activeStep = FeatureDiscovery.activeStep(context);
 
-    // The activeStep might have changed by now (if prepareAction called the callback later).
+    // The activeStep might have changed by now because onOpen is asynchronous.
     if (activeStep != widget.featureId) return;
 
     openController.forward(from: 0.0);
@@ -298,14 +312,24 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
       // There might be another widget with the same feature id in the widget tree,
       // which is already showing the overlay for this feature.
-      if (_FeatureDiscoveryState.of(context).stepShown) return;
+      if (_FeatureDiscoveryState
+          .of(context)
+          .stepShown) return;
 
-      // This needs to be set here and not in show to prevent multiple prepareAction
+      // This needs to be set here and not in show to prevent multiple onOpen
       // calls to stack up (if there are multiple widgets with the same feature id).
-      _FeatureDiscoveryState.of(context).stepShown = true;
+      _FeatureDiscoveryState
+          .of(context)
+          .stepShown = true;
 
-      if (widget.prepareAction != null)
-        widget.prepareAction(show);
+      if (widget.onOpen != null)
+        widget.onOpen().then((shouldOpen) {
+          assert(shouldOpen != null);
+          if (shouldOpen)
+            show();
+          else // Mark this step complete to go to the next step as this step is not shown.
+            FeatureDiscovery.markStepComplete(context, widget.featureId);
+        });
       else
         show();
       return;
@@ -318,12 +342,19 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     }
   }
 
-  void activate() {
+  void activate() async {
+    if (widget.onTargetTap != null)
+      await widget.onTargetTap();
     pulseController?.stop();
     activationController.forward(from: 0.0);
   }
 
-  void dismiss() {
+  void dismiss() async {
+    if (widget.onDismiss != null) {
+      final shouldDismiss = await widget.onDismiss();
+      assert(shouldDismiss != null);
+      if (!shouldDismiss) return;
+    }
     pulseController?.stop();
     dismissController.forward(from: 0.0);
   }
@@ -344,7 +375,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           transitionPercent: transitionPercent,
           anchor: anchor,
           color: (widget.backgroundColor ?? widget.color) ??
-              Theme.of(context).primaryColor,
+              Theme
+                  .of(context)
+                  .primaryColor,
           screenSize: screenSize,
           orientation: widget.contentLocation,
         ),
@@ -410,7 +443,8 @@ class _Background extends StatelessWidget {
     @required this.state,
     @required this.transitionPercent,
     @required this.orientation,
-  })  : assert(anchor != null),
+  })
+      : assert(anchor != null),
         assert(color != null),
         assert(screenSize != null),
         assert(state != null),
@@ -438,8 +472,8 @@ class _Background extends StatelessWidget {
     switch (state) {
       case _OverlayState.opening:
         final double adjustedPercent =
-            const Interval(0.0, 0.8, curve: Curves.easeOut)
-                .transform(transitionPercent);
+        const Interval(0.0, 0.8, curve: Curves.easeOut)
+            .transform(transitionPercent);
         return backgroundRadius * adjustedPercent;
       case _OverlayState.activating:
         return backgroundRadius + transitionPercent * 40.0;
@@ -484,8 +518,8 @@ class _Background extends StatelessWidget {
       switch (state) {
         case _OverlayState.opening:
           final double adjustedPercent =
-              const Interval(0.0, 0.8, curve: Curves.easeOut)
-                  .transform(transitionPercent);
+          const Interval(0.0, 0.8, curve: Curves.easeOut)
+              .transform(transitionPercent);
           return Offset.lerp(startingBackgroundPosition,
               endingBackgroundPosition, adjustedPercent);
         case _OverlayState.activating:
@@ -503,20 +537,20 @@ class _Background extends StatelessWidget {
     switch (state) {
       case _OverlayState.opening:
         final double adjustedPercent =
-            const Interval(0.0, 0.3, curve: Curves.easeOut)
-                .transform(transitionPercent);
+        const Interval(0.0, 0.3, curve: Curves.easeOut)
+            .transform(transitionPercent);
         return 0.96 * adjustedPercent;
 
       case _OverlayState.activating:
         final double adjustedPercent =
-            const Interval(0.1, 0.6, curve: Curves.easeOut)
-                .transform(transitionPercent);
+        const Interval(0.1, 0.6, curve: Curves.easeOut)
+            .transform(transitionPercent);
 
         return 0.96 * (1 - adjustedPercent);
       case _OverlayState.dismissing:
         final double adjustedPercent =
-            const Interval(0.2, 1.0, curve: Curves.easeOut)
-                .transform(transitionPercent);
+        const Interval(0.2, 1.0, curve: Curves.easeOut)
+            .transform(transitionPercent);
         return 0.96 * (1 - adjustedPercent);
       default:
         return 0.96;
@@ -548,12 +582,11 @@ class _Pulse extends StatelessWidget {
   final Offset anchor;
   final Color color;
 
-  const _Pulse(
-      {Key key,
-      @required this.state,
-      @required this.transitionPercent,
-      @required this.anchor,
-      @required this.color})
+  const _Pulse({Key key,
+    @required this.state,
+    @required this.transitionPercent,
+    @required this.anchor,
+    @required this.color})
       : assert(state != null),
         assert(transitionPercent != null),
         assert(anchor != null),
@@ -597,16 +630,16 @@ class _Pulse extends StatelessWidget {
     return state == _OverlayState.closed
         ? Container(height: 0, width: 0)
         : CenterAbout(
-            position: anchor,
-            child: Container(
-              width: radius() * 2,
-              height: radius() * 2,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color.withOpacity(opacity()),
-              ),
-            ),
-          );
+      position: anchor,
+      child: Container(
+        width: radius() * 2,
+        height: radius() * 2,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withOpacity(opacity()),
+        ),
+      ),
+    );
   }
 }
 
@@ -631,7 +664,8 @@ class _TapTarget extends StatelessWidget {
     @required this.backgroundColor,
     @required this.state,
     @required this.transitionPercent,
-  })  : assert(anchor != null),
+  })
+      : assert(anchor != null),
         assert(child != null),
         assert(state != null),
         assert(transitionPercent != null),
@@ -730,7 +764,8 @@ class _Content extends StatelessWidget {
     //this.statusBarHeight,
     @required this.orientation,
     @required this.textColor,
-  })  : assert(anchor != null),
+  })
+      : assert(anchor != null),
         assert(screenSize != null),
         assert(touchTargetRadius != null),
         assert(state != null),
@@ -768,14 +803,14 @@ class _Content extends StatelessWidget {
         return 0.0;
       case _OverlayState.opening:
         final double adjustedPercent =
-            const Interval(0.6, 1.0, curve: Curves.easeOut)
-                .transform(transitionPercent);
+        const Interval(0.6, 1.0, curve: Curves.easeOut)
+            .transform(transitionPercent);
         return adjustedPercent;
       case _OverlayState.activating:
       case _OverlayState.dismissing:
         final double adjustedPercent =
-            const Interval(0.0, 0.4, curve: Curves.easeOut)
-                .transform(transitionPercent);
+        const Interval(0.0, 0.4, curve: Curves.easeOut)
+            .transform(transitionPercent);
         return 1.0 - adjustedPercent;
       default:
         return 1.0;
@@ -800,8 +835,8 @@ class _Content extends StatelessWidget {
       switch (state) {
         case _OverlayState.opening:
           final double adjustedPercent =
-              const Interval(0.0, 0.8, curve: Curves.easeOut)
-                  .transform(transitionPercent);
+          const Interval(0.0, 0.8, curve: Curves.easeOut)
+              .transform(transitionPercent);
           return Offset.lerp(startingBackgroundPosition,
               endingBackgroundPosition, adjustedPercent);
         case _OverlayState.activating:
@@ -818,15 +853,15 @@ class _Content extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DescribedFeatureContentOrientation contentOrientation =
-        getContentOrientation(anchor);
+    getContentOrientation(anchor);
     double contentOffsetMultiplier;
 
     switch (orientation) {
       case ContentOrientation.trivial:
         contentOffsetMultiplier =
-            contentOrientation == DescribedFeatureContentOrientation.below
-                ? 1.0
-                : -1.0;
+        contentOrientation == DescribedFeatureContentOrientation.below
+            ? 1.0
+            : -1.0;
         break;
       case ContentOrientation.above:
         contentOffsetMultiplier = -1.0;
@@ -842,7 +877,7 @@ class _Content extends StatelessWidget {
         anchor.dy + contentOffsetMultiplier * (touchTargetRadius + 20);
 
     final double contentFractionalOffset =
-        contentOffsetMultiplier.clamp(-1.0, 0.0);
+    contentOffsetMultiplier.clamp(-1.0, 0.0);
 
     final double dx = centerPosition().dx - width;
     final double contentX = (dx.isNegative) ? 0.0 : dx;
@@ -865,20 +900,22 @@ class _Content extends StatelessWidget {
                     title == null
                         ? const SizedBox(height: 0)
                         : Text(title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .title
-                                .copyWith(color: textColor)),
+                        style: Theme
+                            .of(context)
+                            .textTheme
+                            .title
+                            .copyWith(color: textColor)),
                     const SizedBox(height: 8.0),
                     description == null
                         ? const SizedBox(height: 0)
                         : Text(
-                            description,
-                            style: Theme.of(context)
-                                .textTheme
-                                .body1
-                                .copyWith(color: textColor.withOpacity(0.9)),
-                          ),
+                      description,
+                      style: Theme
+                          .of(context)
+                          .textTheme
+                          .body1
+                          .copyWith(color: textColor.withOpacity(0.9)),
+                    ),
                   ],
                 ),
               ),
@@ -897,12 +934,13 @@ class _InheritedFeatureDiscovery extends InheritedWidget {
     Key key,
     @required Widget child,
     this.activeStepId,
-  })  : assert(child != null),
+  })
+      : assert(child != null),
         super(key: key, child: child);
 
   static _InheritedFeatureDiscovery of(BuildContext context) =>
       context.inheritFromWidgetOfExactType(_InheritedFeatureDiscovery)
-          as _InheritedFeatureDiscovery;
+      as _InheritedFeatureDiscovery;
 
   @override
   bool updateShouldNotify(_InheritedFeatureDiscovery old) =>
