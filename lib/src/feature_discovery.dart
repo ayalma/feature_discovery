@@ -126,7 +126,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// or as a [Future].
   ///
   /// If this function returns `false`, this step will be marked complete
-  /// and therefore skipped, i.e. it will not be opened.
+  /// and therefore be skipped, i.e. it will not be opened.
   /// When the [Future] finishes and evaluates to `true`, this step will be shown.
   final Future<bool> Function() onOpen;
 
