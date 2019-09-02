@@ -90,7 +90,6 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> {
 class DescribedFeatureOverlay extends StatefulWidget {
   /// This id must be unique among all the [DescribedFeatureOverlay]s widgets.
   final String featureId;
-  final IconData icon;
 
   @Deprecated("Replaced by backgroundColor")
   final Color color;
@@ -118,6 +117,14 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// The function parameter is actually the callback that triggers the display of the overlay.
   /// If not null, the callback MUST be called in order for the overlay to be displayed.
   final Function(VoidCallback onActionCompleted) prepareAction;
+
+  /// This is usually an [Icon].
+  /// The final tap target will already have a tap listener to finish each step.
+  ///
+  /// If you want to hit the tap target in integration tests, you should pass a [Key]
+  /// to this [Widget] instead of as the [Key] of [DescribedFeatureOverlay].
+  final Widget tapTarget;
+
   final Widget child;
   final ContentOrientation contentLocation;
   final bool enablePulsingAnimation;
@@ -126,13 +133,10 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// If not null, the callback MUST be called in order for the overlay to be dismissed.
   final Function(VoidCallback onActionCompleted) onDismissAction;
 
-  /// You can supply this [Key] if you want to hit the tap target in integration tests.
-  final Key tapTargetKey;
-
   const DescribedFeatureOverlay({
     Key key,
     @required this.featureId,
-    @required this.icon,
+    @required this.tapTarget,
     this.color,
     this.backgroundColor,
     this.iconColor,
@@ -146,9 +150,8 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.contentLocation = ContentOrientation.trivial,
     this.enablePulsingAnimation = true,
     this.onDismissAction,
-    this.tapTargetKey,
   })  : assert(featureId != null),
-        assert(icon != null),
+        assert(tapTarget != null),
         assert(child != null),
         assert(contentLocation != null),
         assert(enablePulsingAnimation != null),
@@ -367,14 +370,13 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           color: widget.targetColor,
         ),
         _TapTarget(
-          tapTargetKey: widget.tapTargetKey,
           state: state,
           transitionPercent: transitionPercent,
           anchor: anchor,
-          icon: widget.icon,
           iconColor: widget.iconColor,
           backgroundColor: widget.targetColor,
           onPressed: activate,
+          child: widget.tapTarget,
         ),
       ],
     );
@@ -612,16 +614,15 @@ class _TapTarget extends StatelessWidget {
   final _OverlayState state;
   final double transitionPercent;
   final Offset anchor;
-  final IconData icon;
+  final Widget child;
   final Color iconColor;
   final Color backgroundColor;
   final VoidCallback onPressed;
-  final Key tapTargetKey;
 
   const _TapTarget({
     Key key,
     @required this.anchor,
-    @required this.icon,
+    @required this.child,
     // The two parameters below can technically be null, so assertions are not made for them,
     // but they are annotated as required to not forget them during development
     // (as this is an internal widget and those parameters should always be specified, even when null)
@@ -630,9 +631,8 @@ class _TapTarget extends StatelessWidget {
     @required this.backgroundColor,
     @required this.state,
     @required this.transitionPercent,
-    @required this.tapTargetKey,
   })  : assert(anchor != null),
-        assert(icon != null),
+        assert(child != null),
         assert(state != null),
         assert(transitionPercent != null),
         assert(backgroundColor != null),
@@ -688,11 +688,7 @@ class _TapTarget extends StatelessWidget {
           child: RawMaterialButton(
             fillColor: backgroundColor,
             shape: const CircleBorder(),
-            child: Icon(
-              icon,
-              color: iconColor,
-              key: tapTargetKey,
-            ),
+            child: child,
             onPressed: onPressed,
           ),
         ),
