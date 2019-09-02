@@ -41,11 +41,11 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> {
   ///
   /// If one widget is placed multiple times in the widget tree, e.g. by
   /// [DropdownButton], this is necessary to avoid showing duplicate overlays.
-  Map<String, int> assigneesForFeatureIds;
+  bool stepShown;
 
   @override
   void initState() {
-    assigneesForFeatureIds = {};
+    stepShown = false;
     super.initState();
   }
 
@@ -60,6 +60,8 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> {
     if (steps != null && steps[activeStepIndex] == stepId) {
       setState(() {
         ++activeStepIndex;
+        stepShown = false;
+
         if (activeStepIndex >= steps.length) {
           _cleanupAfterSteps();
         }
@@ -146,8 +148,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
         assert(enablePulsingAnimation != null),
         assert(targetColor != null),
         assert(textColor != null),
-        assert(color == null || backgroundColor == null,
-          "[color] parameter has been replaced by [backgroundColor]: as they're the same, you should only specify one"),
+        assert(color == null || backgroundColor == null, "[color] parameter has been replaced by [backgroundColor]: as they're the same, you should only specify one"),
         super(key: key);
 
   @override
@@ -169,12 +170,6 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
   @override
   void initState() {
     initAnimationControllers();
-
-    WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
-      // This ensures that only the widget that was initialized most recently shows the overlay.
-      _FeatureDiscoveryState.of(context).assigneesForFeatureIds[widget.featureId] = hashCode;
-    });
-
     super.initState();
   }
 
@@ -256,6 +251,11 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
   }
 
   void show() {
+    final activeStep = FeatureDiscovery.activeStep(context);
+
+    // The activeStep might have changed by now (if prepareAction called the callback later).
+    if (activeStep != widget.featureId) return;
+
     openController.forward(from: 0.0);
     setState(() => showOverlay = true);
   }
@@ -272,9 +272,13 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
       // Overlay is already shown. No need to take any actions;
       if (showOverlay == true) return;
 
-      // This step might be assigned to another widget with the same feature id
-      // and we only want to show the overlay once.
-      if (_FeatureDiscoveryState.of(context).assigneesForFeatureIds[activeStep] != hashCode) return;
+      // There might be another widget with the same feature id in the widget tree,
+      // which is already showing the overlay for this feature.
+      if (_FeatureDiscoveryState.of(context).stepShown) return;
+
+      // This needs to be set here and not in show to prevent multiple prepareAction
+      // calls to stack up (if there are multiple widgets with the same feature id).
+      _FeatureDiscoveryState.of(context).stepShown = true;
 
       if (widget.prepareAction != null)
         widget.prepareAction(show);
