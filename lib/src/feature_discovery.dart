@@ -52,7 +52,6 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> {
   }
 
   void discoverFeatures(List<String> steps) {
-    print('_FeatureDiscoveryState.discoverFeatures s0');
     setState(() {
       this.steps = steps;
       activeStepIndex = 0;
