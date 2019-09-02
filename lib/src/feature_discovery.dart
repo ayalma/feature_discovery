@@ -141,8 +141,8 @@ class DescribedFeatureOverlay extends StatefulWidget {
   final Future<bool> Function() onDismiss;
 
   /// Called when the tap target is tapped.
-  /// Whenever the [Future] this function returns is finishes, the feature discovery
-  /// will continue and the next step will call [shouldOpen] after a closing animation.
+  /// Whenever the [Future] this function returns is finished, the feature discovery
+  /// will continue and the next step will try to open after a closing animation.
   final Future<void> Function() onTargetTap;
 
   const DescribedFeatureOverlay({
