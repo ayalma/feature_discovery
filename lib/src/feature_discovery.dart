@@ -251,7 +251,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
   }
 
   void show() {
-    final activeStep = FeatureDiscovery.activeStep(context);
+    final String activeStep = FeatureDiscovery.activeStep(context);
 
     // The activeStep might have changed by now (if prepareAction called the callback later).
     if (activeStep != widget.featureId) return;
@@ -265,7 +265,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
 
     if (activeStep == null) {
       // This condition is met when the feature discovery was dismissed
-      // and in that case the AnimationController's need to be dismissed as well.
+      // and in that case the AnimationController's needs to be dismissed as well.
       openController.stop();
       pulseController?.stop();
     } else if (activeStep == widget.featureId) {

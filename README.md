@@ -8,7 +8,7 @@ A flutter package that implements material design feature discovery
 For installing this lib add below line to you'r dependency section in pubspec.yaml
 ```
     dependencies:
-      feature_discovery: ^0.4.1
+      feature_discovery: ^0.5.0
 
 ```
 
