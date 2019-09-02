@@ -98,14 +98,12 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// If null, defaults to [ThemeData.primaryColor].
   final Color backgroundColor;
 
-  /// If null, defaults to current [IconTheme]
-  final Color iconColor;
-
-  /// Color of the target, that is the small circle behind the icon.
+  /// Color of the target, that is the small circle behind the tap target.
   final Color targetColor;
 
-  /// Color for title and text
+  /// Color for title and text.
   final Color textColor;
+
   final String title;
   final String description;
 
@@ -150,7 +148,6 @@ class DescribedFeatureOverlay extends StatefulWidget {
     @required this.tapTarget,
     this.color,
     this.backgroundColor,
-    this.iconColor,
     this.targetColor = Colors.white,
     this.textColor = Colors.white,
     this.title,
@@ -385,8 +382,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           state: state,
           transitionPercent: transitionPercent,
           anchor: anchor,
-          iconColor: widget.iconColor,
-          backgroundColor: widget.targetColor,
+          color: widget.targetColor,
           onPressed: activate,
           child: widget.tapTarget,
         ),
@@ -627,8 +623,7 @@ class _TapTarget extends StatelessWidget {
   final double transitionPercent;
   final Offset anchor;
   final Widget child;
-  final Color iconColor;
-  final Color backgroundColor;
+  final Color color;
   final VoidCallback onPressed;
 
   const _TapTarget({
@@ -638,16 +633,15 @@ class _TapTarget extends StatelessWidget {
     // The two parameters below can technically be null, so assertions are not made for them,
     // but they are annotated as required to not forget them during development
     // (as this is an internal widget and those parameters should always be specified, even when null)
-    @required this.iconColor,
     @required this.onPressed,
-    @required this.backgroundColor,
+    @required this.color,
     @required this.state,
     @required this.transitionPercent,
   })  : assert(anchor != null),
         assert(child != null),
         assert(state != null),
         assert(transitionPercent != null),
-        assert(backgroundColor != null),
+        assert(color != null),
         super(key: key);
 
   double opacity() {
@@ -698,7 +692,7 @@ class _TapTarget extends StatelessWidget {
         child: Opacity(
           opacity: opacity(),
           child: RawMaterialButton(
-            fillColor: backgroundColor,
+            fillColor: color,
             shape: const CircleBorder(),
             child: child,
             onPressed: onPressed,
