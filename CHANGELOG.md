@@ -1,5 +1,12 @@
 ## 0.5.0
 
+* **Breaking change**: Instead of the `icon` parameter, you now need to use the `tapTarget`
+  parameter, which takes a `Widget` instead of `IconData`.
+  Before: `DescribedFeatureOverlay(icon: Icons.add, ..)`
+  After: `DescribedFeatureOverlay(tapTarget: const Icon(Icons.add), ..)`
+* **Breaking change**: Callbacks are now `onOpen`, `onDismiss`, and `onTargetTap`.
+  `onOpen` and `onDismiss` need to return `Future<bool>` when specified to decide
+  if the step should be open or dimissed respectively.
 * Fixed `DescribedFeatureOverlay`'s constantly rebuilding even if they were never displayed.
 * Fixed `DescribedFeatureOverlay`'s rebuilding after dismissing them.
 * **Warning**: `Theme.of(context)` is now used to determine text styles
