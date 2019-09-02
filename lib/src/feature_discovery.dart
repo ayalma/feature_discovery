@@ -52,6 +52,7 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> {
   }
 
   void discoverFeatures(List<String> steps) {
+    print('_FeatureDiscoveryState.discoverFeatures s0');
     setState(() {
       this.steps = steps;
       activeStepIndex = 0;
@@ -352,7 +353,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         ),
         _Background(
           state: state,
-          transitionPercent: transitionProgress,
+          transitionProgress: transitionProgress,
           anchor: anchor,
           color: widget.backgroundColor ?? Theme.of(context).primaryColor,
           screenSize: screenSize,
@@ -360,7 +361,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         ),
         _Content(
           state: state,
-          transitionPercent: transitionProgress,
+          transitionProgress: transitionProgress,
           anchor: anchor,
           screenSize: screenSize,
           // this parameter is not used
@@ -375,13 +376,13 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         ),
         _Pulse(
           state: state,
-          transitionPercent: transitionProgress,
+          transitionProgress: transitionProgress,
           anchor: anchor,
           color: widget.targetColor,
         ),
         _TapTarget(
           state: state,
-          transitionPercent: transitionProgress,
+          transitionProgress: transitionProgress,
           anchor: anchor,
           color: widget.targetColor,
           onPressed: activate,
@@ -405,7 +406,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
 class _Background extends StatelessWidget {
   final _OverlayState state;
-  final double transitionPercent;
+  final double transitionProgress;
   final Offset anchor;
   final Color color;
   final Size screenSize;
@@ -417,13 +418,13 @@ class _Background extends StatelessWidget {
     @required this.color,
     @required this.screenSize,
     @required this.state,
-    @required this.transitionPercent,
+    @required this.transitionProgress,
     @required this.orientation,
   })  : assert(anchor != null),
         assert(color != null),
         assert(screenSize != null),
         assert(state != null),
-        assert(transitionPercent != null),
+        assert(transitionProgress != null),
         assert(orientation != null),
         super(key: key);
 
@@ -448,12 +449,12 @@ class _Background extends StatelessWidget {
       case _OverlayState.opening:
         final double adjustedPercent =
             const Interval(0.0, 0.8, curve: Curves.easeOut)
-                .transform(transitionPercent);
+                .transform(transitionProgress);
         return backgroundRadius * adjustedPercent;
       case _OverlayState.activating:
-        return backgroundRadius + transitionPercent * 40.0;
+        return backgroundRadius + transitionProgress * 40.0;
       case _OverlayState.dismissing:
-        return backgroundRadius * (1 - transitionPercent);
+        return backgroundRadius * (1 - transitionProgress);
       default:
         return backgroundRadius;
     }
@@ -494,14 +495,14 @@ class _Background extends StatelessWidget {
         case _OverlayState.opening:
           final double adjustedPercent =
               const Interval(0.0, 0.8, curve: Curves.easeOut)
-                  .transform(transitionPercent);
+                  .transform(transitionProgress);
           return Offset.lerp(startingBackgroundPosition,
               endingBackgroundPosition, adjustedPercent);
         case _OverlayState.activating:
           return endingBackgroundPosition;
         case _OverlayState.dismissing:
           return Offset.lerp(endingBackgroundPosition,
-              startingBackgroundPosition, transitionPercent);
+              startingBackgroundPosition, transitionProgress);
         default:
           return endingBackgroundPosition;
       }
@@ -513,19 +514,19 @@ class _Background extends StatelessWidget {
       case _OverlayState.opening:
         final double adjustedPercent =
             const Interval(0.0, 0.3, curve: Curves.easeOut)
-                .transform(transitionPercent);
+                .transform(transitionProgress);
         return 0.96 * adjustedPercent;
 
       case _OverlayState.activating:
         final double adjustedPercent =
             const Interval(0.1, 0.6, curve: Curves.easeOut)
-                .transform(transitionPercent);
+                .transform(transitionProgress);
 
         return 0.96 * (1 - adjustedPercent);
       case _OverlayState.dismissing:
         final double adjustedPercent =
             const Interval(0.2, 1.0, curve: Curves.easeOut)
-                .transform(transitionPercent);
+                .transform(transitionProgress);
         return 0.96 * (1 - adjustedPercent);
       default:
         return 0.96;
@@ -553,18 +554,18 @@ class _Background extends StatelessWidget {
 
 class _Pulse extends StatelessWidget {
   final _OverlayState state;
-  final double transitionPercent;
+  final double transitionProgress;
   final Offset anchor;
   final Color color;
 
   const _Pulse(
       {Key key,
       @required this.state,
-      @required this.transitionPercent,
+      @required this.transitionProgress,
       @required this.anchor,
       @required this.color})
       : assert(state != null),
-        assert(transitionPercent != null),
+        assert(transitionProgress != null),
         assert(anchor != null),
         assert(color != null),
         super(key: key);
@@ -573,15 +574,15 @@ class _Pulse extends StatelessWidget {
     switch (state) {
       case _OverlayState.pulsing:
         double expandedPercent;
-        if (transitionPercent >= 0.3 && transitionPercent <= 0.8) {
-          expandedPercent = (transitionPercent - 0.3) / 0.5;
+        if (transitionProgress >= 0.3 && transitionProgress <= 0.8) {
+          expandedPercent = (transitionProgress - 0.3) / 0.5;
         } else {
           expandedPercent = 0.0;
         }
         return 44.0 + (35.0 * expandedPercent);
       case _OverlayState.dismissing:
       case _OverlayState.activating:
-        return 0.0; //(44.0 + 35.0) * (1.0 - transitionPercent);
+        return 0.0; //(44.0 + 35.0) * (1.0 - transitionProgress);
       default:
         return 0.0;
     }
@@ -591,11 +592,11 @@ class _Pulse extends StatelessWidget {
     switch (state) {
       case _OverlayState.pulsing:
         final double percentOpaque =
-            1.0 - ((transitionPercent.clamp(0.3, 0.8) - 0.3) / 0.5);
+            1.0 - ((transitionProgress.clamp(0.3, 0.8) - 0.3) / 0.5);
         return (percentOpaque * 0.75).clamp(0.0, 1.0);
       case _OverlayState.activating:
       case _OverlayState.dismissing:
-        return 0.0; //((1.0 - transitionPercent) * 0.5).clamp(0.0, 1.0);
+        return 0.0; //((1.0 - transitionProgress) * 0.5).clamp(0.0, 1.0);
       default:
         return 0.0;
     }
@@ -621,7 +622,7 @@ class _Pulse extends StatelessWidget {
 
 class _TapTarget extends StatelessWidget {
   final _OverlayState state;
-  final double transitionPercent;
+  final double transitionProgress;
   final Offset anchor;
   final Widget child;
   final Color color;
@@ -637,11 +638,11 @@ class _TapTarget extends StatelessWidget {
     @required this.onPressed,
     @required this.color,
     @required this.state,
-    @required this.transitionPercent,
+    @required this.transitionProgress,
   })  : assert(anchor != null),
         assert(child != null),
         assert(state != null),
-        assert(transitionPercent != null),
+        assert(transitionProgress != null),
         assert(color != null),
         super(key: key);
 
@@ -649,12 +650,12 @@ class _TapTarget extends StatelessWidget {
     switch (state) {
       case _OverlayState.opening:
         return const Interval(0.0, 0.3, curve: Curves.easeOut)
-            .transform(transitionPercent);
+            .transform(transitionProgress);
       case _OverlayState.activating:
       case _OverlayState.dismissing:
         return 1.0 -
             const Interval(0.7, 1.0, curve: Curves.easeOut)
-                .transform(transitionPercent);
+                .transform(transitionProgress);
       default:
         return 1.0;
     }
@@ -665,19 +666,19 @@ class _TapTarget extends StatelessWidget {
       case _OverlayState.closed:
         return 0.0;
       case _OverlayState.opening:
-        return 20.0 + 24.0 * transitionPercent;
+        return 20.0 + 24.0 * transitionProgress;
       case _OverlayState.pulsing:
         double expandedPercent;
-        if (transitionPercent < 0.3)
-          expandedPercent = transitionPercent / 0.3;
-        else if (transitionPercent < 0.6)
-          expandedPercent = 1.0 - ((transitionPercent - 0.3) / 0.3);
+        if (transitionProgress < 0.3)
+          expandedPercent = transitionProgress / 0.3;
+        else if (transitionProgress < 0.6)
+          expandedPercent = 1.0 - ((transitionProgress - 0.3) / 0.3);
         else
           expandedPercent = 0.0;
         return 44.0 + (20.0 * expandedPercent);
       case _OverlayState.activating:
       case _OverlayState.dismissing:
-        return 20.0 + 24.0 * (1 - transitionPercent);
+        return 20.0 + 24.0 * (1 - transitionProgress);
       default:
         return 44.0;
     }
@@ -706,7 +707,7 @@ class _TapTarget extends StatelessWidget {
 
 class _Content extends StatelessWidget {
   final _OverlayState state;
-  final double transitionPercent;
+  final double transitionProgress;
   final Offset anchor;
   final Size screenSize;
   final double touchTargetRadius;
@@ -733,7 +734,7 @@ class _Content extends StatelessWidget {
     @required this.title,
     @required this.description,
     @required this.state,
-    @required this.transitionPercent,
+    @required this.transitionProgress,
     //this.statusBarHeight,
     @required this.orientation,
     @required this.textColor,
@@ -741,7 +742,7 @@ class _Content extends StatelessWidget {
         assert(screenSize != null),
         assert(touchTargetRadius != null),
         assert(state != null),
-        assert(transitionPercent != null),
+        assert(transitionProgress != null),
         assert(orientation != null),
         assert(textColor != null),
         super(key: key);
@@ -776,13 +777,13 @@ class _Content extends StatelessWidget {
       case _OverlayState.opening:
         final double adjustedPercent =
             const Interval(0.6, 1.0, curve: Curves.easeOut)
-                .transform(transitionPercent);
+                .transform(transitionProgress);
         return adjustedPercent;
       case _OverlayState.activating:
       case _OverlayState.dismissing:
         final double adjustedPercent =
             const Interval(0.0, 0.4, curve: Curves.easeOut)
-                .transform(transitionPercent);
+                .transform(transitionProgress);
         return 1.0 - adjustedPercent;
       default:
         return 1.0;
@@ -808,14 +809,14 @@ class _Content extends StatelessWidget {
         case _OverlayState.opening:
           final double adjustedPercent =
               const Interval(0.0, 0.8, curve: Curves.easeOut)
-                  .transform(transitionPercent);
+                  .transform(transitionProgress);
           return Offset.lerp(startingBackgroundPosition,
               endingBackgroundPosition, adjustedPercent);
         case _OverlayState.activating:
           return endingBackgroundPosition;
         case _OverlayState.dismissing:
           return Offset.lerp(endingBackgroundPosition,
-              startingBackgroundPosition, transitionPercent);
+              startingBackgroundPosition, transitionProgress);
         default:
           return endingBackgroundPosition;
       }
