@@ -91,11 +91,10 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// This id must be unique among all the [DescribedFeatureOverlay]s widgets.
   final String featureId;
 
-  @Deprecated("Replaced by backgroundColor")
+  @Deprecated('Use `backgroundColor` instead.')
   final Color color;
 
   /// The color of the outside layout, behind texts.
-  /// This parameter replaces the [color] parameter: you should only specify this one.
   /// If null, defaults to [ThemeData.primaryColor].
   final Color backgroundColor;
 
@@ -245,12 +244,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
               setState(() => state = _OverlayState.activating);
               break;
             case AnimationStatus.completed:
-              void Function() callback = () =>
-                  FeatureDiscovery.markStepComplete(context, widget.featureId);
-              if (widget.doAction == null)
-                callback();
-              else
-                widget.doAction(callback);
+              FeatureDiscovery.markStepComplete(context, widget.featureId);
               break;
             default:
               break;
