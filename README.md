@@ -25,7 +25,7 @@ return MaterialApp(
       child: child,
     );
   },
-  home: MyHomePage(title: 'Flutter Feature Discavery'),
+  home: MyHomePage(title: 'Flutter Feature DiscoTvery'),
 );
 ```
 
