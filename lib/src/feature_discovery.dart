@@ -32,12 +32,13 @@ class FeatureDiscovery extends StatefulWidget {
 }
 
 class _FeatureDiscoveryState extends State<FeatureDiscovery> {
-  
   static _FeatureDiscoveryState of(BuildContext context) {
-      _FeatureDiscoveryState fdState = context.ancestorStateOfType(TypeMatcher<_FeatureDiscoveryState>())
-          as _FeatureDiscoveryState;
-      assert(fdState != null, "Don't forget to wrap your widget tree in a [FeatureDiscovery] widget.");
-      return fdState;
+    _FeatureDiscoveryState fdState =
+        context.ancestorStateOfType(TypeMatcher<_FeatureDiscoveryState>())
+            as _FeatureDiscoveryState;
+    assert(fdState != null,
+        "Don't forget to wrap your widget tree in a [FeatureDiscovery] widget.");
+    return fdState;
   }
 
   List<String> steps;
@@ -311,7 +312,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
       // There might be another widget with the same feature id in the widget tree,
       // which is already showing the overlay for this feature.
-      if (_FeatureDiscoveryState.of(context).stepShown && widget.allowShowingDuplicate != true) return;
+      if (_FeatureDiscoveryState.of(context).stepShown &&
+          widget.allowShowingDuplicate != true) return;
 
       // This needs to be set here and not in show to prevent multiple onOpen
       // calls to stack up (if there are multiple widgets with the same feature id).
