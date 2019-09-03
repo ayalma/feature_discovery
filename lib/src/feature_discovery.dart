@@ -11,9 +11,9 @@ class FeatureDiscovery extends StatefulWidget {
   }
 
   /// Steps are the featureIds of the overlays.
-  /// Though they can be placed in any [Iterable], it is recommended to pass them as a [Set], as they have to be unique
+  /// Though they can be placed in any [Iterable], it is recommended to pass them as a [Set]
+  /// because this ensures that every step is only shown once.
   static void discoverFeatures(BuildContext context, Iterable<String> steps) {
-    assert(steps.toSet().length == steps.length, "You gave multiple feature ids that are identical ; they must be unique");
     _FeatureDiscoveryState.of(context).discoverFeatures(steps.toList());
   }
 
@@ -36,7 +36,7 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> {
   static _FeatureDiscoveryState of(BuildContext context) {
       _FeatureDiscoveryState fdState = context.ancestorStateOfType(TypeMatcher<_FeatureDiscoveryState>())
           as _FeatureDiscoveryState;
-      assert(fdState != null, "Don't forger to wrap your widget tree in a [FeatureDiscovery] widget.");
+      assert(fdState != null, "Don't forget to wrap your widget tree in a [FeatureDiscovery] widget.");
       return fdState;
   }
 
@@ -92,10 +92,19 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> {
 }
 
 class DescribedFeatureOverlay extends StatefulWidget {
-  /// This id must be unique among all the [DescribedFeatureOverlay]s widgets.
+  /// This id should be unique among all the [DescribedFeatureOverlay] widgets.
+  /// Otherwise, multiple overlays would show at once, which is currently
+  /// only possible if [allowShowingDuplicate] is set to `true`.
   final String featureId;
 
-  /// The color of the outside layout, behind texts.
+  /// By default, for every feature id, i.e. for every step in the feature discovery,
+  /// there can only be a single active overlay at a time.
+  /// This measure was taken primarily to prevent duplicate overlays from showing
+  /// when the same widget is inserted into the widget tree multiple times,
+  /// e.g. when there is an open [DropdownButton].
+  final bool allowShowingDuplicate;
+
+  /// The color of the large circle, where the text sits on.
   /// If null, defaults to [ThemeData.primaryColor].
   final Color backgroundColor;
 
@@ -158,6 +167,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.onOpen,
     this.contentLocation = ContentOrientation.trivial,
     this.enablePulsingAnimation = true,
+    this.allowShowingDuplicate = false,
   })  : assert(featureId != null),
         assert(tapTarget != null),
         assert(child != null),
@@ -301,7 +311,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
       // There might be another widget with the same feature id in the widget tree,
       // which is already showing the overlay for this feature.
-      if (_FeatureDiscoveryState.of(context).stepShown) return;
+      if (_FeatureDiscoveryState.of(context).stepShown && widget.allowShowingDuplicate != true) return;
 
       // This needs to be set here and not in show to prevent multiple onOpen
       // calls to stack up (if there are multiple widgets with the same feature id).
