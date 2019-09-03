@@ -2,7 +2,13 @@ import 'package:feature_discovery/feature_discovery.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-const String feature1 = 'feature1', feature2 = 'feature2', feature3 = 'feature3', feature4 = 'feature4', feature5 = 'feature5', feature6 = 'feature6', feature7 = 'feature7';
+const String feature1 = 'feature1',
+    feature2 = 'feature2',
+    feature3 = 'feature3',
+    feature4 = 'feature4',
+    feature5 = 'feature5',
+    feature6 = 'feature6',
+    feature7 = 'feature7';
 
 void main() {
   // You can increase the timeDilation value if you want to see
@@ -31,7 +37,6 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-
   const MyHomePage({Key key, this.title}) : super(key: key);
 
   final String title;
@@ -43,7 +48,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    final Future<void> Function() action = () async => print('IconButton of $feature7 tapped.');
+    final Future<void> Function() action =
+        () async => print('IconButton of $feature7 tapped.');
     const Icon icon1 = Icon(Icons.drive_eta);
     const Icon icon2 = Icon(Icons.menu);
     const Icon icon3 = Icon(Icons.search);
@@ -61,7 +67,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 backgroundColor: Colors.blue,
                 contentLocation: ContentOrientation.below,
                 title: 'Find the fastest route',
-                description: 'Get car, walking, cycling, or public transit directions to this place',
+                description:
+                    'Get car, walking, cycling, or public transit directions to this place',
                 onTargetTap: action,
                 onOpen: () async {
                   print('The $feature7 overlay is about to be displayed.');
@@ -80,7 +87,8 @@ class _MyHomePageState extends State<MyHomePage> {
           tapTarget: icon2,
           backgroundColor: Colors.teal.shade800,
           title: 'Just how you want it',
-          description: 'Tap the menu icon to switch accounts, change settings & more.',
+          description:
+              'Tap the menu icon to switch accounts, change settings & more.',
           child: IconButton(
             icon: icon2,
             onPressed: () {},
@@ -92,7 +100,8 @@ class _MyHomePageState extends State<MyHomePage> {
             tapTarget: icon3,
             backgroundColor: Colors.green,
             title: 'Search your compounds',
-            description: 'Tap the magnifying glass to quickly scan your compounds',
+            description:
+                'Tap the magnifying glass to quickly scan your compounds',
             child: IconButton(
               icon: icon3,
               onPressed: () {},
@@ -118,7 +127,6 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class Content extends StatefulWidget {
-
   const Content({Key key}) : super(key: key);
 
   @override
@@ -166,7 +174,8 @@ class _ContentState extends State<Content> {
               Container(
                 height: 200,
                 width: double.infinity,
-                child: const Text('Imagine there would be a beautiful picture here.'),
+                child: const Text(
+                    'Imagine there would be a beautiful picture here.'),
               ),
               Container(
                 width: double.infinity,
@@ -206,7 +215,8 @@ class _ContentState extends State<Content> {
                   featureId: feature5,
                   tapTarget: const Icon(Icons.drive_eta),
                   backgroundColor: Colors.green,
-                  onTargetTap: () async => print('Tapped tap target of $feature5.'),
+                  onTargetTap: () async =>
+                      print('Tapped tap target of $feature5.'),
                   onOpen: () async {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       ensureKey.currentState.ensureVisible();
@@ -245,7 +255,8 @@ class _ContentState extends State<Content> {
                 featureId: feature6,
                 tapTarget: const Icon(Icons.drive_eta),
                 backgroundColor: Colors.green,
-                onTargetTap: () async => print('Tapped tap target of $feature6.'),
+                onTargetTap: () async =>
+                    print('Tapped tap target of $feature6.'),
                 onOpen: () async {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     ensureKey2.currentState.ensureVisible();
