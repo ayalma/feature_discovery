@@ -51,12 +51,12 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> {
 
   @override
   void initState() {
-    stepShown = false;
     super.initState();
   }
 
   void discoverFeatures(List<String> steps) {
     setState(() {
+      stepShown = false;
       this.steps = steps;
       activeStepIndex = 0;
     });
