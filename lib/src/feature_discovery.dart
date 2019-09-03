@@ -13,7 +13,7 @@ class FeatureDiscovery extends StatefulWidget {
   /// Steps are the featureIds of the overlays.
   /// Though they can be placed in any [Iterable], it is recommended to pass them as a [Set], as they have to be unique
   static void discoverFeatures(BuildContext context, Iterable<String> steps) {
-    assert(steps.toSet().length == steps.length, "Feature ids must be unique");
+    assert(steps.toSet().length == steps.length, "You gave multiple feature ids that are identical ; they must be unique");
     _FeatureDiscoveryState.of(context).discoverFeatures(steps.toList());
   }
 
@@ -32,9 +32,13 @@ class FeatureDiscovery extends StatefulWidget {
 }
 
 class _FeatureDiscoveryState extends State<FeatureDiscovery> {
-  static _FeatureDiscoveryState of(BuildContext context) =>
-      context.ancestorStateOfType(TypeMatcher<_FeatureDiscoveryState>())
+  
+  static _FeatureDiscoveryState of(BuildContext context) {
+      _FeatureDiscoveryState fdState = context.ancestorStateOfType(TypeMatcher<_FeatureDiscoveryState>())
           as _FeatureDiscoveryState;
+      assert(fdState != null, "Don't forger to wrap your widget tree in a [FeatureDiscovery] widget.");
+      return fdState;
+  }
 
   List<String> steps;
   int activeStepIndex;
