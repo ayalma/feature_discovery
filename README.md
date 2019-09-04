@@ -37,7 +37,7 @@ DescribedFeatureOverlay(
   featureId: 'featureId1', // unique id that identifies this overlay
   tapTarget: icon,
   title: 'Just how you want it',
-  description: Text('Tap the menu icon to switch accounts, change settings & more.'),
+  description: 'Tap the menu icon to switch accounts, change settings & more.',
   onTargetTap: onPressed // action executed when the user taps the icon
   onOpen: () async { // action executed just before the overlay appears
     print("The overlay is about to be displayed");
@@ -85,7 +85,7 @@ DescribedFeatureOverlay(
     });
   },
   title: 'Test text',
-  description: Text('This text is just for test and we dont care about it at all.'),
+  description: 'This text is just for test and we dont care about it at all.',
   child: EnsureVisible(
     key: ensureKey2,
     child: Text(
