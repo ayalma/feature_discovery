@@ -5,7 +5,7 @@
   Before: `DescribedFeatureOverlay(icon: Icons.add, ..)`
   After: `DescribedFeatureOverlay(tapTarget: const Icon(Icons.add), ..)`
 * **Breaking change**: `title` and `description` parameters now take a `Widget`.
-* **Breaking change**: Callbacks are now `onOpen`, `onDismiss`, and `onTargetTap`.
+* **Breaking change**: Callbacks are now `onOpen`, `onDismiss`, and `onComplete`.
   `onOpen` and `onDismiss` need to return `Future<bool>` when specified to decide
   if the step should be open or dimissed respectively.
 * Fixed `DescribedFeatureOverlay`'s constantly rebuilding even if they were never displayed.

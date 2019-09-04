@@ -17,12 +17,42 @@ class FeatureDiscovery extends StatefulWidget {
     _FeatureDiscoveryState.of(context).discoverFeatures(steps.toList());
   }
 
+  /// This will schedule completion of the current discovery step and continue
+  /// onto the step after the activation animation of the current overlay if successful.
+  ///
+  /// If the [DescribedFeatureOverlay] that is associated with the current step is
+  /// not being displayed, this will fail. In that case, use [completeStep].
+  ///
+  /// The [stepId] ensures that you are marking the correct feature for completion.
+  /// If the provided [stepId] does not match the feature that is currently shown, i.e.
+  /// the currently active step, nothing will happen.
   static void markStepComplete(BuildContext context, String stepId) {
     _FeatureDiscoveryState.of(context).markStepComplete(stepId);
   }
 
-  static dismiss(BuildContext context) {
+  /// It is recommend to use [markStepComplete] whenever you can as it shows an animation for context.
+  ///
+  /// This will force complete the current step and move on to the next step without any animations.
+  static void completeStep(BuildContext context) {
+    _FeatureDiscoveryState.of(context).completeStep();
+  }
+
+  /// This will schedule dismissal of the current discovery step and with that
+  /// of the current feature discovery. The dismissal animation will play if successful.
+  /// If you want to complete the step instead and with that continue the feature discovery,
+  /// you will need to call [markStepComplete] instead.
+  ///
+  /// If the [DescribedFeatureOverlay] that is associated with the current step is
+  /// not being displayed, this will fail. In that case, use [clear].
+  static void dismiss(BuildContext context) {
     _FeatureDiscoveryState.of(context).dismiss();
+  }
+
+  /// This will force clear the current feature discovery and cancel the whole
+  /// process without an animation.
+  /// If you want to dismiss the current step regularly, call [dismiss].
+  static void clear(BuildContext context) {
+    _FeatureDiscoveryState.of(context).clear();
   }
 
   final Widget child;
@@ -50,43 +80,55 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> {
   /// [DropdownButton], this is necessary to avoid showing duplicate overlays.
   bool stepShown;
 
-  @override
-  void initState() {
-    super.initState();
-  }
+  bool stepShouldDismiss, stepShouldComplete;
 
   void discoverFeatures(List<String> steps) {
     setState(() {
       stepShown = false;
+      stepShouldComplete = false;
+      stepShouldDismiss = false;
       this.steps = steps;
       activeStepIndex = 0;
     });
   }
 
   void markStepComplete(String stepId) {
-    if (steps != null && steps[activeStepIndex] == stepId) {
-      setState(() {
-        ++activeStepIndex;
-        stepShown = false;
+    if (steps == null || stepId != steps[activeStepIndex]) return;
 
-        if (activeStepIndex >= steps.length) {
-          _cleanupAfterSteps();
-        }
-      });
-    }
+    setState(() => stepShouldComplete = true);
   }
 
-  void dismiss() => setState(() => _cleanupAfterSteps());
+  void completeStep() {
+    if (steps == null) return;
 
-  void _cleanupAfterSteps() {
-    steps = null;
-    activeStepIndex = null;
+    activeStepIndex++;
+
+    if (activeStepIndex >= steps.length)
+      clear();
+    else
+      setState(() {
+        stepShown = false;
+        stepShouldComplete = false;
+      });
+  }
+
+  void dismiss() {
+    setState(() => stepShouldDismiss = true);
+  }
+
+  void clear() {
+    setState(() {
+      steps = null;
+      activeStepIndex = null;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return _InheritedFeatureDiscovery(
       activeStepId: steps?.elementAt(activeStepIndex),
+      stepShouldDismiss: stepShouldDismiss,
+      stepShouldComplete: stepShouldComplete,
       child: widget.child,
     );
   }
@@ -151,7 +193,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// Called when the tap target is tapped.
   /// Whenever the [Future] this function returns is finished, the feature discovery
   /// will continue and the next step will try to open after a closing animation.
-  final Future<void> Function() onTargetTap;
+  final Future<void> Function() onComplete;
 
   const DescribedFeatureOverlay({
     Key key,
@@ -163,7 +205,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.title,
     this.description,
     @required this.child,
-    this.onTargetTap,
+    this.onComplete,
     this.onDismiss,
     this.onOpen,
     this.contentLocation = ContentOrientation.trivial,
@@ -194,7 +236,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   double transitionProgress;
 
   AnimationController openController;
-  AnimationController activationController;
+  AnimationController completeController;
   AnimationController dismissController;
   AnimationController pulseController;
 
@@ -213,7 +255,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   @override
   void dispose() {
     openController.dispose();
-    activationController.dispose();
+    completeController.dispose();
     dismissController.dispose();
     pulseController?.dispose();
     super.dispose();
@@ -247,10 +289,11 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           },
         );
     }
-    activationController = AnimationController(
+
+    completeController = AnimationController(
         vsync: this, duration: Duration(milliseconds: 250))
       ..addListener(
-          () => setState(() => transitionProgress = activationController.value))
+          () => setState(() => transitionProgress = completeController.value))
       ..addStatusListener(
         (AnimationStatus status) {
           switch (status) {
@@ -258,7 +301,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
               setState(() => state = _OverlayState.activating);
               break;
             case AnimationStatus.completed:
-              FeatureDiscovery.markStepComplete(context, widget.featureId);
+              FeatureDiscovery.completeStep(context);
               break;
             default:
               break;
@@ -272,10 +315,16 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           () => setState(() => transitionProgress = dismissController.value))
       ..addStatusListener(
         (AnimationStatus status) {
-          if (status == AnimationStatus.forward)
-            setState(() => state = _OverlayState.dismissing);
-          else if (status == AnimationStatus.completed)
-            FeatureDiscovery.dismiss(context);
+          switch (status) {
+            case AnimationStatus.forward:
+              setState(() => state = _OverlayState.dismissing);
+              break;
+            case AnimationStatus.completed:
+              FeatureDiscovery.clear(context);
+              break;
+            default:
+              break;
+          }
         },
       );
   }
@@ -285,11 +334,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     super.didChangeDependencies();
     screenSize = MediaQuery.of(context).size;
 
-    showOverlayIfActiveStep();
+    _handleOverlayState();
   }
 
   void show() {
-    final String activeStep = FeatureDiscovery.activeStep(context);
+    final String activeStep =
+        _InheritedFeatureDiscovery.of(context).activeStepId;
 
     // The activeStep might have changed by now because onOpen is asynchronous.
     if (activeStep != widget.featureId) return;
@@ -298,21 +348,27 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     setState(() => showOverlay = true);
   }
 
-  void showOverlayIfActiveStep() {
-    final String activeStep = FeatureDiscovery.activeStep(context);
-
+  void _handleOverlayState() {
+    final String activeStep =
+        _InheritedFeatureDiscovery.of(context).activeStepId;
     if (activeStep == null) {
       // This condition is met when the feature discovery was dismissed
       // and in that case the AnimationController's needs to be dismissed as well.
       openController.stop();
       pulseController?.stop();
     } else if (activeStep == widget.featureId) {
-      // Overlay is already shown. No need to take any actions;
-      if (showOverlay == true) return;
+      // Overlay is already shown.
+      if (showOverlay == true) {
+        if (_InheritedFeatureDiscovery.of(context).stepShouldComplete == true)
+          complete();
+        else if (_InheritedFeatureDiscovery.of(context).stepShouldDismiss ==
+            true) dismiss();
+        return;
+      }
 
       // There might be another widget with the same feature id in the widget tree,
       // which is already showing the overlay for this feature.
-      if (_FeatureDiscoveryState.of(context).stepShown &&
+      if (_FeatureDiscoveryState.of(context).stepShown == true &&
           widget.allowShowingDuplicate != true) return;
 
       // This needs to be set here and not in show to prevent multiple onOpen
@@ -324,8 +380,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           assert(shouldOpen != null);
           if (shouldOpen)
             show();
-          else // Mark this step complete to go to the next step as this step is not shown.
-            FeatureDiscovery.markStepComplete(context, widget.featureId);
+          else // Move on to the next step as this step should not be opened.
+            FeatureDiscovery.completeStep(context);
         });
       else
         show();
@@ -339,13 +395,18 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     }
   }
 
-  void activate() async {
-    if (widget.onTargetTap != null) await widget.onTargetTap();
+  void complete() async {
+    if (completeController.isAnimating) return;
+
+    if (widget.onComplete != null) await widget.onComplete();
     pulseController?.stop();
-    activationController.forward(from: 0.0);
+    completeController.forward(from: 0.0);
   }
 
   void dismiss() async {
+    // The method might be triggered multiple times, especially when swiping.
+    if (dismissController.isAnimating) return;
+
     if (widget.onDismiss != null) {
       final shouldDismiss = await widget.onDismiss();
       assert(shouldDismiss != null);
@@ -360,6 +421,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       children: <Widget>[
         GestureDetector(
           onTap: dismiss,
+          // According to the spec, the user should be able to dismiss by swiping.
+          onPanUpdate: (DragUpdateDetails _) => dismiss(),
           child: Container(
             width: double.infinity,
             height: double.infinity,
@@ -400,7 +463,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           transitionProgress: transitionProgress,
           anchor: anchor,
           color: widget.targetColor,
-          onPressed: activate,
+          onPressed: complete,
           child: widget.tapTarget,
         ),
       ],
@@ -729,7 +792,7 @@ class _Content extends StatelessWidget {
 
   // this parameter is not used
   // final double touchTargetToContentPadding;
-  
+
   /// Can be null
   final Widget title;
 
@@ -889,9 +952,9 @@ class _Content extends StatelessWidget {
                     if (title != null)
                       DefaultTextStyle(
                         style: Theme.of(context)
-                          .textTheme
-                          .title
-                          .copyWith(color: textColor),
+                            .textTheme
+                            .title
+                            .copyWith(color: textColor),
                         child: title,
                       ),
                     if (title != null && description != null)
@@ -899,9 +962,9 @@ class _Content extends StatelessWidget {
                     if (description != null)
                       DefaultTextStyle(
                         style: Theme.of(context)
-                          .textTheme
-                          .body1
-                          .copyWith(color: textColor.withOpacity(0.9)),
+                            .textTheme
+                            .body1
+                            .copyWith(color: textColor.withOpacity(0.9)),
                         child: description,
                       )
                   ],
@@ -917,11 +980,14 @@ class _Content extends StatelessWidget {
 
 class _InheritedFeatureDiscovery extends InheritedWidget {
   final String activeStepId;
+  final bool stepShouldDismiss, stepShouldComplete;
 
   const _InheritedFeatureDiscovery({
     Key key,
     @required Widget child,
     this.activeStepId,
+    this.stepShouldComplete,
+    this.stepShouldDismiss,
   })  : assert(child != null),
         super(key: key, child: child);
 
@@ -931,7 +997,9 @@ class _InheritedFeatureDiscovery extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_InheritedFeatureDiscovery old) =>
-      old.activeStepId != activeStepId;
+      old.activeStepId != activeStepId ||
+      (old.stepShouldComplete || old.stepShouldDismiss) !=
+          (stepShouldComplete || stepShouldDismiss);
 }
 
 enum DescribedFeatureContentOrientation {

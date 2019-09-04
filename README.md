@@ -58,10 +58,10 @@ This is `ContentOrientation.trivial` by default, however, the package cannot alw
   
  * `ContentOrientation.above`: Text is displayed above the target.
 
-#### `onTargetTap`
+#### `onComplete`
 
 ```dart
-   onTargetTap: () async {
+   onComplete: () async {
     // Executed when the tap target is tapped. The overlay will not close before
     // this function returns and after that, the next step will be opened.
     print('Target tapped.'); 
