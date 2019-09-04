@@ -66,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 tapTarget: icon1,
                 backgroundColor: Colors.blue,
                 contentLocation: ContentOrientation.below,
-                title: 'Find the fastest route',
+                title: Text('Find the fastest route'),
                 description:
                     Text('Get car, walking, cycling, or public transit directions to this place'),
                 onTargetTap: action,
@@ -86,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
           featureId: feature1,
           tapTarget: icon2,
           backgroundColor: Colors.teal,
-          title: 'Just how you want it',
+          title: Text('Just how you want it'),
           description:
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
             featureId: feature2,
             tapTarget: icon3,
             backgroundColor: Colors.green,
-            title: 'Search your compounds',
+            title: Text('Search your compounds'),
             description:
                 Text('Tap the magnifying glass to quickly scan your compounds'),
             child: IconButton(
@@ -129,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
         featureId: feature3,
         tapTarget: icon4,
         backgroundColor: Colors.green,
-        title: 'FAB feature',
+        title: Text('FAB feature'),
         description: Text('This is a floating action button and it does stuff.'),
         child: FloatingActionButton(
           onPressed: () {},
@@ -238,7 +238,7 @@ class _ContentState extends State<Content> {
                     });
                     return true;
                   },
-                  title: 'Discover Features',
+                  title: Text('Discover Features'),
                   description:
                       Text('Find all available features in this application with this button.'),
                   child: EnsureVisible(
@@ -278,7 +278,7 @@ class _ContentState extends State<Content> {
                   });
                   return true;
                 },
-                title: 'Title text',
+                title: Text('Title text'),
                 description:
                     Text('This text is just for test and we don\'t care about it at all.'),
                 child: EnsureVisible(
@@ -308,7 +308,7 @@ class _ContentState extends State<Content> {
                 print('Tapped tap target of $feature4.');
                 return true;
               },
-              title: 'Find the fastest route',
+              title: Text('Find the fastest route'),
               description:
                   Text('Get car, walking, cycling or public transit directions to this place.'),
               child: FloatingActionButton(

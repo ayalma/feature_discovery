@@ -115,7 +115,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// Color for title and text.
   final Color textColor;
 
-  final String title;
+  final Widget title;
   final Widget description;
 
   /// This is usually an [Icon].
@@ -729,8 +729,9 @@ class _Content extends StatelessWidget {
 
   // this parameter is not used
   // final double touchTargetToContentPadding;
+  
   /// Can be null
-  final String title;
+  final Widget title;
 
   /// Can be null
   final Widget description;
@@ -887,11 +888,13 @@ class _Content extends StatelessWidget {
                   children: <Widget>[
                     title == null
                         ? const SizedBox(height: 0)
-                        : Text(title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .title
-                                .copyWith(color: textColor)),
+                        : DefaultTextStyle(
+                          style: Theme.of(context)
+                            .textTheme
+                            .title
+                            .copyWith(color: textColor),
+                          child: title,
+                        ),
                     const SizedBox(height: 8.0),
                     description == null
                         ? const SizedBox(height: 0)
@@ -902,13 +905,6 @@ class _Content extends StatelessWidget {
                             .copyWith(color: textColor.withOpacity(0.9)),
                           child: description,
                         )
-                        /*: Text(
-                            description,
-                            style: Theme.of(context)
-                                .textTheme
-                                .body1
-                                .copyWith(color: textColor.withOpacity(0.9)),
-                          ),*/
                   ],
                 ),
               ),
