@@ -36,7 +36,7 @@ DescribedFeatureOverlay(
   featureId: 'add_item_feature_id', // Unique id that identifies this overlay.
   tapTarget: const Icon(Icons.add), // The widget that will be displayed as the tap target.
   title: 'Add item',
-  description: 'Tap the plus icon to add an item to your list.',
+  description: Text('Tap the plus icon to add an item to your list.'),
   backgroundColor: Theme.of(context).primaryColor,
   targetColor: Colors.white,
   textColor: Colors.white,
@@ -156,7 +156,7 @@ DescribedFeatureOverlay(
     });
   },
   title: 'Cake',
-  description: 'This is your reward for making it this far.',
+  description: Text('This is your reward for making it this far.'),
   child: EnsureVisible(
     key: ensureVisibleGlobalKey,
     child: const Icon(Icons.cake),
