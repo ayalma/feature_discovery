@@ -1,98 +1,169 @@
 # feature_discovery
 
-A flutter package that implements material design feature discovery 
+This Flutter package implements Feature Discovery following the [Material Design guidelines](https://material.io/archive/guidelines/growth-communications/feature-discovery.html).  
+
+With Feature Discovery, you can add context to any UI element, i.e. any `Widget` in your Flutter app. 
 
 ## Installing
 
-For installing this package add below line to you'r dependency section in pubspec.yaml
-```
-dependencies:
-  feature_discovery: ^0.5.0
+To use this package, follow the [installing guide](https://pub.dev/packages/feature_discovery#-installing-tab-).
+
+## Usage
+
+### `FeatureDiscovery`
+
+To be able to work with any of the global functions provided by the `feature_discovery` package, you will have to wrap your widget tree in a `FeatureDiscovery` widget.    
+There are many places where you can add `FeatureDiscovery` in your build tree, but the easiest to assure that it sits on top is to wrap your `MaterialApp` with it:
+```dart
+FeatureDiscovery(
+  child: MaterialApp(
+   ...
+  )
+)
 ```
 
-Then run ```flutter pub get``` to retrieve package
+### `DescribedFeatureOverlay`
 
-## Using
+For every UI element (`Widget`) that you want to describe using Feature Discovery, you will need to add a `DescribedFeatureOverlay`.  
+This widget takes all the parameters for the overlay that will be displayed during Feature Discovery and takes the `Widget` you want to display the overlay about as its `child`.
 
-This works like an inherited widget. 
-Wrap the part of your app that uses ```DescribedFeatureOverlay``` widgets with a ```FeatureDiscovery``` widget:
-```
-return MaterialApp(
-  title: 'Feature Discovery example app',
-  theme: ThemeData(primarySwatch: Colors.blue),
-  builder: (context, child) {
-    return FeatureDiscovery( // adding feature discovery at this point make it available to all pages
-      child: child,
-    );
-  },
-  home: MyHomePage(title: 'Flutter Feature Discovery'),
-);
-```
+#### Feature ids
 
-Then wrap the widgets whose feature you want to prompt with a ```DescribedFeatureOverlay``` widget:
-```
-final Future<void> Function() onPressed = () async => print("IconButton pressed !");
-const Icon icon = Icon(Icons.menu);
+Every feature you describe should have a unique identifier, which is a `String` passed to the `featureId` parameter. You will also need to provide these ids when starting the discovery.  
+
+```dart
 DescribedFeatureOverlay(
-  featureId: 'featureId1', // unique id that identifies this overlay
-  tapTarget: icon,
-  title: 'Just how you want it',
-  description: 'Tap the menu icon to switch accounts, change settings & more.',
-  onTargetTap: onPressed // action executed when the user taps the icon
-  onOpen: () async { // action executed just before the overlay appears
-    print("The overlay is about to be displayed");
-    return true;
-  },
-  child: IconButton( // The actual widget that is in your interface
-    icon: icon,
-    onPressed: onPressed
+  featureId: 'add_item_feature_id', // Unique id that identifies this overlay.
+  tapTarget: const Icon(Icons.add), // The widget that will be displayed as the tap target.
+  title: 'Add item',
+  description: 'Tap the plus icon to add an item to your list.',
+  backgroundColor: Theme.of(context).primaryColor,
+  targetColor: Colors.white,
+  textColor: Colors.white,
+  child: IconButton( // Your widget that is actually part of the UI.
+    icon: cons Icon(Icons.add),
+    onPressed: addItem,
   ),
 );
-``` 
+```
 
-When you want to display the feature overlay, call:
+<details>
+<summary>Additional parameters</summary>
 
+#### `contentLocation`
 
-``` 
+This is `ContentOrientation.trivial` by default, however, the package cannot always determine the correct placement for the overlay. In those cases, you can provide either of these two:
+
+ * `ContentOrientation.below`: Text is displayed below the target.
+  
+ * `ContentOrientation.above`: Text is displayed above the target.
+
+#### `onTargetTap`
+
+```dart
+   onTargetTap: () async {
+    // Executed when the tap target is tapped. The overlay will not close before
+    // this function returns and after that, the next step will be opened.
+    print('Target tapped.'); 
+  },
+```
+
+#### `onDismiss`
+
+```dart
+  onDismiss: () async {
+    // Called when the user taps outside of the overlay, trying to dismiss it.
+    // You can prevent dismissal by returning `false`.
+    print('Overlay dismissed.');
+    return true;
+  },
+```
+
+#### `onOpen`
+
+```dart
+  onOpen: () async {
+    // This callback is called before the overlay is displayed.
+    // If you return false, it will not be opened and the next step
+    // will be attempted to open.
+    print('The overlay is about to be displayed');
+    return true;
+  },
+```
+
+#### `enablePulsingAnimation`
+
+This is set to `true` by default, but you can disable the pulsing animation about the tap target by setting this to `false`.
+
+#### `allowShowingDuplicate`
+
+If multiple `DescribedFeatureOverlay`s have the same `featureId`, they will interfere with each other during discovery and if you want to display multiple overlays at the same time, you will have to set `allowShowingDuplicate` to `true` for all of them.
+</details>
+
+### `FeatureDiscovery.discoverFeatures`
+
+When you want to showcase your features, you can call `FeatureDiscovery.discoverFeatures` with the applicable feature ids. The features will be displayed as steps in order if the user does not dismiss them.  
+By tapping the tap target, the user will be sent on to the next step and by tapping outside of the overlay, the user will dismiss all queued steps.
+
+```dart
 FeatureDiscovery.discoverFeatures(
   context,
-  const {'featureId1'}, // ids of your different overlays
+  const <String>{ // Feature ids for every feature that you want to showcase in order.
+    'add_item_feature_id',
+  },
 );
 ```
 
-### Note 
+If you want to display Feature Discovery for a page right after it has been opened, you can use [`SchedulerBinding.addPostFrameCallback`] in the [`initState` method of your `StatefulWidget`](https://api.flutter.dev/flutter/widgets/State/initState.html):
 
-#### contentLocation :
-we use this property for placing the text in proper position when lib can't do it (because of text width and height measurement issue in flutter )
-  
-ContentOrientation.below: move text under the target
-ContentOrientation.above: move text above the target
-ContentOrientation.trivial: let lib decide
-    
-## Bonus 
-
-When you'r desired target is in scrollable content and is hidden when the feature discovery runs you can use ```EnsureVisible``` widget like that
-    
+```dart
+@override
+void initState() {
+  // ...
+  SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+    FeatureDiscovery.discoverFeatures(
+      context,
+      const <String>{ // Feature ids for every feature that you want to showcase in order.
+        'add_item_feature_id',
+      },
+    ); 
+  });
+  super.initState();
+}
 ```
-GlobalKey<EnsureVisibleState> ensureKey2 = GlobalKey<EnsureVisibleState>();
+
+#### Other methods
+
+You can view the [API reference for `FeatureDiscovery`](https://pub.dev/documentation/feature_discovery/latest/feature_discovery/FeatureDiscovery-class.html#static-methods) to find other useful methods for controlling the Feature Discovery process programmatically.
+
+
+### `EnsureVisible`
+
+You can use the [`EnsureVisible` widget](https://pub.dev/documentation/feature_discovery/latest/feature_discovery/EnsureVisible-class.html) from the Flutter framework to automatically scroll to widgets that are inside of scrollable viewports when they are described during Feature Discovery:
+
+```dart
+// You need to save an instance of a GlobalKey in order to call ensureVisible in onOpen.
+GlobalKey<EnsureVisibleState> ensureVisibleGlobalKey = GlobalKey<EnsureVisibleState>();
+
+// The widget in your build tree:
 DescribedFeatureOverlay(
-  featureId: 'id',
-  tapTarget: const Icon(Icons.drive_eta),
+  featureId: 'list_item_feature_id',
+  tapTarget: const Icon(Icons.cake),
   onOpen: () async {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ensureKey2.currentState.ensureVisible();
+    WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+      ensureVisibleGlobalKey.currentState.ensureVisible();
       return true;
     });
   },
-  title: 'Test text',
-  description: 'This text is just for test and we dont care about it at all.',
+  title: 'Cake',
+  description: 'This is your reward for making it this far.',
   child: EnsureVisible(
-    key: ensureKey2,
-    child: Text(
-      'Custom text',
-    ),
+    key: ensureVisibleGlobalKey,
+    child: const Icon(Icons.cake),
   ),
-);
+)
 ```
 
-## Thank you [mattcarroll](https://medium.com/@mattcarroll) for your awesome video about feature discovery
+## Notes
+
+Thanks to [mattcarroll](https://medium.com/@mattcarroll) for their [Flutter challenge about Feature Discovery on Fluttery](https://youtu.be/Xm0ELlBtNWM).
