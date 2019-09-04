@@ -280,7 +280,7 @@ class _ContentState extends State<Content> {
                 },
                 title: 'Title text',
                 description:
-                    Text('This text is just for test and we dont care about it at all.'),
+                    Text('This text is just for test and we don't care about it at all.'),
                 child: EnsureVisible(
                   key: ensureKey2,
                   child: Text(
