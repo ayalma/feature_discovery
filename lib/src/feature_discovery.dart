@@ -82,6 +82,15 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> {
 
   bool stepShouldDismiss, stepShouldComplete;
 
+  @override
+  void initState() {
+    // This is necessary to be able to evaluate the boolean expressions in _InheritedFeatureDiscovery.shouldUpdate.
+    stepShouldDismiss = false;
+    stepShouldComplete = false;
+
+    super.initState();
+  }
+
   void discoverFeatures(List<String> steps) {
     setState(() {
       stepShown = false;
