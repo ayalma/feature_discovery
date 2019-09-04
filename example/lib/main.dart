@@ -68,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 contentLocation: ContentOrientation.below,
                 title: 'Find the fastest route',
                 description:
-                    'Get car, walking, cycling, or public transit directions to this place',
+                    Text('Get car, walking, cycling, or public transit directions to this place'),
                 onTargetTap: action,
                 onOpen: () async {
                   print('The $feature7 overlay is about to be displayed.');
@@ -85,10 +85,25 @@ class _MyHomePageState extends State<MyHomePage> {
         leading: DescribedFeatureOverlay(
           featureId: feature1,
           tapTarget: icon2,
-          backgroundColor: Colors.teal.shade800,
+          backgroundColor: Colors.teal,
           title: 'Just how you want it',
           description:
-              'Tap the menu icon to switch accounts, change settings & more.',
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const Text('Tap the menu icon to switch accounts, change settings & more.'),
+                  const SizedBox(height: 12),
+                  FlatButton(
+                    padding: const EdgeInsets.all(0),
+                    child: Text(
+                      "UNDERSTOOD", 
+                      style: Theme.of(context).textTheme.button
+                        .copyWith(color: Colors.white)
+                    ),
+                    onPressed: () => FeatureDiscovery.markStepComplete(context, feature1),
+                  )
+                ],
+              ),
           child: IconButton(
             icon: icon2,
             onPressed: () {},
@@ -101,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
             backgroundColor: Colors.green,
             title: 'Search your compounds',
             description:
-                'Tap the magnifying glass to quickly scan your compounds',
+                Text('Tap the magnifying glass to quickly scan your compounds'),
             child: IconButton(
               icon: icon3,
               onPressed: () {},
@@ -115,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
         tapTarget: icon4,
         backgroundColor: Colors.green,
         title: 'FAB feature',
-        description: 'This is a floating action button and it does stuff.',
+        description: Text('This is a floating action button and it does stuff.'),
         child: FloatingActionButton(
           onPressed: () {},
           tooltip: 'Increment',
@@ -225,7 +240,7 @@ class _ContentState extends State<Content> {
                   },
                   title: 'Discover Features',
                   description:
-                      'Find all available features in this application with this button.',
+                      Text('Find all available features in this application with this button.'),
                   child: EnsureVisible(
                     key: ensureKey,
                     child: RaisedButton(
@@ -265,7 +280,7 @@ class _ContentState extends State<Content> {
                 },
                 title: 'Title text',
                 description:
-                    'This text is just for test and we dont care about it at all.',
+                    Text('This text is just for test and we dont care about it at all.'),
                 child: EnsureVisible(
                   key: ensureKey2,
                   child: Text(
@@ -295,7 +310,7 @@ class _ContentState extends State<Content> {
               },
               title: 'Find the fastest route',
               description:
-                  'Get car, walking, cycling or public transit directions to this place.',
+                  Text('Get car, walking, cycling or public transit directions to this place.'),
               child: FloatingActionButton(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.blue,

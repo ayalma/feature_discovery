@@ -116,7 +116,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
   final Color textColor;
 
   final String title;
-  final String description;
+  final Widget description;
 
   /// This is usually an [Icon].
   /// The final tap target will already have a tap listener to finish each step.
@@ -733,7 +733,7 @@ class _Content extends StatelessWidget {
   final String title;
 
   /// Can be null
-  final String description;
+  final Widget description;
 
   // not used
   // final double statusBarHeight;
@@ -895,13 +895,20 @@ class _Content extends StatelessWidget {
                     const SizedBox(height: 8.0),
                     description == null
                         ? const SizedBox(height: 0)
-                        : Text(
+                        : DefaultTextStyle(
+                          style: Theme.of(context)
+                            .textTheme
+                            .body1
+                            .copyWith(color: textColor.withOpacity(0.9)),
+                          child: description,
+                        )
+                        /*: Text(
                             description,
                             style: Theme.of(context)
                                 .textTheme
                                 .body1
                                 .copyWith(color: textColor.withOpacity(0.9)),
-                          ),
+                          ),*/
                   ],
                 ),
               ),
