@@ -96,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   FlatButton(
                     padding: const EdgeInsets.all(0),
                     child: Text(
-                      "UNDERSTOOD", 
+                      'Understood', 
                       style: Theme.of(context).textTheme.button
                         .copyWith(color: Colors.white)
                     ),
