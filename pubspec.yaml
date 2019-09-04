@@ -5,7 +5,7 @@ author: ayalma <alimohammadi7117@gmail.com>
 homepage: https://github.com/ayalma/feature_discovery
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
   flutter:

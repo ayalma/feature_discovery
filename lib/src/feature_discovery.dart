@@ -886,25 +886,24 @@ class _Content extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    title == null
-                        ? const SizedBox(height: 0)
-                        : DefaultTextStyle(
-                          style: Theme.of(context)
-                            .textTheme
-                            .title
-                            .copyWith(color: textColor),
-                          child: title,
-                        ),
-                    const SizedBox(height: 8.0),
-                    description == null
-                        ? const SizedBox(height: 0)
-                        : DefaultTextStyle(
-                          style: Theme.of(context)
-                            .textTheme
-                            .body1
-                            .copyWith(color: textColor.withOpacity(0.9)),
-                          child: description,
-                        )
+                    if (title != null)
+                      DefaultTextStyle(
+                        style: Theme.of(context)
+                          .textTheme
+                          .title
+                          .copyWith(color: textColor),
+                        child: title,
+                      ),
+                    if (title != null && description != null)
+                      const SizedBox(height: 8.0),
+                    if (description != null)
+                      DefaultTextStyle(
+                        style: Theme.of(context)
+                          .textTheme
+                          .body1
+                          .copyWith(color: textColor.withOpacity(0.9)),
+                        child: description,
+                      )
                   ],
                 ),
               ),
