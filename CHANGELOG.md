@@ -4,7 +4,7 @@
   parameter, which takes a `Widget` instead of `IconData`.
   Before: `DescribedFeatureOverlay(icon: Icons.add, ..)`
   After: `DescribedFeatureOverlay(tapTarget: const Icon(Icons.add), ..)`
-* **Breaking change**: `title` and `description` parameters now accept a `Widget` object
+* **Breaking change**: `title` and `description` parameters now take a `Widget`.
 * **Breaking change**: Callbacks are now `onOpen`, `onDismiss`, and `onTargetTap`.
   `onOpen` and `onDismiss` need to return `Future<bool>` when specified to decide
   if the step should be open or dimissed respectively.
