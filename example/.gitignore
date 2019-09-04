@@ -23,11 +23,11 @@
 .dart_tool/
 .flutter-plugins
 .packages
-.pubspec.lock
 .metadata
 .pub-cache/
 .pub/
 /build/
+pubspec.lock
 
 # Android related
 **/android/**/gradle-wrapper.jar
