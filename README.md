@@ -114,7 +114,7 @@ FeatureDiscovery.discoverFeatures(
 );
 ```
 
-If you want to display Feature Discovery for a page right after it has been opened, you can use [`SchedulerBinding.addPostFrameCallback`] in the [`initState` method of your `StatefulWidget`](https://api.flutter.dev/flutter/widgets/State/initState.html):
+If you want to display Feature Discovery for a page right after it has been opened, you can use [`SchedulerBinding.addPostFrameCallback`](https://api.flutter.dev/flutter/scheduler/SchedulerBinding/addPostFrameCallback.html) in the [`initState` method of your `StatefulWidget`](https://api.flutter.dev/flutter/widgets/State/initState.html):
 
 ```dart
 @override
