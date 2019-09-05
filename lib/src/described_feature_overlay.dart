@@ -1,5 +1,5 @@
 // This file needs to be part of the src/feature_discovery.dart library
-// in order to have access to the library private _InheritedFeatureDiscovery.
+// in order to have access to the library private classes.
 part of 'package:feature_discovery/src/feature_discovery.dart';
 
 class DescribedFeatureOverlay extends StatefulWidget {

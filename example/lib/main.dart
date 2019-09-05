@@ -102,7 +102,16 @@ class _MyHomePageState extends State<MyHomePage> {
                         .copyWith(color: Colors.white)),
                 onPressed: () =>
                     FeatureDiscovery.markStepComplete(context, feature1),
-              )
+              ),
+              FlatButton(
+                padding: const EdgeInsets.all(0),
+                child: Text('Dismiss',
+                    style: Theme.of(context)
+                        .textTheme
+                        .button
+                        .copyWith(color: Colors.white)),
+                onPressed: () => FeatureDiscovery.dismiss(context),
+              ),
             ],
           ),
           child: IconButton(
