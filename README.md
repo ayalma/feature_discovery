@@ -58,10 +58,10 @@ This is `ContentOrientation.trivial` by default, however, the package cannot alw
   
  * `ContentOrientation.above`: Text is displayed above the target.
 
-#### `onTargetTap`
+#### `onComplete`
 
 ```dart
-   onTargetTap: () async {
+   onComplete: () async {
     // Executed when the tap target is tapped. The overlay will not close before
     // this function returns and after that, the next step will be opened.
     print('Target tapped.'); 
@@ -139,7 +139,7 @@ You can view the [API reference for `FeatureDiscovery`](https://pub.dev/document
 
 ### `EnsureVisible`
 
-You can use the [`EnsureVisible` widget](https://pub.dev/documentation/feature_discovery/latest/feature_discovery/EnsureVisible-class.html) from the Flutter framework to automatically scroll to widgets that are inside of scrollable viewports when they are described during Feature Discovery:
+You can use the [`EnsureVisible` widget](https://pub.dev/documentation/feature_discovery/latest/feature_discovery/EnsureVisible-class.html) to automatically scroll to widgets that are inside of scrollable viewports when they are described during Feature Discovery:
 
 ```dart
 // You need to save an instance of a GlobalKey in order to call ensureVisible in onOpen.

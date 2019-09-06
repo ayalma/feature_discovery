@@ -67,9 +67,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 backgroundColor: Colors.blue,
                 contentLocation: ContentOrientation.below,
                 title: Text('Find the fastest route'),
-                description:
-                    Text('Get car, walking, cycling, or public transit directions to this place'),
-                onTargetTap: action,
+                description: Text(
+                    'Get car, walking, cycling, or public transit directions to this place'),
+                onComplete: action,
                 onOpen: () async {
                   print('The $feature7 overlay is about to be displayed.');
                   return true;
@@ -87,23 +87,33 @@ class _MyHomePageState extends State<MyHomePage> {
           tapTarget: icon2,
           backgroundColor: Colors.teal,
           title: Text('Just how you want it'),
-          description:
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const Text('Tap the menu icon to switch accounts, change settings & more.'),
-                  const SizedBox(height: 12),
-                  FlatButton(
-                    padding: const EdgeInsets.all(0),
-                    child: Text(
-                      'Understood', 
-                      style: Theme.of(context).textTheme.button
-                        .copyWith(color: Colors.white)
-                    ),
-                    onPressed: () => FeatureDiscovery.markStepComplete(context, feature1),
-                  )
-                ],
+          description: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const Text(
+                  'Tap the menu icon to switch accounts, change settings & more.'),
+              const SizedBox(height: 12),
+              FlatButton(
+                padding: const EdgeInsets.all(0),
+                child: Text('Understood',
+                    style: Theme.of(context)
+                        .textTheme
+                        .button
+                        .copyWith(color: Colors.white)),
+                onPressed: () =>
+                    FeatureDiscovery.markStepComplete(context, feature1),
               ),
+              FlatButton(
+                padding: const EdgeInsets.all(0),
+                child: Text('Dismiss',
+                    style: Theme.of(context)
+                        .textTheme
+                        .button
+                        .copyWith(color: Colors.white)),
+                onPressed: () => FeatureDiscovery.dismiss(context),
+              ),
+            ],
+          ),
           child: IconButton(
             icon: icon2,
             onPressed: () {},
@@ -130,7 +140,8 @@ class _MyHomePageState extends State<MyHomePage> {
         tapTarget: icon4,
         backgroundColor: Colors.green,
         title: Text('FAB feature'),
-        description: Text('This is a floating action button and it does stuff.'),
+        description:
+            Text('This is a floating action button and it does stuff.'),
         child: FloatingActionButton(
           onPressed: () {},
           tooltip: 'Increment',
@@ -230,7 +241,7 @@ class _ContentState extends State<Content> {
                   featureId: feature5,
                   tapTarget: const Icon(Icons.drive_eta),
                   backgroundColor: Colors.green,
-                  onTargetTap: () async =>
+                  onComplete: () async =>
                       print('Tapped tap target of $feature5.'),
                   onOpen: () async {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -239,8 +250,8 @@ class _ContentState extends State<Content> {
                     return true;
                   },
                   title: Text('Discover Features'),
-                  description:
-                      Text('Find all available features in this application with this button.'),
+                  description: Text(
+                      'Find all available features in this application with this button.'),
                   child: EnsureVisible(
                     key: ensureKey,
                     child: RaisedButton(
@@ -270,7 +281,7 @@ class _ContentState extends State<Content> {
                 featureId: feature6,
                 tapTarget: const Icon(Icons.drive_eta),
                 backgroundColor: Colors.green,
-                onTargetTap: () async =>
+                onComplete: () async =>
                     print('Tapped tap target of $feature6.'),
                 onOpen: () async {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -279,8 +290,8 @@ class _ContentState extends State<Content> {
                   return true;
                 },
                 title: Text('Title text'),
-                description:
-                    Text('This text is just for test and we don\'t care about it at all.'),
+                description: Text(
+                    'This text is just for test and we don\'t care about it at all.'),
                 child: EnsureVisible(
                   key: ensureKey2,
                   child: Text(
@@ -309,8 +320,8 @@ class _ContentState extends State<Content> {
                 return true;
               },
               title: Text('Find the fastest route'),
-              description:
-                  Text('Get car, walking, cycling or public transit directions to this place.'),
+              description: Text(
+                  'Get car, walking, cycling or public transit directions to this place.'),
               child: FloatingActionButton(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.blue,
