@@ -1,11 +1,19 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart' hide OverlayState;
+import 'package:flutter/material.dart';
+
+enum ContentOrientation {
+  above,
+  below,
+  trivial,
+}
 
 class FeatureDiscovery extends StatefulWidget {
 
-  // TODO: This method should not be available to the public
-  static _FeatureDiscoveryState of(BuildContext context) {
+  // TODO do not expose this method publicly
+  static Bloc blocOf(BuildContext context) => _stateOf(context)._bloc;
+
+  static _FeatureDiscoveryState _stateOf(BuildContext context) {
     _FeatureDiscoveryState state = 
       (context.inheritFromWidgetOfExactType(_InheritedFeatureDiscovery)
         as _InheritedFeatureDiscovery)
@@ -19,7 +27,7 @@ class FeatureDiscovery extends StatefulWidget {
   /// Though they can be placed in any [Iterable], it is recommended to pass them as a [Set]
   /// because this ensures that every step is only shown once.
   static void discoverFeatures(BuildContext context, Iterable<String> steps)
-    => of(context).discoverFeatures(steps.toList());
+    => _stateOf(context).discoverFeatures(steps.toList());
 
   /// This will schedule completion of the current discovery step and continue
   /// onto the step after the activation animation of the current overlay if successful.
@@ -31,7 +39,7 @@ class FeatureDiscovery extends StatefulWidget {
   /// If the provided [stepId] does not match the feature that is currently shown, i.e.
   /// the currently active step, nothing will happen.
   static void completeCurrentStep(BuildContext context)   
-    => of(context).bloc._inComplete.add(null);
+    => _stateOf(context)._completeStep();
 
   /// This will schedule dismissal of the current discovery step and with that
   /// of the current feature discovery. The dismissal animation will play if successful.
@@ -41,7 +49,7 @@ class FeatureDiscovery extends StatefulWidget {
   /// If the [DescribedFeatureOverlay] that is associated with the current step is
   /// not being displayed, this will fail. In that case, use [clear].
   static void dismissCurrentStep(BuildContext context)
-    => of(context).bloc._inDismiss.add(null);
+    => _stateOf(context)._dismissStep();
 
   final Widget child;
   
@@ -64,7 +72,7 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> {
   ///
   /// If one widget is placed multiple times in the widget tree, e.g. by
   /// [DropdownButton], this is necessary to avoid showing duplicate overlays.
-  bool stepShown;
+  //bool stepShown;
 
   String get activeStepId => _steps?.elementAt(_activeStepIndex);
   Bloc get bloc => _bloc;
@@ -73,16 +81,6 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> {
   void initState() {
     super.initState();
     _bloc = Bloc();
-    bloc.outComplete.listen((_) {
-      bloc._outAnimationFinished
-        .take(1)
-        .listen((_) => _completeStep());
-    });
-    bloc.outDismiss.listen((_) {
-      bloc._outAnimationFinished
-        .take(1)
-        .listen((_) => _clear());
-    });
   }
 
   @override
@@ -92,26 +90,27 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery> {
   }
 
   void discoverFeatures(List<String> steps) {
-    stepShown = false;
+    //stepShown = false;
     _steps = steps;
     _activeStepIndex = 0;
-    bloc._inStart.add(null);
+    bloc._inStart.add(activeStepId);
   }
 
   void _completeStep() {
     if (_steps == null) return;
 
+    bloc._inComplete.add(activeStepId);
     _activeStepIndex++;
 
-    if (_activeStepIndex >= _steps.length)
-      _clear();
-    else
-      stepShown = false;
-      bloc._inStart.add(null);
-    
+    if (_activeStepIndex < _steps.length)
+      bloc._inStart.add(activeStepId);    
   }
 
-  void _clear() async {
+  void _dismissStep() async {
+    if (_steps == null) return;
+
+    bloc._inDismiss.add(activeStepId);
+    
     _steps = null;
     _activeStepIndex = null;
   }
@@ -143,27 +142,22 @@ class _InheritedFeatureDiscovery extends InheritedWidget {
 
 class Bloc {
 
-  final StreamController<void> _dismissController = StreamController.broadcast();
-  Stream<void> get outDismiss => _dismissController.stream;
-  Sink<void> get _inDismiss => _dismissController.sink;
+  final StreamController<String> _dismissController = StreamController.broadcast();
+  Stream<String> get outDismiss => _dismissController.stream;
+  Sink<String> get _inDismiss => _dismissController.sink;
 
-  final StreamController<void> _completeController = StreamController.broadcast();
-  Stream<void> get outComplete => _completeController.stream;
-  Sink<void> get _inComplete => _completeController.sink;
+  final StreamController<String> _completeController = StreamController.broadcast();
+  Stream<String> get outComplete => _completeController.stream;
+  Sink<String> get _inComplete => _completeController.sink;
 
-  final StreamController<void> _startController = StreamController.broadcast();
-  Stream<void> get outStart => _startController.stream;
-  Sink<void> get _inStart => _startController.sink;
-
-  final StreamController<void> _animationFinished = StreamController.broadcast();
-  Stream<void> get _outAnimationFinished => _animationFinished.stream;
+  final StreamController<String> _startController = StreamController.broadcast();
+  Stream<String> get outStart => _startController.stream;
+  Sink<String> get _inStart => _startController.sink;
 
   void dispose () {
     _dismissController.close();
     _completeController.close();
     _startController.close();
-    _animationFinished.close();
   }
 
-  void animationIsFinished () => _animationFinished.sink.add(null);
 }

@@ -2,9 +2,21 @@ import 'dart:async';
 import 'dart:math' as Math;
 
 import 'package:feature_discovery/feature_discovery.dart';
-import 'package:feature_discovery/src/enums.dart';
 import 'package:feature_discovery/src/layout.dart';
-import 'package:flutter/material.dart' hide OverlayState;
+import 'package:flutter/material.dart';
+
+enum DescribedFeatureContentOrientation {
+  above,
+  below,
+}
+
+enum OverlayState {
+  closed,
+  opening,
+  pulsing,
+  activating,
+  dismissing,
+}
 
 class DescribedFeatureOverlay extends StatefulWidget {
   /// This id should be unique among all the [DescribedFeatureOverlay] widgets.
@@ -113,12 +125,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   AnimationController _dismissController;
   AnimationController _pulseController;
 
-  Stream<void> _startStream;
-  Stream<void> _dismissStream;
-  Stream<void> _completeStream;
-  StreamSubscription<void> _startStreamSubscription;
-  StreamSubscription<void> _dismissStreamSubscription;
-  StreamSubscription<void> _completeStreamSubscription;
+  Stream<String> _startStream;
+  Stream<String> _dismissStream;
+  Stream<String> _completeStream;
+  StreamSubscription<String> _startStreamSubscription;
+  StreamSubscription<String> _dismissStreamSubscription;
+  StreamSubscription<String> _completeStreamSubscription;
 
   @override
   void initState() {
@@ -147,44 +159,47 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final Bloc bloc = FeatureDiscovery.of(context).bloc;
-    final Stream<void> newDismissStream = bloc.outDismiss;
-    final Stream<void> newCompleteStream = bloc.outComplete;
-    final Stream<void> newStartStream = bloc.outStart;
+    final Bloc bloc = FeatureDiscovery.blocOf(context);
+    final Stream<String> newDismissStream = bloc.outDismiss;
+    final Stream<String> newCompleteStream = bloc.outComplete;
+    final Stream<String> newStartStream = bloc.outStart;
     if (_dismissStream != newDismissStream) _setDismissStream(newDismissStream);
     if (_completeStream != newCompleteStream) _setCompleteStream(newCompleteStream);
     if (_startStream != newStartStream) _setStartStream(newStartStream);
     _screenSize = MediaQuery.of(context).size;
-    //_handleOverlayState();
   }
 
   void _setDismissStream (Stream<void> newStream) {
     _dismissStreamSubscription?.cancel();
     _dismissStream = newStream;
-    _dismissStreamSubscription = _dismissStream.listen((_) async {
-      if (_isActiveStep) await _dismiss();
-    });
+    _dismissStreamSubscription = _dismissStream.listen(
+      (featureId) async {
+        assert(featureId != null);
+        if (featureId == widget.featureId) await _dismiss();
+      }
+    );
   }
 
   void _setCompleteStream (Stream<void> newStream) {
     _completeStreamSubscription?.cancel();
     _completeStream = newStream;
-    _completeStreamSubscription = _completeStream.listen((_) async {
-      if (_isActiveStep) await _complete();
-    });
+    _completeStreamSubscription = _completeStream.listen(
+      (featureId) async {
+        assert(featureId != null);
+        if (featureId == widget.featureId) await _complete();
+      }
+    );
   }
 
   void _setStartStream (Stream<void> newStream) {
     _startStreamSubscription?.cancel();
     _startStream = newStream;
-    _startStreamSubscription = _startStream.listen((_) {
-      if (_isActiveStep) _handleOverlayState();
-    });
-  }
-
-  bool get _isActiveStep {
-    final String activeStepId = FeatureDiscovery.of(context).activeStepId;
-    return (widget.featureId == activeStepId);
+    _startStreamSubscription = _startStream.listen(
+      (featureId) async {
+        assert(featureId != null);
+        if (featureId == widget.featureId) await _open();
+      }
+    );
   }
 
   void _initAnimationControllers() {
@@ -201,7 +216,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
             },
           );
 
-    if (widget.enablePulsingAnimation) {
+    if (!widget.enablePulsingAnimation) _pulseController = null;
+    else
       _pulseController = AnimationController(
           vsync: this, duration: Duration(milliseconds: 1000))
         ..addListener(
@@ -214,7 +230,6 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
               _pulseController.forward(from: 0.0);
           },
         );
-    }
 
     _completeController = AnimationController(
         vsync: this, duration: Duration(milliseconds: 250))
@@ -222,16 +237,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           () => setState(() => _transitionProgress = _completeController.value))
       ..addStatusListener(
         (AnimationStatus status) {
-          switch (status) {
-            case AnimationStatus.forward:
-              setState(() => _state = OverlayState.activating);
-              break;
-            case AnimationStatus.completed:
-              FeatureDiscovery.of(context).bloc.animationIsFinished();
-              break;
-            default:
-              break;
-          }
+          if (status == AnimationStatus.forward)
+            setState(() => _state = OverlayState.activating);
         },
       );
 
@@ -241,72 +248,39 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           () => setState(() => _transitionProgress = _dismissController.value))
       ..addStatusListener(
         (AnimationStatus status) {
-          switch (status) {
-            case AnimationStatus.forward:
-              setState(() => _state = OverlayState.dismissing);
-              break;
-            case AnimationStatus.completed:
-              FeatureDiscovery.of(context).bloc.animationIsFinished();
-              break;
-            default:
-              break;
-          }
+          if (status == AnimationStatus.forward)
+            setState(() => _state = OverlayState.dismissing);
         },
       );
   }
 
   void _show() {
-    final String activeStep = FeatureDiscovery.of(context).activeStepId;
 
     // The activeStep might have changed by now because onOpen is asynchronous.
-    if (activeStep != widget.featureId) return;
+    // TODO
+    //if (activeStep != widget.featureId) return;
 
     _openController.forward(from: 0.0);
     setState(() => _showOverlay = true);
   }
 
-  void _handleOverlayState() {
-    final String activeStep = FeatureDiscovery.of(context).activeStepId;
-    if (activeStep == null) {
-      // This condition is met when the feature discovery was dismissed
-      // and in that case the AnimationController's needs to be dismissed as well.
-      _openController.stop();
-      _pulseController?.stop();
-    } else if (activeStep == widget.featureId) {
-      // Overlay is already shown.
-
-      // There might be another widget with the same feature id in the widget tree,
-      // which is already showing the overlay for this feature.
-      if (FeatureDiscovery.of(context).stepShown == true &&
-          widget.allowShowingDuplicate != true) return;
-
-      // This needs to be set here and not in show to prevent multiple onOpen
-      // calls to stack up (if there are multiple widgets with the same feature id).
-      FeatureDiscovery.of(context).stepShown = true;
-
-      if (widget.onOpen != null)
-        widget.onOpen().then((shouldOpen) {
-          assert(shouldOpen != null);
-          if (shouldOpen)
-            _show();
-          else // Move on to the next step as this step should not be opened.
-            FeatureDiscovery.completeCurrentStep(context);
-        });
-      else
+  Future<void> _open() async {
+    if (widget.onOpen != null) {
+      final bool shouldOpen = await widget.onOpen();
+      assert(shouldOpen != null, "You must return true or false at the end of the [onOpen] function");
+      if (shouldOpen)
         _show();
-      return;
+      else
+        FeatureDiscovery.completeCurrentStep(context);
     }
-
-    if (_showOverlay == true) {
-      // This can only be reached if activeStep is not equal to the feature id of this widget.
-      // In that case, this overlay needs to be hidden.
-      setState(() => _showOverlay = false);
-    }
+    else
+      _show();
   }
 
   Future<void> _complete() async {
     if (_completeController.isAnimating) return;
     if (widget.onComplete != null) await widget.onComplete();
+    _openController.stop();
     _pulseController?.stop();
     await _completeController.forward(from: 0.0);
     setState(() => _showOverlay = false);
@@ -316,10 +290,11 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     // The method might be triggered multiple times, especially when swiping.
     if (_dismissController.isAnimating) return;
     if (widget.onDismiss != null) {
-      final shouldDismiss = await widget.onDismiss();
+      final bool shouldDismiss = await widget.onDismiss();
       assert(shouldDismiss != null);
       if (!shouldDismiss) return;
     }
+    _openController.stop();
     _pulseController?.stop();
     await _dismissController.forward(from: 0.0);
     setState(() => _showOverlay = false);
