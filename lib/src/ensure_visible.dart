@@ -19,8 +19,11 @@ class EnsureVisible extends StatefulWidget {
       {Key key,
       this.curve = Curves.ease,
       this.duration = const Duration(milliseconds: 100),
-      this.child})
-      : super(key: key);
+      @required this.child})
+      : assert(curve != null),
+        assert(duration != null),
+        assert(child != null),
+        super(key: key);
 
   @override
   EnsureVisibleState createState() => EnsureVisibleState();

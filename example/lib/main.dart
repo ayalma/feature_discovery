@@ -2,16 +2,19 @@ import 'package:feature_discovery/feature_discovery.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-final feature1 = "FEATURE_1";
-final feature2 = "FEATURE_2";
-final feature3 = "FEATURE_3";
-final feature4 = "FEATURE_4";
-final feature5 = "FEATURE_5";
-final feature6 = "FEATURE_6";
-final feature7 = "FEATURE_7";
+const String feature1 = 'feature1',
+    feature2 = 'feature2',
+    feature3 = 'feature3',
+    feature4 = 'feature4',
+    feature5 = 'feature5',
+    feature6 = 'feature6',
+    feature7 = 'feature7';
 
 void main() {
+  // You can increase the timeDilation value if you want to see
+  // the animations more slowly.
   timeDilation = 1.0;
+
   runApp(MyApp());
 }
 
@@ -19,7 +22,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Feature Discavery',
+      title: 'Feature Discovery',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -28,13 +31,13 @@ class MyApp extends StatelessWidget {
           child: child,
         );
       },
-      home: MyHomePage(title: 'Flutter Feature Discavery'),
+      home: const MyHomePage(title: 'Flutter Feature Discovery'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key key, this.title}) : super(key: key);
 
   final String title;
 
@@ -45,66 +48,104 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
+    final Future<void> Function() action =
+        () async => print('IconButton of $feature7 tapped.');
+    const Icon icon1 = Icon(Icons.drive_eta);
+    const Icon icon2 = Icon(Icons.menu);
+    const Icon icon3 = Icon(Icons.search);
+    const Icon icon4 = Icon(Icons.add);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
         bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(80),
           child: Column(
             children: <Widget>[
               DescribedFeatureOverlay(
                 featureId: feature7,
-                icon: Icons.print,
-                color: Colors.purple,
+                tapTarget: icon1,
+                backgroundColor: Colors.blue,
                 contentLocation: ContentOrientation.below,
-                title: 'Just how you want it',
-                description:
-                    'Tap the menu icon to switch account, change setting & more.Tap the menu icon to switch account, change setting & more.',
+                title: Text('Find the fastest route'),
+                description: Text(
+                    'Get car, walking, cycling, or public transit directions to this place'),
+                onComplete: action,
+                onOpen: () async {
+                  print('The $feature7 overlay is about to be displayed.');
+                  return true;
+                },
                 child: IconButton(
-                  icon: Icon(Icons.print),
+                  icon: icon1,
+                  onPressed: action,
                 ),
               ),
             ],
           ),
-          preferredSize: Size.fromHeight(80),
         ),
         leading: DescribedFeatureOverlay(
           featureId: feature1,
-          icon: Icons.menu,
-          color: Colors.green,
-          title: 'Just how you want it',
-          description:
-              'Tap the menu icon to switch account, change setting & more.',
+          tapTarget: icon2,
+          backgroundColor: Colors.teal,
+          title: Text('Just how you want it'),
+          description: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const Text(
+                  'Tap the menu icon to switch accounts, change settings & more.'),
+              const SizedBox(height: 12),
+              FlatButton(
+                padding: const EdgeInsets.all(0),
+                child: Text('Understood',
+                    style: Theme.of(context)
+                        .textTheme
+                        .button
+                        .copyWith(color: Colors.white)),
+                onPressed: () =>
+                    FeatureDiscovery.markStepComplete(context, feature1),
+              ),
+              FlatButton(
+                padding: const EdgeInsets.all(0),
+                child: Text('Dismiss',
+                    style: Theme.of(context)
+                        .textTheme
+                        .button
+                        .copyWith(color: Colors.white)),
+                onPressed: () => FeatureDiscovery.dismiss(context),
+              ),
+            ],
+          ),
           child: IconButton(
-            icon: Icon(Icons.menu),
+            icon: icon2,
             onPressed: () {},
           ),
         ),
         actions: <Widget>[
           DescribedFeatureOverlay(
             featureId: feature2,
-            icon: Icons.search,
-            color: Colors.green,
-            title: 'Search your compounds',
+            tapTarget: icon3,
+            backgroundColor: Colors.green,
+            title: Text('Search your compounds'),
             description:
-                'Tap the magnifying glass to quickly scan your compounds',
+                Text('Tap the magnifying glass to quickly scan your compounds'),
             child: IconButton(
-              icon: Icon(Icons.search),
+              icon: icon3,
               onPressed: () {},
             ),
           ),
         ],
       ),
-      body: Content(),
+      body: const Content(),
       floatingActionButton: DescribedFeatureOverlay(
         featureId: feature3,
-        icon: Icons.menu,
-        color: Colors.green,
-        title: 'FAB feature',
-        description: 'This is FAB and it does stuff.',
+        tapTarget: icon4,
+        backgroundColor: Colors.green,
+        title: Text('FAB feature'),
+        description:
+            Text('This is a floating action button and it does stuff.'),
         child: FloatingActionButton(
           onPressed: () {},
           tooltip: 'Increment',
-          child: Icon(Icons.add),
+          child: icon4,
         ),
       ),
     );
@@ -112,6 +153,8 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class Content extends StatefulWidget {
+  const Content({Key key}) : super(key: key);
+
   @override
   _ContentState createState() => _ContentState();
 }
@@ -128,7 +171,15 @@ class _ContentState extends State<Content> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FeatureDiscovery.discoverFeatures(
         context,
-        [feature7, feature1, feature2, feature3, feature4, feature6, feature5],
+        const {
+          feature7,
+          feature1,
+          feature2,
+          feature3,
+          feature4,
+          feature6,
+          feature5
+        },
       );
     });
     super.initState();
@@ -146,11 +197,11 @@ class _ContentState extends State<Content> {
         SingleChildScrollView(
           child: Column(
             children: <Widget>[
-              Image.network(
-                'https://www.balboaisland.com/wp-content/uploads/dish-republic-balboa-island-newport-beach-ca-496x303.jpg',
-                fit: BoxFit.cover,
+              Container(
+                height: 200,
                 width: double.infinity,
-                height: 200.0,
+                child: const Text(
+                    'Imagine there would be a beautiful picture here.'),
               ),
               Container(
                 width: double.infinity,
@@ -169,7 +220,7 @@ class _ContentState extends State<Content> {
                         ),
                       ),
                     ),
-                    Text(
+                    const Text(
                       'Eat',
                       style: TextStyle(
                         color: Colors.white,
@@ -188,36 +239,34 @@ class _ContentState extends State<Content> {
                 padding: const EdgeInsets.all(16.0),
                 child: DescribedFeatureOverlay(
                   featureId: feature5,
-                  icon: Icons.drive_eta,
-                  color: Colors.green,
-                  doAction: (f) {
-                    print('ha ha ha ');
-                    f();
-                  },
-                  prepareAction: (done) {
+                  tapTarget: const Icon(Icons.drive_eta),
+                  backgroundColor: Colors.green,
+                  onComplete: () async =>
+                      print('Tapped tap target of $feature5.'),
+                  onOpen: () async {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       ensureKey.currentState.ensureVisible();
-                      done();
                     });
+                    return true;
                   },
-                  title: 'Discover Featurs',
-                  description:
-                      'Find all available feature in this application with this button.',
+                  title: Text('Discover Features'),
+                  description: Text(
+                      'Find all available features in this application with this button.'),
                   child: EnsureVisible(
                     key: ensureKey,
                     child: RaisedButton(
-                      child: Text('Do Feature Discavery'),
+                      child: Text('Start Feature Discovery'),
                       onPressed: () {
                         FeatureDiscovery.discoverFeatures(
                           context,
-                          [
+                          const {
                             feature1,
                             feature2,
                             feature3,
                             feature4,
                             feature6,
                             feature5
-                          ],
+                          },
                         );
                       },
                     ),
@@ -230,21 +279,19 @@ class _ContentState extends State<Content> {
               ),
               DescribedFeatureOverlay(
                 featureId: feature6,
-                icon: Icons.drive_eta,
-                color: Colors.green,
-                doAction: (f) {
-                  print('ha ha ha ');
-                  f();
-                },
-                prepareAction: (done) {
+                tapTarget: const Icon(Icons.drive_eta),
+                backgroundColor: Colors.green,
+                onComplete: () async =>
+                    print('Tapped tap target of $feature6.'),
+                onOpen: () async {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     ensureKey2.currentState.ensureVisible();
-                    done();
                   });
+                  return true;
                 },
-                title: 'Test text',
-                description:
-                    'This text is just for test and we dont care about it at all.',
+                title: Text('Title text'),
+                description: Text(
+                    'This text is just for test and we don\'t care about it at all.'),
                 child: EnsureVisible(
                   key: ensureKey2,
                   child: Text(
@@ -266,21 +313,21 @@ class _ContentState extends State<Content> {
             translation: const Offset(-.5, -0.5),
             child: DescribedFeatureOverlay(
               featureId: feature4,
-              icon: Icons.drive_eta,
-              color: Colors.green,
-              doAction: (f) {
-                print('ha ha ha ');
-                f();
+              tapTarget: const Icon(Icons.drive_eta),
+              backgroundColor: Colors.green,
+              onOpen: () async {
+                print('Tapped tap target of $feature4.');
+                return true;
               },
-              title: 'Find the fastest route',
-              description:
-                  'Get car, walking, cycling or public transit directions to this place.',
+              title: Text('Find the fastest route'),
+              description: Text(
+                  'Get car, walking, cycling or public transit directions to this place.'),
               child: FloatingActionButton(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.blue,
-                child: Icon(Icons.drive_eta),
+                child: const Icon(Icons.drive_eta),
                 onPressed: () {
-                  //TODO:
+                  print('Floating action button tapped.');
                 },
               ),
             ),

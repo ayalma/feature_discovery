@@ -1,122 +1,171 @@
 # feature_discovery
 
-A flutter package that implements material design feature discovery 
+This Flutter package implements Feature Discovery following the [Material Design guidelines](https://material.io/archive/guidelines/growth-communications/feature-discovery.html).  
+
+With Feature Discovery, you can add context to any UI element, i.e. any `Widget` in your Flutter app. 
 
 ## Installing
 
+To use this package, follow the [installing guide](https://pub.dev/packages/feature_discovery#-installing-tab-).
 
-For installing this lib add below line to you'r dependency section in pubspec.yaml
+## Usage
+
+### `FeatureDiscovery`
+
+To be able to work with any of the global functions provided by the `feature_discovery` package, you will have to wrap your widget tree in a `FeatureDiscovery` widget.    
+There are many places where you can add `FeatureDiscovery` in your build tree, but the easiest to assure that it sits on top is to wrap your `MaterialApp` with it:
+```dart
+FeatureDiscovery(
+  child: MaterialApp(
+   ...
+  )
+)
 ```
-    dependencies:
-      feature_discovery: ^0.4.1
 
+### `DescribedFeatureOverlay`
+
+For every UI element (`Widget`) that you want to describe using Feature Discovery, you will need to add a `DescribedFeatureOverlay`.  
+This widget takes all the parameters for the overlay that will be displayed during Feature Discovery and takes the `Widget` you want to display the overlay about as its `child`.
+
+#### Feature ids
+
+Every feature you describe should have a unique identifier, which is a `String` passed to the `featureId` parameter. You will also need to provide these ids when starting the discovery.  
+
+```dart
+DescribedFeatureOverlay(
+  featureId: 'add_item_feature_id', // Unique id that identifies this overlay.
+  tapTarget: const Icon(Icons.add), // The widget that will be displayed as the tap target.
+  title: Text('Add item'),
+  description: Text('Tap the plus icon to add an item to your list.'),
+  backgroundColor: Theme.of(context).primaryColor,
+  targetColor: Colors.white,
+  textColor: Colors.white,
+  child: IconButton( // Your widget that is actually part of the UI.
+    icon: cons Icon(Icons.add),
+    onPressed: addItem,
+  ),
+);
 ```
 
-Then run  ```flutter pub get``` to retrieve package
+<details>
+<summary>Additional parameters</summary>
 
+#### `contentLocation`
 
-## Using
+This is `ContentOrientation.trivial` by default, however, the package cannot always determine the correct placement for the overlay. In those cases, you can provide either of these two:
 
-For using this library first add featureDiscovery to material app builder property like that
+ * `ContentOrientation.below`: Text is displayed below the target.
+  
+ * `ContentOrientation.above`: Text is displayed above the target.
+
+#### `onComplete`
+
+```dart
+   onComplete: () async {
+    // Executed when the tap target is tapped. The overlay will not close before
+    // this function returns and after that, the next step will be opened.
+    print('Target tapped.'); 
+  },
 ```
-return MaterialApp(
-      title: 'Feature Discavery',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      builder: (context, child) {
-        return FeatureDiscovery( // adding feature discovery at this point make it available to all pages
-          child: child,
-        );
+
+#### `onDismiss`
+
+```dart
+  onDismiss: () async {
+    // Called when the user taps outside of the overlay, trying to dismiss it.
+    // You can prevent dismissal by returning `false`.
+    print('Overlay dismissed.');
+    return true;
+  },
+```
+
+#### `onOpen`
+
+```dart
+  onOpen: () async {
+    // This callback is called before the overlay is displayed.
+    // If you return false, it will not be opened and the next step
+    // will be attempted to open.
+    print('The overlay is about to be displayed');
+    return true;
+  },
+```
+
+#### `enablePulsingAnimation`
+
+This is set to `true` by default, but you can disable the pulsing animation about the tap target by setting this to `false`.
+
+#### `allowShowingDuplicate`
+
+If multiple `DescribedFeatureOverlay`s have the same `featureId`, they will interfere with each other during discovery and if you want to display multiple overlays at the same time, you will have to set `allowShowingDuplicate` to `true` for all of them.
+</details>
+
+### `FeatureDiscovery.discoverFeatures`
+
+When you want to showcase your features, you can call `FeatureDiscovery.discoverFeatures` with the applicable feature ids. The features will be displayed as steps in order if the user does not dismiss them.  
+By tapping the tap target, the user will be sent on to the next step and by tapping outside of the overlay, the user will dismiss all queued steps.
+
+```dart
+FeatureDiscovery.discoverFeatures(
+  context,
+  const <String>{ // Feature ids for every feature that you want to showcase in order.
+    'add_item_feature_id',
+  },
+);
+```
+
+If you want to display Feature Discovery for a page right after it has been opened, you can use [`SchedulerBinding.addPostFrameCallback`](https://api.flutter.dev/flutter/scheduler/SchedulerBinding/addPostFrameCallback.html) in the [`initState` method of your `StatefulWidget`](https://api.flutter.dev/flutter/widgets/State/initState.html):
+
+```dart
+@override
+void initState() {
+  // ...
+  SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+    FeatureDiscovery.discoverFeatures(
+      context,
+      const <String>{ // Feature ids for every feature that you want to showcase in order.
+        'add_item_feature_id',
       },
-      home: MyHomePage(title: 'Flutter Feature Discavery'),
-    );
-
+    ); 
+  });
+  super.initState();
+}
 ```
 
-### Note :
- Adding feature discovery at this point make it available to all pages
- 
-Then wrap you'r desired widget with ```DescribedFeatureOverlay``` widget
-like that :
-```
-   DescribedFeatureOverlay(
-                featureId: 'featureId1',
-                icon: Icons.print,
-                color: Colors.purple,
-                contentLocation: ContentOrientation.below, // look at note 
-                title: 'Just how you want it',
-                description:
-                    'Tap the menu icon to switch account, change setting & more.Tap the menu icon to switch account, change setting & more.',
-                child: IconButton(
-                  icon: Icon(Icons.print),
-                ),
-              ),
-``` 
+#### Other methods
 
-Then in initState method of you'r widget call 
+You can view the [API reference for `FeatureDiscovery`](https://pub.dev/documentation/feature_discovery/latest/feature_discovery/FeatureDiscovery-class.html#static-methods) to find other useful methods for controlling the Feature Discovery process programmatically.
 
 
-``` 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      FeatureDiscovery.discoverFeatures(
-        context,
-        ['featureId1'],
-      );
+### `EnsureVisible`
+
+You can use the [`EnsureVisible` widget](https://pub.dev/documentation/feature_discovery/latest/feature_discovery/EnsureVisible-class.html) to automatically scroll to widgets that are inside of scrollable viewports when they are described during Feature Discovery:
+
+```dart
+// You need to save an instance of a GlobalKey in order to call ensureVisible in onOpen.
+GlobalKey<EnsureVisibleState> ensureVisibleGlobalKey = GlobalKey<EnsureVisibleState>();
+
+// The widget in your build tree:
+DescribedFeatureOverlay(
+  featureId: 'list_item_feature_id',
+  tapTarget: const Icon(Icons.cake),
+  onOpen: () async {
+    WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+      ensureVisibleGlobalKey.currentState.ensureVisible();
+      return true;
     });
-
+  },
+  title: Text('Cake'),
+  description: Text('This is your reward for making it this far.'),
+  child: EnsureVisible(
+    key: ensureVisibleGlobalKey,
+    child: const Icon(Icons.cake),
+  ),
+)
 ```
-### Note 
 
-#### contentLocation :
-   we use this property for placing the content text in proper position when 
-    lib can't do it (because of text width and height measurement  issue in flutter )
-    
-   ContentOrientation.below : move content to  below of target
-   ContentOrientation.above : move content to above of target
-   ContentOrientation.trivial : let lib decide
-    
-## Bonus 
+## Notes
 
-   When you'r desired target is in scrollable content and is hidden when the feature discovery runs
-    you can use ```EnsureVisible``` widget like that
-    
-   ```
-       var  ensureKey2 = GlobalKey<EnsureVisibleState>();
-       DescribedFeatureOverlay(
-                    featureId: 'id',
-                    icon: Icons.drive_eta,
-                    color: Colors.green,
-                    doAction: (f) {
-                      // do what you want ...
-                      f();
-                    },
-                    prepareAction: (done) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        ensureKey2.currentState.ensureVisible(); // this line scroll to target before feature discovery 
-                        done();
-                      });
-                    },
-                    title: 'Test text',
-                    description:
-                        'This text is just for test and we dont care about it at all.',
-                    child: EnsureVisible(
-                      key: ensureKey2,
-                      child: Text(
-                        'Custom text',
-                      ),
-                    ),
-                  ),
-    
-   ```
-## Thank you [mattcarroll](https://medium.com/@mattcarroll) for you'r awesome video about feature discovery
- 
+In `DescribedFeatureOverlay`, `tapTarget`, `title`, and `description` can take any widget, but it is recommended to use an `Icon` for the tap target and simple `Text` widgets for the title and description. The package takes care of styling these widgets and having these as `Widget`s allows you to pass `Key`s, `Semantics`, etc. 
 
-This project is a starting point for a Dart
-[package](https://flutter.dev/developing-packages/),
-a library module containing code that can be shared easily across
-multiple Flutter or Dart projects.
-
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+Thanks to [mattcarroll](https://medium.com/@mattcarroll) for their [Flutter challenge about Feature Discovery on Fluttery](https://youtu.be/Xm0ELlBtNWM).

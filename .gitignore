@@ -23,9 +23,11 @@
 .dart_tool/
 .flutter-plugins
 .packages
+.metadata
 .pub-cache/
 .pub/
 build/
+pubspec.lock
 
 # Android related
 **/android/**/gradle-wrapper.jar
@@ -35,6 +37,7 @@ build/
 **/android/gradlew.bat
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
+**/example/android/app/.*
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
