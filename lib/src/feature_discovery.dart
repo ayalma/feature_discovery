@@ -22,30 +22,30 @@ class FeatureDiscovery extends StatefulWidget {
   /// This will schedule completion of the current discovery step and continue
   /// onto the step after the activation animation of the current overlay if successful.
   ///
-  /// If the [DescribedFeatureOverlay] that is associated with the current step is
-  /// not being displayed, this will fail. In that case, use [completeStep].
-  ///
+  // If the [DescribedFeatureOverlay] that is associated with the current step is
+  // not being displayed, this will fail. In that case, use [_forceCompleteStep].
+  //
   /// The [stepId] ensures that you are marking the correct feature for completion.
   /// If the provided [stepId] does not match the feature that is currently shown, i.e.
   /// the currently active step, nothing will happen.
-  static void markStepComplete(BuildContext context, String stepId) {
+  static void completeStep(BuildContext context, String stepId) {
     _FeatureDiscoveryState.of(context).markStepComplete(stepId);
   }
 
-  /// It is recommend to use [markStepComplete] whenever you can as it shows an animation for context.
+  /// It is recommend to use [completeStep] whenever you can as it shows an animation for context.
   ///
   /// This will force complete the current step and move on to the next step without any animations.
-  static void completeStep(BuildContext context) {
+  static void _forceCompleteStep(BuildContext context) {
     _FeatureDiscoveryState.of(context).completeStep();
   }
 
   /// This will schedule dismissal of the current discovery step and with that
   /// of the current feature discovery. The dismissal animation will play if successful.
   /// If you want to complete the step instead and with that continue the feature discovery,
-  /// you will need to call [markStepComplete] instead.
+  /// you will need to call [completeStep] instead.
   ///
   /// If the [DescribedFeatureOverlay] that is associated with the current step is
-  /// not being displayed, this will fail. In that case, use [clear].
+  /// not being displayed, this will fail. In that case, use [_forceDismiss].
   static void dismiss(BuildContext context) {
     _FeatureDiscoveryState.of(context).dismiss();
   }
@@ -53,7 +53,7 @@ class FeatureDiscovery extends StatefulWidget {
   /// This will force clear the current feature discovery and cancel the whole
   /// process without an animation.
   /// If you want to dismiss the current step regularly, call [dismiss].
-  static void clear(BuildContext context) {
+  static void _forceDismiss(BuildContext context) {
     _FeatureDiscoveryState.of(context).clear();
   }
 

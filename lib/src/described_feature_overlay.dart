@@ -169,7 +169,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
               setState(() => state = _OverlayState.activating);
               break;
             case AnimationStatus.completed:
-              FeatureDiscovery.completeStep(context);
+              FeatureDiscovery._forceCompleteStep(context);
               break;
             default:
               break;
@@ -188,7 +188,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
               setState(() => state = _OverlayState.dismissing);
               break;
             case AnimationStatus.completed:
-              FeatureDiscovery.clear(context);
+              FeatureDiscovery._forceDismiss(context);
               break;
             default:
               break;
@@ -249,7 +249,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           if (shouldOpen)
             show();
           else // Move on to the next step as this step should not be opened.
-            FeatureDiscovery.completeStep(context);
+            FeatureDiscovery._forceCompleteStep(context);
         });
       else
         show();
