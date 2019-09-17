@@ -1,9 +1,9 @@
-name: Dart CI
+name: Flutter Tests
 
 on: [push, pull_request]
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-latest
     
@@ -18,5 +18,5 @@ jobs:
         flutter-version: '1.9.1+hotfix.2'
     - name: Install dependencies
       run: flutter pub get
-    - run: flutter pub run test
-    - run: flutter test
+    - name: Run tests
+      run: flutter test
