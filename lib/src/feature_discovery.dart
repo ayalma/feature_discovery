@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'dart:math' as Math;
 
+import 'package:feature_discovery/src/layout.dart';
 import 'package:flutter/material.dart';
+
+part 'described_feature_overlay.dart';
 
 enum ContentOrientation {
   above,
@@ -10,53 +14,43 @@ enum ContentOrientation {
 
 class FeatureDiscovery extends StatefulWidget {
 
-  // TODO do not expose this method publicly
-  static Bloc blocOf(BuildContext context) => _stateOf(context)._bloc;
-
-  static _FeatureDiscoveryState _stateOf(BuildContext context) {
-    _FeatureDiscoveryState state = 
-      (context.inheritFromWidgetOfExactType(_InheritedFeatureDiscovery)
-        as _InheritedFeatureDiscovery)
-        .state;
-    assert(state != null,
-      "Don't forget to wrap your widget tree in a [FeatureDiscovery] widget.");
-    return state;
+  static _Bloc _blocOf(BuildContext context) {
+    FeatureDiscovery state = context.ancestorWidgetOfExactType(FeatureDiscovery);
+    assert(state != null, "Don't forget to wrap your widget tree in a [FeatureDiscovery] widget.");
+    return state._bloc;
   }
 
   /// Steps are the featureIds of the overlays.
   /// Though they can be placed in any [Iterable], it is recommended to pass them as a [Set]
   /// because this ensures that every step is only shown once.
   static void discoverFeatures(BuildContext context, Iterable<String> steps)
-    => _stateOf(context).discoverFeatures(steps.toList());
+    => _blocOf(context)._discoverFeatures(steps: steps.toList());
 
   /// This will schedule completion of the current discovery step and continue
   /// onto the step after the activation animation of the current overlay if successful.
-  ///
-  /// If the [DescribedFeatureOverlay] that is associated with the current step is
-  /// not being displayed, this will fail. In that case, use [_completeStep].
-  ///
+  /// 
   /// The [stepId] ensures that you are marking the correct feature for completion.
   /// If the provided [stepId] does not match the feature that is currently shown, i.e.
   /// the currently active step, nothing will happen.
   static void completeCurrentStep(BuildContext context)   
-    => _stateOf(context)._completeStep();
+    => _blocOf(context)._completeStep();
 
   /// This will schedule dismissal of the current discovery step and with that
   /// of the current feature discovery. The dismissal animation will play if successful.
-  /// If you want to complete the step instead and with that continue the feature discovery,
-  /// you will need to call [markStepComplete] instead.
-  ///
-  /// If the [DescribedFeatureOverlay] that is associated with the current step is
-  /// not being displayed, this will fail. In that case, use [clear].
-  static void dismissCurrentStep(BuildContext context)
-    => _stateOf(context)._dismissStep();
+  /// If you want to complete the step and continue the feature discovery,
+  /// call [completeCurrentStep] instead.
+  static void dismiss(BuildContext context)
+    => _blocOf(context)._dismiss();
 
   final Widget child;
+  final _Bloc _bloc;
   
-  const FeatureDiscovery({
+  FeatureDiscovery({
     Key key, 
     @required this.child
-  }) : super(key: key);
+  }) : 
+    _bloc = _Bloc(),
+    super(key: key);
 
   @override
   _FeatureDiscoveryState createState() => _FeatureDiscoveryState();
@@ -64,83 +58,22 @@ class FeatureDiscovery extends StatefulWidget {
 
 class _FeatureDiscoveryState extends State<FeatureDiscovery> {
   
-  Bloc _bloc;
-  List<String> _steps;
-  int _activeStepIndex;
-
-  /// This variable ensures that each discovery step only shows one overlay.
-  ///
-  /// If one widget is placed multiple times in the widget tree, e.g. by
-  /// [DropdownButton], this is necessary to avoid showing duplicate overlays.
-  //bool stepShown;
-
-  String get activeStepId => _steps?.elementAt(_activeStepIndex);
-  Bloc get bloc => _bloc;
-
-  @override
-  void initState() {
-    super.initState();
-    _bloc = Bloc();
-  }
-
   @override
   void dispose() {
-    bloc.dispose();
+    widget._bloc?._dispose();
     super.dispose();
   }
 
-  void discoverFeatures(List<String> steps) {
-    //stepShown = false;
-    _steps = steps;
-    _activeStepIndex = 0;
-    bloc._inStart.add(activeStepId);
-  }
-
-  void _completeStep() {
-    if (_steps == null) return;
-
-    bloc._inComplete.add(activeStepId);
-    _activeStepIndex++;
-
-    if (_activeStepIndex < _steps.length)
-      bloc._inStart.add(activeStepId);    
-  }
-
-  void _dismissStep() async {
-    if (_steps == null) return;
-
-    bloc._inDismiss.add(activeStepId);
-    
-    _steps = null;
-    _activeStepIndex = null;
-  }
-
   @override
-  Widget build(BuildContext context) {
-    return _InheritedFeatureDiscovery(
-      state: this,
-      child: widget.child,
-    );
-  }
+  Widget build(BuildContext context) => widget.child;
 }
 
-class _InheritedFeatureDiscovery extends InheritedWidget {
+class _Bloc {
 
-  final _FeatureDiscoveryState state;
+  Iterable<String> _steps;
+  int _activeStepIndex;
 
-  const _InheritedFeatureDiscovery({
-    Key key,
-    @required Widget child,
-    @required this.state
-  }) : 
-    assert(child != null),
-    super(key: key, child: child);
-
-  @override
-  bool updateShouldNotify(_InheritedFeatureDiscovery old) => old.state.bloc != state.bloc;
-}
-
-class Bloc {
+  // The different streams send the featureId that must display/complete
 
   final StreamController<String> _dismissController = StreamController.broadcast();
   Stream<String> get outDismiss => _dismissController.stream;
@@ -154,10 +87,31 @@ class Bloc {
   Stream<String> get outStart => _startController.stream;
   Sink<String> get _inStart => _startController.sink;
 
-  void dispose () {
+  String get _activeStepId => _steps?.elementAt(_activeStepIndex);
+
+  void _dispose() {
     _dismissController.close();
     _completeController.close();
     _startController.close();
+  }
+
+  void _discoverFeatures({Iterable<String> steps}) {
+    assert(steps != null);
+    _steps = steps;
+    _activeStepIndex = 0;
+    _inStart.add(_activeStepId);
+  }
+
+  void _completeStep() {
+    if (_steps == null) return;
+    _inComplete.add(_activeStepId);
+    _activeStepIndex++;
+    if (_activeStepIndex < _steps.length)
+      _inStart.add(_activeStepId);    
+  }
+
+  void _dismiss() {
+    _inDismiss.add(_activeStepId);
   }
 
 }

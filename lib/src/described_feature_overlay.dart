@@ -1,9 +1,4 @@
-import 'dart:async';
-import 'dart:math' as Math;
-
-import 'package:feature_discovery/feature_discovery.dart';
-import 'package:feature_discovery/src/layout.dart';
-import 'package:flutter/material.dart';
+part of 'package:feature_discovery/src/feature_discovery.dart';
 
 enum DescribedFeatureContentOrientation {
   above,
@@ -159,7 +154,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final Bloc bloc = FeatureDiscovery.blocOf(context);
+    final _Bloc bloc = FeatureDiscovery._blocOf(context);
     final Stream<String> newDismissStream = bloc.outDismiss;
     final Stream<String> newCompleteStream = bloc.outComplete;
     final Stream<String> newStartStream = bloc.outStart;
@@ -304,9 +299,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     return Stack(
       children: <Widget>[
         GestureDetector(
-          onTap: () => FeatureDiscovery.dismissCurrentStep(context),
+          onTap: () => FeatureDiscovery.dismiss(context),
           // According to the spec, the user should be able to dismiss by swiping.
-          onPanUpdate: (DragUpdateDetails _) => FeatureDiscovery.dismissCurrentStep(context),
+          onPanUpdate: (DragUpdateDetails _) => FeatureDiscovery.dismiss(context),
           child: Container(
             width: double.infinity,
             height: double.infinity,

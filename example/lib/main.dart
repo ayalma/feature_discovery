@@ -105,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
               FlatButton(
                 padding: const EdgeInsets.all(0),
                 child: Text('Cancel'),
-                onPressed: () => FeatureDiscovery.dismissCurrentStep(context),
+                onPressed: () => FeatureDiscovery.dismiss(context),
               )
             ],
           ),
