@@ -100,13 +100,18 @@ class _MyHomePageState extends State<MyHomePage> {
                         .textTheme
                         .button
                         .copyWith(color: Colors.white)),
-                onPressed: () => FeatureDiscovery.completeCurrentStep(context),
+                onPressed: () =>
+                    FeatureDiscovery.completeCurrentStep(context),
               ),
               FlatButton(
                 padding: const EdgeInsets.all(0),
-                child: Text('Cancel'),
+                child: Text('Dismiss',
+                    style: Theme.of(context)
+                        .textTheme
+                        .button
+                        .copyWith(color: Colors.white)),
                 onPressed: () => FeatureDiscovery.dismiss(context),
-              )
+              ),
             ],
           ),
           child: IconButton(
