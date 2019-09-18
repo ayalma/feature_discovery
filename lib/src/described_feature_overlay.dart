@@ -268,7 +268,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       _show();
   }
 
-  void _complete() async {
+  Future<void> _complete() async {
     if (_completeController.isAnimating) return;
 
     if (widget.onComplete != null) await widget.onComplete();
@@ -278,7 +278,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     setState(() => _showOverlay = false);
   }
 
-  void _dismiss() async {
+  Future<void> _dismiss() async {
     // The method might be triggered multiple times, especially when swiping.
     if (_dismissController.isAnimating) return;
 
@@ -340,7 +340,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           transitionProgress: _transitionProgress,
           anchor: anchor,
           color: widget.targetColor,
-          onPressed: _complete,
+          onPressed: () => FeatureDiscovery.completeCurrentStep(context),
           child: widget.tapTarget,
         ),
       ],
