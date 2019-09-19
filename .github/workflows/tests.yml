@@ -21,9 +21,7 @@ jobs:
     - name: Flutter action
       uses: subosito/flutter-action@v1.1.1
       with:
-        flutter-version: '1.9.1+hotfix.2'
-    - name: Upgrade Flutter
-      run: flutter upgrade
+        channel: 'stable'
     - name: Install dependencies
       run: flutter pub get
     - name: Run tests
