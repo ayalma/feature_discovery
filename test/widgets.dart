@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 @visibleForTesting
 class TestWidget extends StatelessWidget {
 
-  final Iterable<String> steps;
+  final Iterable<String> featureIds;
 
   const TestWidget({
     Key key,
-    @required this.steps
+    @required this.featureIds
   }) : 
     super(key: key);
 
@@ -23,7 +23,7 @@ class TestWidget extends StatelessWidget {
           ),
           body: Center(
             child: Column(
-              children: steps
+              children: featureIds
                 .map((featureId) => TestIcon(featureId: featureId))
                 .toList(),
             ),

@@ -1,6 +1,17 @@
-// This file needs to be part of the src/feature_discovery.dart library
-// in order to have access to the library private classes.
 part of 'package:feature_discovery/src/feature_discovery.dart';
+
+enum DescribedFeatureContentOrientation {
+  above,
+  below,
+}
+
+enum OverlayState {
+  closed,
+  opening,
+  pulsing,
+  activating,
+  dismissing,
+}
 
 class DescribedFeatureOverlay extends StatefulWidget {
   /// This id should be unique among all the [DescribedFeatureOverlay] widgets.
@@ -95,202 +106,200 @@ class DescribedFeatureOverlay extends StatefulWidget {
 
 class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     with TickerProviderStateMixin {
-  Size screenSize;
+  Size _screenSize;
 
-  bool showOverlay;
+  bool _showOverlay;
 
-  _OverlayState state;
+  _OverlayState _state;
 
-  double transitionProgress;
+  double _transitionProgress;
 
-  AnimationController openController;
-  AnimationController completeController;
-  AnimationController dismissController;
-  AnimationController pulseController;
+  AnimationController _openController;
+  AnimationController _completeController;
+  AnimationController _dismissController;
+  AnimationController _pulseController;
+
+  Stream<String> _startStream;
+  Stream<String> _dismissStream;
+  Stream<String> _completeStream;
+  StreamSubscription<String> _startStreamSubscription;
+  StreamSubscription<String> _dismissStreamSubscription;
+  StreamSubscription<String> _completeStreamSubscription;
 
   @override
   void initState() {
-    showOverlay = false;
+    _showOverlay = false;
 
-    state = _OverlayState.closed;
+    _state = _OverlayState.closed;
 
-    transitionProgress = 1;
+    _transitionProgress = 1;
 
-    initAnimationControllers();
+    _initAnimationControllers();
     super.initState();
   }
 
   @override
   void dispose() {
-    openController.dispose();
-    completeController.dispose();
-    dismissController.dispose();
-    pulseController?.dispose();
+    _openController.dispose();
+    _completeController.dispose();
+    _dismissController.dispose();
+    _pulseController?.dispose();
     super.dispose();
-  }
-
-  void initAnimationControllers() {
-    openController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
-          ..addListener(
-              () => setState(() => transitionProgress = openController.value))
-          ..addStatusListener(
-            (AnimationStatus status) {
-              if (status == AnimationStatus.forward)
-                setState(() => state = _OverlayState.opening);
-              else if (status == AnimationStatus.completed)
-                pulseController?.forward(from: 0.0);
-            },
-          );
-
-    if (widget.enablePulsingAnimation) {
-      pulseController = AnimationController(
-          vsync: this, duration: Duration(milliseconds: 1000))
-        ..addListener(
-            () => setState(() => transitionProgress = pulseController.value))
-        ..addStatusListener(
-          (AnimationStatus status) {
-            if (status == AnimationStatus.forward)
-              setState(() => state = _OverlayState.pulsing);
-            else if (status == AnimationStatus.completed)
-              pulseController.forward(from: 0.0);
-          },
-        );
-    }
-
-    completeController = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 250))
-      ..addListener(
-          () => setState(() => transitionProgress = completeController.value))
-      ..addStatusListener(
-        (AnimationStatus status) {
-          switch (status) {
-            case AnimationStatus.forward:
-              setState(() => state = _OverlayState.activating);
-              break;
-            case AnimationStatus.completed:
-              FeatureDiscovery.completeStep(context);
-              break;
-            default:
-              break;
-          }
-        },
-      );
-
-    dismissController = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 250))
-      ..addListener(
-          () => setState(() => transitionProgress = dismissController.value))
-      ..addStatusListener(
-        (AnimationStatus status) {
-          switch (status) {
-            case AnimationStatus.forward:
-              setState(() => state = _OverlayState.dismissing);
-              break;
-            case AnimationStatus.completed:
-              FeatureDiscovery.clear(context);
-              break;
-            default:
-              break;
-          }
-        },
-      );
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    screenSize = MediaQuery.of(context).size;
-
-    _handleOverlayState();
+    final _Bloc bloc = FeatureDiscovery._blocOf(context);
+    final Stream<String> newDismissStream = bloc.outDismiss;
+    final Stream<String> newCompleteStream = bloc.outComplete;
+    final Stream<String> newStartStream = bloc.outStart;
+    if (_dismissStream != newDismissStream) _setDismissStream(newDismissStream);
+    if (_completeStream != newCompleteStream) _setCompleteStream(newCompleteStream);
+    if (_startStream != newStartStream) _setStartStream(newStartStream);
+    _screenSize = MediaQuery.of(context).size;
   }
 
-  void show() {
-    final String activeStep =
-        _InheritedFeatureDiscovery.of(context).activeStepId;
+  void _setDismissStream (Stream<void> newStream) {
+    _dismissStreamSubscription?.cancel();
+    _dismissStream = newStream;
+    _dismissStreamSubscription = _dismissStream.listen(
+      (featureId) async {
+        assert(featureId != null);
+        if (featureId == widget.featureId) await _dismiss();
+      }
+    );
+  }
+
+  void _setCompleteStream (Stream<void> newStream) {
+    _completeStreamSubscription?.cancel();
+    _completeStream = newStream;
+    _completeStreamSubscription = _completeStream.listen(
+      (featureId) async {
+        assert(featureId != null);
+        if (featureId == widget.featureId) await _complete();
+      }
+    );
+  }
+
+  void _setStartStream (Stream<void> newStream) {
+    _startStreamSubscription?.cancel();
+    _startStream = newStream;
+    _startStreamSubscription = _startStream.listen(
+      (featureId) async {
+        assert(featureId != null);
+        if (featureId == widget.featureId) await _open();
+      }
+    );
+  }
+
+  void _initAnimationControllers() {
+    _openController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
+          ..addListener(
+              () => setState(() => _transitionProgress = _openController.value))
+          ..addStatusListener(
+            (AnimationStatus status) {
+              if (status == AnimationStatus.forward)
+                setState(() => _state = _OverlayState.opening);
+              else if (status == AnimationStatus.completed)
+                _pulseController?.forward(from: 0.0);
+            },
+          );
+
+    if (!widget.enablePulsingAnimation) _pulseController = null;
+    else
+      _pulseController = AnimationController(
+          vsync: this, duration: Duration(milliseconds: 1000))
+        ..addListener(
+            () => setState(() => _transitionProgress = _pulseController.value))
+        ..addStatusListener(
+          (AnimationStatus status) {
+            if (status == AnimationStatus.forward)
+              setState(() => _state = _OverlayState.pulsing);
+            else if (status == AnimationStatus.completed)
+              _pulseController.forward(from: 0.0);
+          },
+        );
+
+    _completeController = AnimationController(
+        vsync: this, duration: Duration(milliseconds: 250))
+      ..addListener(
+          () => setState(() => _transitionProgress = _completeController.value))
+      ..addStatusListener(
+        (AnimationStatus status) {
+          if (status == AnimationStatus.forward)
+            setState(() => _state = _OverlayState.activating);
+        },
+      );
+
+    _dismissController = AnimationController(
+        vsync: this, duration: Duration(milliseconds: 250))
+      ..addListener(
+          () => setState(() => _transitionProgress = _dismissController.value))
+      ..addStatusListener(
+        (AnimationStatus status) {
+          if (status == AnimationStatus.forward)
+            setState(() => _state = _OverlayState.dismissing);
+        },
+      );
+  }
+
+  void _show() {
 
     // The activeStep might have changed by now because onOpen is asynchronous.
-    if (activeStep != widget.featureId) return;
+    // TODO
+    //if (activeStep != widget.featureId) return;
 
-    openController.forward(from: 0.0);
-    setState(() => showOverlay = true);
+    _openController.forward(from: 0.0);
+    setState(() => _showOverlay = true);
   }
 
-  void _handleOverlayState() {
-    final String activeStep =
-        _InheritedFeatureDiscovery.of(context).activeStepId;
-    if (activeStep == null) {
-      // This condition is met when the feature discovery was dismissed
-      // and in that case the AnimationController's needs to be dismissed as well.
-      openController.stop();
-      pulseController?.stop();
-    } else if (activeStep == widget.featureId) {
-      // Overlay is already shown.
-      if (showOverlay == true) {
-        if (_InheritedFeatureDiscovery.of(context).stepShouldComplete == true)
-          complete();
-        else if (_InheritedFeatureDiscovery.of(context).stepShouldDismiss ==
-            true) dismiss();
-        return;
-      }
-
-      // There might be another widget with the same feature id in the widget tree,
-      // which is already showing the overlay for this feature.
-      if (_FeatureDiscoveryState.of(context).stepShown == true &&
-          widget.allowShowingDuplicate != true) return;
-
-      // This needs to be set here and not in show to prevent multiple onOpen
-      // calls to stack up (if there are multiple widgets with the same feature id).
-      _FeatureDiscoveryState.of(context).stepShown = true;
-
-      if (widget.onOpen != null)
-        widget.onOpen().then((shouldOpen) {
-          assert(shouldOpen != null);
-          if (shouldOpen)
-            show();
-          else // Move on to the next step as this step should not be opened.
-            FeatureDiscovery.completeStep(context);
-        });
+  Future<void> _open() async {
+    if (widget.onOpen != null) {
+      final bool shouldOpen = await widget.onOpen();
+      assert(shouldOpen != null, "You must return true or false at the end of the [onOpen] function");
+      if (shouldOpen)
+        _show();
       else
-        show();
-      return;
+        FeatureDiscovery.completeCurrentStep(context);
     }
-
-    if (showOverlay == true) {
-      // This can only be reached if activeStep is not equal to the feature id of this widget.
-      // In that case, this overlay needs to be hidden.
-      setState(() => showOverlay = false);
-    }
+    else
+      _show();
   }
 
-  void complete() async {
-    if (completeController.isAnimating) return;
+  Future<void> _complete() async {
+    if (_completeController.isAnimating) return;
 
     if (widget.onComplete != null) await widget.onComplete();
-    pulseController?.stop();
-    completeController.forward(from: 0.0);
+    _openController.stop();
+    _pulseController?.stop();
+    await _completeController.forward(from: 0.0);
+    setState(() => _showOverlay = false);
   }
 
-  void dismiss() async {
+  Future<void> _dismiss() async {
     // The method might be triggered multiple times, especially when swiping.
-    if (dismissController.isAnimating) return;
+    if (_dismissController.isAnimating) return;
 
     if (widget.onDismiss != null) {
-      final shouldDismiss = await widget.onDismiss();
+      final bool shouldDismiss = await widget.onDismiss();
       assert(shouldDismiss != null);
       if (!shouldDismiss) return;
     }
-    pulseController?.stop();
-    dismissController.forward(from: 0.0);
+    _openController.stop();
+    _pulseController?.stop();
+    await _dismissController.forward(from: 0.0);
+    setState(() => _showOverlay = false);
   }
 
   Widget _buildOverlay(Offset anchor) {
     return Stack(
       children: <Widget>[
         GestureDetector(
-          onTap: dismiss,
+          onTap: () => FeatureDiscovery.dismiss(context),
           // According to the spec, the user should be able to dismiss by swiping.
-          onPanUpdate: (DragUpdateDetails _) => dismiss(),
+          onPanUpdate: (DragUpdateDetails _) => FeatureDiscovery.dismiss(context),
           child: Container(
             width: double.infinity,
             height: double.infinity,
@@ -298,18 +307,18 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           ),
         ),
         _Background(
-          state: state,
-          transitionProgress: transitionProgress,
+          state: _state,
+          transitionProgress: _transitionProgress,
           anchor: anchor,
           color: widget.backgroundColor ?? Theme.of(context).primaryColor,
-          screenSize: screenSize,
+          screenSize: _screenSize,
           orientation: widget.contentLocation,
         ),
         _Content(
-          state: state,
-          transitionProgress: transitionProgress,
+          state: _state,
+          transitionProgress: _transitionProgress,
           anchor: anchor,
-          screenSize: screenSize,
+          screenSize: _screenSize,
           // this parameter is not used
           // statusBarHeight: statusBarHeight,
           touchTargetRadius: 44.0,
@@ -321,17 +330,17 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           textColor: widget.textColor,
         ),
         _Pulse(
-          state: state,
-          transitionProgress: transitionProgress,
+          state: _state,
+          transitionProgress: _transitionProgress,
           anchor: anchor,
           color: widget.targetColor,
         ),
         _TapTarget(
-          state: state,
-          transitionProgress: transitionProgress,
+          state: _state,
+          transitionProgress: _transitionProgress,
           anchor: anchor,
           color: widget.targetColor,
-          onPressed: complete,
+          onPressed: () => FeatureDiscovery.completeCurrentStep(context),
           child: widget.tapTarget,
         ),
       ],
@@ -341,7 +350,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   @override
   Widget build(BuildContext context) {
     return AnchoredOverlay(
-      showOverlay: showOverlay,
+      showOverlay: _showOverlay,
       overlayBuilder: (BuildContext context, Offset anchor) {
         return _buildOverlay(anchor);
       },
@@ -388,7 +397,7 @@ class _Background extends StatelessWidget {
 
   double radius() {
     final bool isBackgroundCentered = isCloseToTopOrBottom(anchor);
-    final double backgroundRadius = min(screenSize.width, screenSize.height) *
+    final double backgroundRadius = Math.min(screenSize.width, screenSize.height) *
         (isBackgroundCentered ? 1.0 : 0.7);
     switch (state) {
       case _OverlayState.opening:
@@ -406,7 +415,7 @@ class _Background extends StatelessWidget {
   }
 
   Offset backgroundPosition() {
-    final double width = min(screenSize.width, screenSize.height);
+    final double width = Math.min(screenSize.width, screenSize.height);
     final bool isBackgroundCentered = isCloseToTopOrBottom(anchor);
 
     if (isBackgroundCentered) {
@@ -737,7 +746,7 @@ class _Content extends StatelessWidget {
   }
 
   Offset centerPosition() {
-    final double width = min(screenSize.width, screenSize.height);
+    final double width = Math.min(screenSize.width, screenSize.height);
     final bool isBackgroundCentered = isCloseToTopOrBottom(anchor);
 
     if (isBackgroundCentered)
@@ -790,7 +799,7 @@ class _Content extends StatelessWidget {
         break;
     }
 
-    final double width = min(screenSize.width, screenSize.height);
+    final double width = Math.min(screenSize.width, screenSize.height);
 
     final double contentY =
         anchor.dy + contentOffsetMultiplier * (touchTargetRadius + 20);
@@ -845,21 +854,10 @@ class _Content extends StatelessWidget {
   }
 }
 
-enum DescribedFeatureContentOrientation {
-  above,
-  below,
-}
-
 enum _OverlayState {
   closed,
   opening,
   pulsing,
   activating,
   dismissing,
-}
-
-enum ContentOrientation {
-  above,
-  below,
-  trivial,
 }

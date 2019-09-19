@@ -101,7 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         .button
                         .copyWith(color: Colors.white)),
                 onPressed: () =>
-                    FeatureDiscovery.markStepComplete(context, feature1),
+                    FeatureDiscovery.completeCurrentStep(context),
               ),
               FlatButton(
                 padding: const EdgeInsets.all(0),
