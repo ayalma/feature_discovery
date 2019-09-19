@@ -1,3 +1,8 @@
+## 0.6.0
+
+* Methods `completeStep` and `markStepComplete` have been deprecated and `completeCurrentStep` should now be used.
+* Methods `clear` is deprecated and `dismiss` should now be used.
+
 ## 0.5.0
 
 * **Breaking change**: Instead of the `icon` parameter, you now need to use the `tapTarget`

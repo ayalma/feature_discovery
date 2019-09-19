@@ -42,6 +42,14 @@ class FeatureDiscovery extends StatefulWidget {
   static void dismiss(BuildContext context)
     => _blocOf(context)._dismiss();
 
+  // Deprecated methods (kept for retrocompatibility)
+  @Deprecated("Use [dismiss] instead")
+  static void clear(BuildContext context) => dismiss(context);
+  @Deprecated("Use [completeCurrentStep] instead")
+  static void completeStep(BuildContext context) => completeCurrentStep(context);
+  @Deprecated("Use [completeCurrentStep] instead ; [stepId] argument will not be used")
+  static void markStepComplete(BuildContext context, String stepId) => completeCurrentStep(context);
+
   final Widget child;
   final _Bloc _bloc;
   
