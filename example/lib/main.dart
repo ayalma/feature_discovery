@@ -100,8 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         .textTheme
                         .button
                         .copyWith(color: Colors.white)),
-                onPressed: () =>
-                    FeatureDiscovery.completeCurrentStep(context),
+                onPressed: () => FeatureDiscovery.completeCurrentStep(context),
               ),
               FlatButton(
                 padding: const EdgeInsets.all(0),

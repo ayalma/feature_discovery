@@ -3,14 +3,9 @@ import 'package:flutter/material.dart';
 
 @visibleForTesting
 class TestWidget extends StatelessWidget {
-
   final Iterable<String> featureIds;
 
-  const TestWidget({
-    Key key,
-    @required this.featureIds
-  }) : 
-    super(key: key);
+  const TestWidget({Key key, @required this.featureIds}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +19,8 @@ class TestWidget extends StatelessWidget {
           body: Center(
             child: Column(
               children: featureIds
-                .map((featureId) => TestIcon(featureId: featureId))
-                .toList(),
+                  .map((featureId) => TestIcon(featureId: featureId))
+                  .toList(),
             ),
           ),
         ),
@@ -36,14 +31,9 @@ class TestWidget extends StatelessWidget {
 
 @visibleForTesting
 class TestIcon extends StatefulWidget {
-
   final String featureId;
 
-  const TestIcon({
-    Key key,
-    @required this.featureId
-  }) : 
-    super(key: key);
+  const TestIcon({Key key, @required this.featureId}) : super(key: key);
 
   @override
   TestIconState createState() => TestIconState();
@@ -51,9 +41,8 @@ class TestIcon extends StatefulWidget {
 
 @visibleForTesting
 class TestIconState extends State<TestIcon> {
-
   @override
-  Widget build (BuildContext context) {
+  Widget build(BuildContext context) {
     const Icon icon = Icon(Icons.more_horiz);
     return DescribedFeatureOverlay(
       featureId: widget.featureId,
