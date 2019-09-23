@@ -155,42 +155,37 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     final Stream<String> newCompleteStream = bloc.outComplete;
     final Stream<String> newStartStream = bloc.outStart;
     if (_dismissStream != newDismissStream) _setDismissStream(newDismissStream);
-    if (_completeStream != newCompleteStream) _setCompleteStream(newCompleteStream);
+    if (_completeStream != newCompleteStream)
+      _setCompleteStream(newCompleteStream);
     if (_startStream != newStartStream) _setStartStream(newStartStream);
     _screenSize = MediaQuery.of(context).size;
   }
 
-  void _setDismissStream (Stream<void> newStream) {
+  void _setDismissStream(Stream<void> newStream) {
     _dismissStreamSubscription?.cancel();
     _dismissStream = newStream;
-    _dismissStreamSubscription = _dismissStream.listen(
-      (featureId) async {
-        assert(featureId != null);
-        if (featureId == widget.featureId) await _dismiss();
-      }
-    );
+    _dismissStreamSubscription = _dismissStream.listen((featureId) async {
+      assert(featureId != null);
+      if (featureId == widget.featureId) await _dismiss();
+    });
   }
 
-  void _setCompleteStream (Stream<void> newStream) {
+  void _setCompleteStream(Stream<void> newStream) {
     _completeStreamSubscription?.cancel();
     _completeStream = newStream;
-    _completeStreamSubscription = _completeStream.listen(
-      (featureId) async {
-        assert(featureId != null);
-        if (featureId == widget.featureId) await _complete();
-      }
-    );
+    _completeStreamSubscription = _completeStream.listen((featureId) async {
+      assert(featureId != null);
+      if (featureId == widget.featureId) await _complete();
+    });
   }
 
-  void _setStartStream (Stream<void> newStream) {
+  void _setStartStream(Stream<void> newStream) {
     _startStreamSubscription?.cancel();
     _startStream = newStream;
-    _startStreamSubscription = _startStream.listen(
-      (featureId) async {
-        assert(featureId != null);
-        if (featureId == widget.featureId) await _open();
-      }
-    );
+    _startStreamSubscription = _startStream.listen((featureId) async {
+      assert(featureId != null);
+      if (featureId == widget.featureId) await _open();
+    });
   }
 
   void _initAnimationControllers() {
@@ -207,7 +202,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
             },
           );
 
-    if (!widget.enablePulsingAnimation) _pulseController = null;
+    if (!widget.enablePulsingAnimation)
+      _pulseController = null;
     else
       _pulseController = AnimationController(
           vsync: this, duration: Duration(milliseconds: 1000))
@@ -246,7 +242,6 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   }
 
   void _show() {
-
     // The activeStep might have changed by now because onOpen is asynchronous.
     // TODO
     //if (activeStep != widget.featureId) return;
@@ -258,13 +253,13 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   Future<void> _open() async {
     if (widget.onOpen != null) {
       final bool shouldOpen = await widget.onOpen();
-      assert(shouldOpen != null, "You must return true or false at the end of the [onOpen] function");
+      assert(shouldOpen != null,
+          "You must return true or false at the end of the [onOpen] function");
       if (shouldOpen)
         _show();
       else
         FeatureDiscovery.completeCurrentStep(context);
-    }
-    else
+    } else
       _show();
   }
 
@@ -299,7 +294,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         GestureDetector(
           onTap: () => FeatureDiscovery.dismiss(context),
           // According to the spec, the user should be able to dismiss by swiping.
-          onPanUpdate: (DragUpdateDetails _) => FeatureDiscovery.dismiss(context),
+          onPanUpdate: (DragUpdateDetails _) =>
+              FeatureDiscovery.dismiss(context),
           child: Container(
             width: double.infinity,
             height: double.infinity,
@@ -397,8 +393,9 @@ class _Background extends StatelessWidget {
 
   double radius() {
     final bool isBackgroundCentered = isCloseToTopOrBottom(anchor);
-    final double backgroundRadius = Math.min(screenSize.width, screenSize.height) *
-        (isBackgroundCentered ? 1.0 : 0.7);
+    final double backgroundRadius =
+        Math.min(screenSize.width, screenSize.height) *
+            (isBackgroundCentered ? 1.0 : 0.7);
     switch (state) {
       case _OverlayState.opening:
         final double adjustedPercent =

@@ -1,6 +1,6 @@
 name: feature_discovery
 description: A Flutter package that implements Material Design feature discovery to show a description of UI elements to the user.
-version: 0.5.0
+version: 0.5.1
 author: ayalma <alimohammadi7117@gmail.com>
 homepage: https://github.com/ayalma/feature_discovery
 
