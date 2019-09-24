@@ -26,12 +26,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      builder: (context, child) {
-        return FeatureDiscovery(
-          child: child,
-        );
-      },
-      home: const MyHomePage(title: 'Flutter Feature Discovery'),
+      home: FeatureDiscovery(
+        child: const MyHomePage(title: 'Flutter Feature Discovery'),
+      ),
     );
   }
 }
