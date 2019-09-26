@@ -150,7 +150,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final _Bloc bloc = FeatureDiscovery._blocOf(context);
+    final Bloc bloc = FeatureDiscovery._blocOf(context);
     final Stream<String> newDismissStream = bloc.outDismiss;
     final Stream<String> newCompleteStream = bloc.outComplete;
     final Stream<String> newStartStream = bloc.outStart;
