@@ -851,6 +851,23 @@ class _Content extends StatelessWidget {
   }
 }
 
+/// Controls how content that overflows the background should be handled.
+///
+/// The default for [DescribedFeatureOverlay] is [doNothing], which will simply
+/// render the overflowing content as is.
+///
+/// Modes:
+///
+///  * [clip] will not render any content that is outside the background's area,
+///    i.e. clip the content.
+///  * [cover] will expand the background circle. The radius will be increased until
+///    the content fits within the circle's area.
+enum OverflowMode {
+  doNothing,
+  clip,
+  cover,
+}
+
 enum _OverlayState {
   closed,
   opening,

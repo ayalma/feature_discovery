@@ -11,7 +11,7 @@ authors:
 homepage: https://github.com/ayalma/feature_discovery
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: ">=2.2.2 <3.0.0" # This should never be higher than the Flutter stable constraints.
 
 dependencies:
   flutter:
