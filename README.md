@@ -15,7 +15,7 @@ To use this package, follow the [installing guide](https://pub.dev/packages/feat
 To be able to work with any of the global functions provided by the `feature_discovery` package, you will have to wrap your widget tree in a `FeatureDiscovery` widget.    
 There are many places where you can add `FeatureDiscovery` in your build tree, but the easiest to assure that it sits on top is to wrap your `MaterialApp` with it:
 ```dart
-FeatureDiscovery(
+const FeatureDiscovery(
   child: MaterialApp(
    ...
   )

@@ -26,12 +26,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      builder: (context, child) {
-        return FeatureDiscovery(
-          child: child,
-        );
-      },
-      home: const MyHomePage(title: 'Flutter Feature Discovery'),
+      home: const FeatureDiscovery(
+        child: MyHomePage(title: 'Flutter Feature Discovery'),
+      ),
     );
   }
 }
@@ -66,8 +63,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 tapTarget: icon1,
                 backgroundColor: Colors.blue,
                 contentLocation: ContentOrientation.below,
-                title: Text('Find the fastest route'),
-                description: Text(
+                title: const Text('Find the fastest route'),
+                description: const Text(
                     'Get car, walking, cycling, or public transit directions to this place'),
                 onComplete: action,
                 onOpen: () async {
@@ -86,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
           featureId: feature1,
           tapTarget: icon2,
           backgroundColor: Colors.teal,
-          title: Text('Just how you want it'),
+          title: const Text('Just how you want it'),
           description: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -123,9 +120,9 @@ class _MyHomePageState extends State<MyHomePage> {
             featureId: feature2,
             tapTarget: icon3,
             backgroundColor: Colors.green,
-            title: Text('Search your compounds'),
-            description:
-                Text('Tap the magnifying glass to quickly scan your compounds'),
+            title: const Text('Search your compounds'),
+            description: const Text(
+                'Tap the magnifying glass to quickly scan your compounds'),
             child: IconButton(
               icon: icon3,
               onPressed: () {},
@@ -138,9 +135,9 @@ class _MyHomePageState extends State<MyHomePage> {
         featureId: feature3,
         tapTarget: icon4,
         backgroundColor: Colors.green,
-        title: Text('FAB feature'),
+        title: const Text('FAB feature'),
         description:
-            Text('This is a floating action button and it does stuff.'),
+            const Text('This is a floating action button and it does stuff.'),
         child: FloatingActionButton(
           onPressed: () {},
           tooltip: 'Increment',
@@ -211,7 +208,7 @@ class _ContentState extends State<Content> {
                   children: <Widget>[
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Text(
+                      child: const Text(
                         'DISH REPUBLIC',
                         style: TextStyle(
                           color: Colors.white,
@@ -248,13 +245,13 @@ class _ContentState extends State<Content> {
                     });
                     return true;
                   },
-                  title: Text('Discover Features'),
-                  description: Text(
+                  title: const Text('Discover Features'),
+                  description: const Text(
                       'Find all available features in this application with this button.'),
                   child: EnsureVisible(
                     key: ensureKey,
                     child: RaisedButton(
-                      child: Text('Start Feature Discovery'),
+                      child: const Text('Start Feature Discovery'),
                       onPressed: () {
                         FeatureDiscovery.discoverFeatures(
                           context,
@@ -288,12 +285,12 @@ class _ContentState extends State<Content> {
                   });
                   return true;
                 },
-                title: Text('Title text'),
-                description: Text(
+                title: const Text('Title text'),
+                description: const Text(
                     'This text is just for test and we don\'t care about it at all.'),
                 child: EnsureVisible(
                   key: ensureKey2,
-                  child: Text(
+                  child: const Text(
                     'Custom text',
                   ),
                 ),
@@ -318,8 +315,8 @@ class _ContentState extends State<Content> {
                 print('Tapped tap target of $feature4.');
                 return true;
               },
-              title: Text('Find the fastest route'),
-              description: Text(
+              title: const Text('Find the fastest route'),
+              description: const Text(
                   'Get car, walking, cycling or public transit directions to this place.'),
               child: FloatingActionButton(
                 backgroundColor: Colors.white,
