@@ -84,6 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
           tapTarget: icon2,
           backgroundColor: Colors.teal,
           title: const Text('Just how you want it'),
+          enablePulsingAnimation: false,
           description: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[

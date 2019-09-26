@@ -143,8 +143,21 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _openController.dispose();
     _completeController.dispose();
     _dismissController.dispose();
-    _pulseController?.dispose();
+    _pulseController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(DescribedFeatureOverlay oldWidget) {
+    if (oldWidget.enablePulsingAnimation != widget.enablePulsingAnimation) {
+      if (widget.enablePulsingAnimation)
+        _pulseController.forward(from: 0);
+      else {
+        _pulseController.stop();
+        setState(() => _transitionProgress = 0);
+      }
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -197,26 +210,25 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
             (AnimationStatus status) {
               if (status == AnimationStatus.forward)
                 setState(() => _state = _OverlayState.opening);
-              else if (status == AnimationStatus.completed)
-                _pulseController?.forward(from: 0.0);
+              else if (status == AnimationStatus.completed &&
+                  widget.enablePulsingAnimation == true)
+                _pulseController.forward(from: 0.0);
             },
           );
 
-    if (!widget.enablePulsingAnimation)
-      _pulseController = null;
-    else
-      _pulseController = AnimationController(
-          vsync: this, duration: Duration(milliseconds: 1000))
-        ..addListener(
-            () => setState(() => _transitionProgress = _pulseController.value))
-        ..addStatusListener(
-          (AnimationStatus status) {
-            if (status == AnimationStatus.forward)
-              setState(() => _state = _OverlayState.pulsing);
-            else if (status == AnimationStatus.completed)
-              _pulseController.forward(from: 0.0);
-          },
-        );
+    _pulseController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 1000))
+          ..addListener(() {
+            setState(() => _transitionProgress = _pulseController.value);
+          })
+          ..addStatusListener(
+            (AnimationStatus status) {
+              if (status == AnimationStatus.forward)
+                setState(() => _state = _OverlayState.pulsing);
+              else if (status == AnimationStatus.completed)
+                _pulseController.forward(from: 0.0);
+            },
+          );
 
     _completeController = AnimationController(
         vsync: this, duration: Duration(milliseconds: 250))
@@ -268,7 +280,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
     if (widget.onComplete != null) await widget.onComplete();
     _openController.stop();
-    _pulseController?.stop();
+    _pulseController.stop();
     await _completeController.forward(from: 0.0);
     setState(() => _showOverlay = false);
   }
@@ -283,7 +295,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       if (!shouldDismiss) return;
     }
     _openController.stop();
-    _pulseController?.stop();
+    _pulseController.stop();
     await _dismissController.forward(from: 0.0);
     setState(() => _showOverlay = false);
   }
