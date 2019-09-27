@@ -45,9 +45,14 @@ jobs:
         uses: subosito/flutter-action@v1
       - name: Install pana
         run: flutter pub global activate pana
-      - name: Run pana
-        shell: bash
-        run: flutter pub global run pana --source path . --scores --no-warning
-        # run: |
-        #   OUTPUT="$(flutter pub global run pana --source path . --scores --no-warning)"
-        #   echo "$OUTPUT"
+      - name: Install Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ^3.7.4
+      - name: Install PyGithub package
+        run: pip install PyGithub
+      - name: Run pana, process the output, and post comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_PAYLOAD: ${{ toJson(github.event) }}
+        run: python ./.github/workflows/pana_scores.py $(pwd)
