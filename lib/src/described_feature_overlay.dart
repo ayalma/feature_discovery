@@ -63,7 +63,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
 
   /// Controls what happens with content that overflows the background's area.
   ///
-  /// Defaults to [OverflowMode.doNothing].
+  /// Defaults to [OverflowMode.overflow].
   ///
   /// Important consideration: if your content is overflowing the inner area, it will catch hit events
   /// and if you do not handle these correctly, the user might not be able to dismiss your feature
@@ -92,7 +92,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.contentLocation = ContentOrientation.trivial,
     this.enablePulsingAnimation = true,
     this.allowShowingDuplicate = false,
-    this.overflowMode = OverflowMode.doNothing,
+    this.overflowMode = OverflowMode.overflow,
   })  : assert(featureId != null),
         assert(tapTarget != null),
         assert(child != null),
@@ -963,22 +963,22 @@ class _RenderClipContent extends RenderProxyBox {
 
 /// Controls how content that overflows the background should be handled.
 ///
-/// The default for [DescribedFeatureOverlay] is [doNothing].
+/// The default for [DescribedFeatureOverlay] is [overflow].
 ///
 /// Modes:
 ///
-///  * [doNothing] will render the content as is, even if it exceeds the
+///  * [overflow] will render the content as is, even if it exceeds the
 ///    boundaries of the background circle.
 ///  * [clip] will not render any content that is outside the background's area,
 ///    i.e. clip the content.
 ///    Additionally, it will discard any hit events that occur outside of the
 ///    inner area, so you do not have to worry about that.
-///  * [cover] will expand the background circle. The radius will be increased until
+///  * [extendBackground] will expand the background circle. The radius will be increased until
 ///    the content fits within the circle's area.
 enum OverflowMode {
-  doNothing,
+  overflow,
   clip,
-  cover,
+  extendBackground,
 }
 
 enum _OverlayState {

@@ -118,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     onPressed: () => setState(() {
                           feature1OverflowMode =
                               feature1OverflowMode == OverflowMode.clip
-                                  ? OverflowMode.doNothing
+                                  ? OverflowMode.overflow
                                   : OverflowMode.clip;
                         })),
                 for (int n = 42; n > 0; n--)
