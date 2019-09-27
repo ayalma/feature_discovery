@@ -858,6 +858,16 @@ class __ContentState extends State<_Content> {
                             ]))))));
 
     if (widget.overflowMode == OverflowMode.clip) {
+      // TODO(creativecreatorormaybenot) Move this into a SingleChildRenderObjectWidget as this is horrible.
+      // TODO(creativecreatorormaybenot) Move this into a SingleChildRenderObjectWidget as this is horrible.
+      // TODO(creativecreatorormaybenot) Move this into a SingleChildRenderObjectWidget as this is horrible.
+      // TODO(creativecreatorormaybenot) Move this into a SingleChildRenderObjectWidget as this is horrible.
+      // TODO(creativecreatorormaybenot) Move this into a SingleChildRenderObjectWidget as this is horrible.
+      // TODO(creativecreatorormaybenot) Move this into a SingleChildRenderObjectWidget as this is horrible.
+      // TODO(creativecreatorormaybenot) Move this into a SingleChildRenderObjectWidget as this is horrible.
+      // TODO(creativecreatorormaybenot) Move this into a SingleChildRenderObjectWidget as this is horrible.
+
+
       // If we want to know the current location of our context, we will have to build it twice
       // because the RenderObject for the current position will only be attached after the build phase.
       // For that reason we schedule a callback after the build phase, which will render the clipper.
