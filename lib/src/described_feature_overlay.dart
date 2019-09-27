@@ -63,7 +63,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
 
   /// Controls what happens with content that overflows the background's area.
   ///
-  /// Defaults to [OverflowMode.clip].
+  /// Defaults to [OverflowMode.doNothing].
   ///
   /// See also:
   ///
@@ -86,7 +86,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.contentLocation = ContentOrientation.trivial,
     this.enablePulsingAnimation = true,
     this.allowShowingDuplicate = false,
-    this.overflowMode = OverflowMode.clip,
+    this.overflowMode = OverflowMode.doNothing,
   })  : assert(featureId != null),
         assert(tapTarget != null),
         assert(child != null),
@@ -886,7 +886,7 @@ class _ContentClipper extends CustomClipper<Rect> {
 
 /// Controls how content that overflows the background should be handled.
 ///
-/// The default for [DescribedFeatureOverlay] is [clip].
+/// The default for [DescribedFeatureOverlay] is [doNothing].
 ///
 /// Modes:
 ///
