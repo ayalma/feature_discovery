@@ -91,7 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               const Text(
-                  'The same goes for the description.\n\n\n\nAlso, notice how the pulsing animation is not playing because it is deactivated for this feature.'),
+                  'The same goes for the description.\n\n\n\nAlso, notice how the pulsing animation is not playing because it is deactivated for this feature.\n'),
               const SizedBox(height: 12),
               FlatButton(
                 padding: const EdgeInsets.all(0),
@@ -104,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               FlatButton(
                 padding: const EdgeInsets.all(0),
-                child: Text('Dismiss',
+                child: Text('Dismiss\n\n\n\nClipping test',
                     style: Theme.of(context)
                         .textTheme
                         .button

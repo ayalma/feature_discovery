@@ -664,7 +664,7 @@ class _TapTarget extends StatelessWidget {
   }
 }
 
-class _Content extends StatelessWidget {
+class _Content extends StatefulWidget {
   final _OverlayState state;
   final double transitionProgress;
   final Offset anchor;
@@ -707,16 +707,22 @@ class _Content extends StatelessWidget {
         assert(textColor != null),
         super(key: key);
 
+  @override
+  __ContentState createState() => __ContentState();
+}
+
+class __ContentState extends State<_Content> {
   bool isCloseToTopOrBottom(Offset position) {
-    return position.dy <= 88.0 || (screenSize.height - position.dy) <= 88.0;
+    return position.dy <= 88.0 ||
+        (widget.screenSize.height - position.dy) <= 88.0;
   }
 
   bool isOnTopHalfOfScreen(Offset position) {
-    return position.dy < (screenSize.height / 2.0);
+    return position.dy < (widget.screenSize.height / 2.0);
   }
 
   bool isOnLeftHalfOfScreen(Offset position) {
-    return position.dx < (screenSize.width / 2.0);
+    return position.dx < (widget.screenSize.width / 2.0);
   }
 
   _DescribedFeatureContentOrientation getContentOrientation(Offset position) {
@@ -731,19 +737,19 @@ class _Content extends StatelessWidget {
   }
 
   double opacity() {
-    switch (state) {
+    switch (widget.state) {
       case _OverlayState.closed:
         return 0.0;
       case _OverlayState.opening:
         final double adjustedPercent =
             const Interval(0.6, 1.0, curve: Curves.easeOut)
-                .transform(transitionProgress);
+                .transform(widget.transitionProgress);
         return adjustedPercent;
       case _OverlayState.activating:
       case _OverlayState.dismissing:
         final double adjustedPercent =
             const Interval(0.0, 0.4, curve: Curves.easeOut)
-                .transform(transitionProgress);
+                .transform(widget.transitionProgress);
         return 1.0 - adjustedPercent;
       default:
         return 1.0;
@@ -751,45 +757,47 @@ class _Content extends StatelessWidget {
   }
 
   Offset centerPosition() {
-    final double width = min(screenSize.width, screenSize.height);
-    final bool isBackgroundCentered = isCloseToTopOrBottom(anchor);
+    final double width = min(widget.screenSize.width, widget.screenSize.height);
+    final bool isBackgroundCentered = isCloseToTopOrBottom(widget.anchor);
 
     if (isBackgroundCentered)
-      return anchor;
+      return widget.anchor;
     else {
-      final Offset startingBackgroundPosition = anchor;
+      final Offset startingBackgroundPosition = widget.anchor;
       final Offset endingBackgroundPosition = Offset(
-          width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
-          anchor.dy +
-              (isOnTopHalfOfScreen(anchor)
+          width / 2.0 + (isOnLeftHalfOfScreen(widget.anchor) ? -20.0 : 20.0),
+          widget.anchor.dy +
+              (isOnTopHalfOfScreen(widget.anchor)
                   ? -(width / 2) + 40.0
                   : (width / 20.0) - 40.0));
 
-      switch (state) {
+      switch (widget.state) {
         case _OverlayState.opening:
           final double adjustedPercent =
               const Interval(0.0, 0.8, curve: Curves.easeOut)
-                  .transform(transitionProgress);
+                  .transform(widget.transitionProgress);
           return Offset.lerp(startingBackgroundPosition,
               endingBackgroundPosition, adjustedPercent);
         case _OverlayState.activating:
           return endingBackgroundPosition;
         case _OverlayState.dismissing:
           return Offset.lerp(endingBackgroundPosition,
-              startingBackgroundPosition, transitionProgress);
+              startingBackgroundPosition, widget.transitionProgress);
         default:
           return endingBackgroundPosition;
       }
     }
   }
 
+  bool laidOut;
+
   @override
   Widget build(BuildContext context) {
     double contentOffsetMultiplier;
 
-    switch (orientation) {
+    switch (widget.orientation) {
       case ContentOrientation.trivial:
-        contentOffsetMultiplier = getContentOrientation(anchor) ==
+        contentOffsetMultiplier = getContentOrientation(widget.anchor) ==
                 _DescribedFeatureContentOrientation.below
             ? 1.0
             : -1.0;
@@ -802,10 +810,10 @@ class _Content extends StatelessWidget {
         break;
     }
 
-    final double width = min(screenSize.width, screenSize.height);
+    final double width = min(widget.screenSize.width, widget.screenSize.height);
 
-    final double contentY =
-        anchor.dy + contentOffsetMultiplier * (touchTargetRadius + 20);
+    final double contentY = widget.anchor.dy +
+        contentOffsetMultiplier * (widget.touchTargetRadius + 20);
 
     final double contentFractionalOffset =
         contentOffsetMultiplier.clamp(-1.0, 0.0);
@@ -826,39 +834,54 @@ class _Content extends StatelessWidget {
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              if (title != null)
+                              if (widget.title != null)
                                 DefaultTextStyle(
                                   style: Theme.of(context)
                                       .textTheme
                                       .title
-                                      .copyWith(color: textColor),
-                                  child: title,
+                                      .copyWith(color: widget.textColor),
+                                  child: widget.title,
                                 ),
-                              if (title != null && description != null)
+                              if (widget.title != null &&
+                                  widget.description != null)
                                 const SizedBox(height: 8.0),
-                              if (description != null)
+                              if (widget.description != null)
                                 DefaultTextStyle(
                                   style: Theme.of(context)
                                       .textTheme
                                       .body1
                                       .copyWith(
-                                          color: textColor.withOpacity(0.9)),
-                                  child: description,
+                                          color: widget.textColor
+                                              .withOpacity(0.9)),
+                                  child: widget.description,
                                 )
                             ]))))));
 
-    if (overflowMode == OverflowMode.clip) {
-      // The _ContentClipper, i.e. CustomClipper's in general, work with local positions.
-      // Thus, we need to convert the global backgroundPosition to a local position.
-      final localPosition = (context.findRenderObject() as RenderBox)
-          .globalToLocal(backgroundPosition);
+    if (widget.overflowMode == OverflowMode.clip) {
+      // If we want to know the current location of our context, we will have to build it twice
+      // because the RenderObject for the current position will only be attached after the build phase.
+      // For that reason we schedule a callback after the build phase, which will render the clipper.
+      if (laidOut != true)
+        WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {
+              laidOut = true;
+            }));
+      else {
+        // The next build might change the position of our widget, so we need to reset
+        // laidOut to rebuild it in order to work with the RenderObject again.
+        laidOut = false;
 
-      result = ClipOval(
-          clipper: _ContentClipper(
-            radius: backgroundRadius,
-            position: localPosition,
-          ),
-          child: result);
+        // The _ContentClipper, i.e. CustomClipper's in general, work with local positions.
+        // Thus, we need to convert the global backgroundPosition to a local position.
+        final localPosition = (context.findRenderObject() as RenderBox)
+            .globalToLocal(widget.backgroundPosition);
+
+        result = ClipOval(
+            clipper: _ContentClipper(
+              radius: widget.backgroundRadius,
+              position: localPosition,
+            ),
+            child: result);
+      }
     }
 
     result = Positioned(top: contentY, left: contentX, child: result);
