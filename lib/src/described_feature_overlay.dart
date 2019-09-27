@@ -63,7 +63,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
 
   /// Controls what happens with content that overflows the background's area.
   ///
-  /// Defaults to [OverflowMode.doNothing].
+  /// Defaults to [OverflowMode.clip].
   ///
   /// See also:
   ///
@@ -86,7 +86,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.contentLocation = ContentOrientation.trivial,
     this.enablePulsingAnimation = true,
     this.allowShowingDuplicate = false,
-    this.overflowMode = OverflowMode.doNothing,
+    this.overflowMode = OverflowMode.clip,
   })  : assert(featureId != null),
         assert(tapTarget != null),
         assert(child != null),
@@ -298,7 +298,90 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     setState(() => _showOverlay = false);
   }
 
+  bool _isCloseToTopOrBottom(Offset position) {
+    return position.dy <= 88.0 || (_screenSize.height - position.dy) <= 88.0;
+  }
+
+  bool _isOnTopHalfOfScreen(Offset position) {
+    return position.dy < (_screenSize.height / 2.0);
+  }
+
+  bool _isOnLeftHalfOfScreen(Offset position) {
+    return position.dx < (_screenSize.width / 2.0);
+  }
+
+  double _backgroundRadius(Offset anchor) {
+    final bool isBackgroundCentered = _isCloseToTopOrBottom(anchor);
+    final double backgroundRadius = min(_screenSize.width, _screenSize.height) *
+        (isBackgroundCentered ? 1.0 : 0.7);
+    switch (_state) {
+      case _OverlayState.opening:
+        final double adjustedPercent =
+            const Interval(0.0, 0.8, curve: Curves.easeOut)
+                .transform(_transitionProgress);
+        return backgroundRadius * adjustedPercent;
+      case _OverlayState.activating:
+        return backgroundRadius + _transitionProgress * 40.0;
+      case _OverlayState.dismissing:
+        return backgroundRadius * (1 - _transitionProgress);
+      default:
+        return backgroundRadius;
+    }
+  }
+
+  Offset _backgroundPosition(Offset anchor) {
+    final double width = min(_screenSize.width, _screenSize.height);
+    final bool isBackgroundCentered = _isCloseToTopOrBottom(anchor);
+
+    if (isBackgroundCentered) {
+      return anchor;
+    } else {
+      final startingBackgroundPosition = anchor;
+
+      Offset endingBackgroundPosition;
+      switch (widget.contentLocation) {
+        case ContentOrientation.trivial:
+          endingBackgroundPosition = Offset(
+              width / 2.0 + (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
+              anchor.dy +
+                  (_isOnTopHalfOfScreen(anchor)
+                      ? -(width / 2.0) + 40.0
+                      : (width / 2.0) - 40.0));
+          break;
+        case ContentOrientation.above:
+          endingBackgroundPosition = Offset(
+              width / 2.0 + (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
+              anchor.dy - (width / 2.0) + 40.0);
+          break;
+        case ContentOrientation.below:
+          endingBackgroundPosition = Offset(
+              width / 2.0 + (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
+              anchor.dy + (width / 2.0) - 40.0);
+          break;
+      }
+
+      switch (_state) {
+        case _OverlayState.opening:
+          final double adjustedPercent =
+              const Interval(0.0, 0.8, curve: Curves.easeOut)
+                  .transform(_transitionProgress);
+          return Offset.lerp(startingBackgroundPosition,
+              endingBackgroundPosition, adjustedPercent);
+        case _OverlayState.activating:
+          return endingBackgroundPosition;
+        case _OverlayState.dismissing:
+          return Offset.lerp(endingBackgroundPosition,
+              startingBackgroundPosition, _transitionProgress);
+        default:
+          return endingBackgroundPosition;
+      }
+    }
+  }
+
   Widget _buildOverlay(Offset anchor) {
+    final backgroundPosition = _backgroundPosition(anchor),
+        backgroundRadius = _backgroundRadius(anchor);
+
     return Stack(
       children: <Widget>[
         GestureDetector(
@@ -313,29 +396,26 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           ),
         ),
         _Background(
-          state: _state,
           transitionProgress: _transitionProgress,
-          anchor: anchor,
           color: widget.backgroundColor ?? Theme.of(context).primaryColor,
-          screenSize: _screenSize,
-          orientation: widget.contentLocation,
+          state: _state,
           overflowMode: widget.overflowMode,
+          position: backgroundPosition,
+          radius: backgroundRadius,
         ),
         _Content(
           state: _state,
           transitionProgress: _transitionProgress,
           anchor: anchor,
           screenSize: _screenSize,
-          // this parameter is not used
-          // statusBarHeight: statusBarHeight,
           touchTargetRadius: 44.0,
-          // this parameter is not used
-          // touchTargetToContentPadding: 20.0,
           title: widget.title,
           description: widget.description,
           orientation: widget.contentLocation,
           textColor: widget.textColor,
           overflowMode: widget.overflowMode,
+          backgroundPosition: backgroundPosition,
+          backgroundRadius: backgroundRadius,
         ),
         _Pulse(
           state: _state,
@@ -370,109 +450,26 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 class _Background extends StatelessWidget {
   final _OverlayState state;
   final double transitionProgress;
-  final Offset anchor;
   final Color color;
-  final Size screenSize;
-  final ContentOrientation orientation;
   final OverflowMode overflowMode;
+
+  final double radius;
+  final Offset position;
 
   const _Background({
     Key key,
-    this.anchor,
     this.color,
-    this.screenSize,
     this.state,
     this.transitionProgress,
-    this.orientation,
     this.overflowMode,
-  })  : assert(anchor != null),
-        assert(color != null),
-        assert(screenSize != null),
+    this.position,
+    this.radius,
+  })  : assert(color != null),
         assert(state != null),
         assert(transitionProgress != null),
-        assert(orientation != null),
+        assert(position != null),
+        assert(radius != null),
         super(key: key);
-
-  bool isCloseToTopOrBottom(Offset position) {
-    return position.dy <= 88.0 || (screenSize.height - position.dy) <= 88.0;
-  }
-
-  bool isOnTopHalfOfScreen(Offset position) {
-    return position.dy < (screenSize.height / 2.0);
-  }
-
-  bool isOnLeftHalfOfScreen(Offset position) {
-    return position.dx < (screenSize.width / 2.0);
-  }
-
-  double radius() {
-    final bool isBackgroundCentered = isCloseToTopOrBottom(anchor);
-    final double backgroundRadius =
-        Math.min(screenSize.width, screenSize.height) *
-            (isBackgroundCentered ? 1.0 : 0.7);
-    switch (state) {
-      case _OverlayState.opening:
-        final double adjustedPercent =
-            const Interval(0.0, 0.8, curve: Curves.easeOut)
-                .transform(transitionProgress);
-        return backgroundRadius * adjustedPercent;
-      case _OverlayState.activating:
-        return backgroundRadius + transitionProgress * 40.0;
-      case _OverlayState.dismissing:
-        return backgroundRadius * (1 - transitionProgress);
-      default:
-        return backgroundRadius;
-    }
-  }
-
-  Offset backgroundPosition() {
-    final double width = Math.min(screenSize.width, screenSize.height);
-    final bool isBackgroundCentered = isCloseToTopOrBottom(anchor);
-
-    if (isBackgroundCentered) {
-      return anchor;
-    } else {
-      final startingBackgroundPosition = anchor;
-
-      Offset endingBackgroundPosition;
-      switch (orientation) {
-        case ContentOrientation.trivial:
-          endingBackgroundPosition = Offset(
-              width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
-              anchor.dy +
-                  (isOnTopHalfOfScreen(anchor)
-                      ? -(width / 2.0) + 40.0
-                      : (width / 2.0) - 40.0));
-          break;
-        case ContentOrientation.above:
-          endingBackgroundPosition = Offset(
-              width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
-              anchor.dy - (width / 2.0) + 40.0);
-          break;
-        case ContentOrientation.below:
-          endingBackgroundPosition = Offset(
-              width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
-              anchor.dy + (width / 2.0) - 40.0);
-          break;
-      }
-
-      switch (state) {
-        case _OverlayState.opening:
-          final double adjustedPercent =
-              const Interval(0.0, 0.8, curve: Curves.easeOut)
-                  .transform(transitionProgress);
-          return Offset.lerp(startingBackgroundPosition,
-              endingBackgroundPosition, adjustedPercent);
-        case _OverlayState.activating:
-          return endingBackgroundPosition;
-        case _OverlayState.dismissing:
-          return Offset.lerp(endingBackgroundPosition,
-              startingBackgroundPosition, transitionProgress);
-        default:
-          return endingBackgroundPosition;
-      }
-    }
-  }
 
   double backgroundOpacity() {
     switch (state) {
@@ -505,10 +502,10 @@ class _Background extends StatelessWidget {
     }
 
     return CenterAbout(
-      position: backgroundPosition(),
+      position: position,
       child: Container(
-        width: 2 * radius(),
-        height: 2 * radius(),
+        width: 2 * radius,
+        height: 2 * radius,
         decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: color.withOpacity(backgroundOpacity())),
@@ -682,7 +679,10 @@ class _Content extends StatelessWidget {
 
   final ContentOrientation orientation;
   final Color textColor;
+
   final OverflowMode overflowMode;
+  final double backgroundRadius;
+  final Offset backgroundPosition;
 
   const _Content({
     Key key,
@@ -696,6 +696,8 @@ class _Content extends StatelessWidget {
     this.orientation,
     this.textColor,
     this.overflowMode,
+    this.backgroundRadius,
+    this.backgroundPosition,
   })  : assert(anchor != null),
         assert(screenSize != null),
         assert(touchTargetRadius != null),
@@ -749,7 +751,7 @@ class _Content extends StatelessWidget {
   }
 
   Offset centerPosition() {
-    final double width = Math.min(screenSize.width, screenSize.height);
+    final double width = min(screenSize.width, screenSize.height);
     final bool isBackgroundCentered = isCloseToTopOrBottom(anchor);
 
     if (isBackgroundCentered)
@@ -800,7 +802,7 @@ class _Content extends StatelessWidget {
         break;
     }
 
-    final double width = Math.min(screenSize.width, screenSize.height);
+    final double width = min(screenSize.width, screenSize.height);
 
     final double contentY =
         anchor.dy + contentOffsetMultiplier * (touchTargetRadius + 20);
@@ -810,58 +812,86 @@ class _Content extends StatelessWidget {
 
     final double dx = centerPosition().dx - width;
     final double contentX = (dx.isNegative) ? 0.0 : dx;
-    return Positioned(
-      top: contentY,
-      left: contentX,
-      child: FractionalTranslation(
+
+    Widget result = FractionalTranslation(
         translation: Offset(0.0, contentFractionalOffset),
         child: Opacity(
-          opacity: opacity(),
-          child: Container(
-            width: width,
-            child: Material(
-              color: Colors.transparent,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 40.0, right: 40.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    if (title != null)
-                      DefaultTextStyle(
-                        style: Theme.of(context)
-                            .textTheme
-                            .title
-                            .copyWith(color: textColor),
-                        child: title,
-                      ),
-                    if (title != null && description != null)
-                      const SizedBox(height: 8.0),
-                    if (description != null)
-                      DefaultTextStyle(
-                        style: Theme.of(context)
-                            .textTheme
-                            .body1
-                            .copyWith(color: textColor.withOpacity(0.9)),
-                        child: description,
-                      )
-                  ],
-                ),
-              ),
-            ),
+            opacity: opacity(),
+            child: Container(
+                width: width,
+                child: Material(
+                    color: Colors.transparent,
+                    child: Padding(
+                        padding: const EdgeInsets.only(left: 40.0, right: 40.0),
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              if (title != null)
+                                DefaultTextStyle(
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .title
+                                      .copyWith(color: textColor),
+                                  child: title,
+                                ),
+                              if (title != null && description != null)
+                                const SizedBox(height: 8.0),
+                              if (description != null)
+                                DefaultTextStyle(
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .body1
+                                      .copyWith(
+                                          color: textColor.withOpacity(0.9)),
+                                  child: description,
+                                )
+                            ]))))));
+
+    if (overflowMode == OverflowMode.clip) {
+      // The _ContentClipper, i.e. CustomClipper's in general, work with local positions.
+      // Thus, we need to convert the global backgroundPosition to a local position.
+      final localPosition = (context.findRenderObject() as RenderBox)
+          .globalToLocal(backgroundPosition);
+
+      result = ClipOval(
+          clipper: _ContentClipper(
+            radius: backgroundRadius,
+            position: localPosition,
           ),
-        ),
-      ),
-    );
+          child: result);
+    }
+
+    result = Positioned(top: contentY, left: contentX, child: result);
+
+    return result;
+  }
+}
+
+class _ContentClipper extends CustomClipper<Rect> {
+  final double radius;
+  final Offset position;
+
+  const _ContentClipper({this.radius, this.position});
+
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromCircle(center: position, radius: radius);
+  }
+
+  @override
+  bool shouldReclip(_ContentClipper oldClipper) {
+    return oldClipper.radius != radius || oldClipper.position != position;
   }
 }
 
 /// Controls how content that overflows the background should be handled.
 ///
-/// The default for [DescribedFeatureOverlay] is [doNothing], which will simply
-/// render the overflowing content as is.
+/// The default for [DescribedFeatureOverlay] is [clip].
 ///
 /// Modes:
 ///
+///  * [doNothing] will render the content as is, even if it exceeds the
+///    boundaries of the background circle.
 ///  * [clip] will not render any content that is outside the background's area,
 ///    i.e. clip the content.
 ///  * [cover] will expand the background circle. The radius will be increased until

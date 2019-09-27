@@ -83,13 +83,15 @@ class _MyHomePageState extends State<MyHomePage> {
           featureId: feature1,
           tapTarget: icon2,
           backgroundColor: Colors.teal,
-          title: const Text('Just how you want it'),
+          title: const Text(
+              'This is overly long on purpose to test OverflowMode.clip!'),
+          overflowMode: OverflowMode.clip,
           enablePulsingAnimation: false,
           description: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               const Text(
-                  'Tap the menu icon to switch accounts, change settings & more.'),
+                  'The same goes for the description.\n\n\n\nAlso, notice how the pulsing animation is not playing because it is deactivated for this feature.'),
               const SizedBox(height: 12),
               FlatButton(
                 padding: const EdgeInsets.all(0),

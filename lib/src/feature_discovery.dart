@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math' as Math;
+import 'dart:math';
 
 import 'package:feature_discovery/src/bloc.dart';
 import 'package:feature_discovery/src/layout.dart';
