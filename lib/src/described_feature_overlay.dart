@@ -603,6 +603,7 @@ class _TapTarget extends StatelessWidget {
     Key key,
     this.anchor,
     this.child,
+    
     this.onPressed,
     this.color,
     this.state,
@@ -823,38 +824,43 @@ class _Content extends StatelessWidget {
     final double contentX = (dx.isNegative) ? 0.0 : dx;
 
     Widget result = FractionalTranslation(
-        translation: Offset(0.0, contentFractionalOffset),
-        child: Opacity(
-            opacity: opacity(),
-            child: Container(
-                width: width,
-                child: Material(
-                    color: Colors.transparent,
-                    child: Padding(
-                        padding: const EdgeInsets.only(left: 40.0, right: 40.0),
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              if (title != null)
-                                DefaultTextStyle(
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .title
-                                      .copyWith(color: textColor),
-                                  child: title,
-                                ),
-                              if (title != null && description != null)
-                                const SizedBox(height: 8.0),
-                              if (description != null)
-                                DefaultTextStyle(
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .body1
-                                      .copyWith(
-                                          color: textColor.withOpacity(0.9)),
-                                  child: description,
-                                )
-                            ]))))));
+      translation: Offset(0.0, contentFractionalOffset),
+      child: Opacity(
+        opacity: opacity(),
+        child: Container(
+          width: width,
+          child: Material(
+            color: Colors.transparent,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 40.0, right: 40.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  if (title != null)
+                    DefaultTextStyle(
+                      style: Theme.of(context)
+                          .textTheme
+                          .title
+                          .copyWith(color: textColor),
+                      child: title,
+                    ),
+                  if (title != null && description != null)
+                    const SizedBox(height: 8.0),
+                  if (description != null)
+                    DefaultTextStyle(
+                      style: Theme.of(context)
+                          .textTheme
+                          .body1
+                          .copyWith(color: textColor.withOpacity(0.9)),
+                      child: description,
+                    )
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
 
     if (overflowMode == OverflowMode.clip)
       result = _ClipContent(
@@ -919,7 +925,7 @@ class _RenderClipContent extends RenderProxyBox {
       : _center = center,
         _radius = radius;
 
-  // The inner area of the DescribedFeatureOverlay.
+  /// The inner area of the DescribedFeatureOverlay.
   Path get innerCircle => Path()
     ..addOval(Rect.fromCircle(
       center: globalToLocal(_center),
