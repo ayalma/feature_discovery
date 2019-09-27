@@ -65,6 +65,12 @@ class DescribedFeatureOverlay extends StatefulWidget {
   ///
   /// Defaults to [OverflowMode.doNothing].
   ///
+  /// Important consideration: if your content is overflowing the inner area, it will catch hit events
+  /// and if you do not handle these correctly, the user might not be able to dismiss your feature
+  /// overlay by tapping outside of the circle. If you use [OverflowMode.clip], the package takes
+  /// care of hit testing and allows the user to tap outside the circle even if your content would
+  /// appear there without clipping.
+  ///
   /// See also:
   ///
   ///  * [OverflowMode], which has explanations for the different modes.
@@ -190,12 +196,16 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     });
   }
 
+  String activeFeatureId;
+
   void _setStartStream(Stream<void> newStream) {
     _startStreamSubscription?.cancel();
     _startStream = newStream;
-    _startStreamSubscription = _startStream.listen((featureId) async {
+    _startStreamSubscription = _startStream.listen((String featureId) async {
       assert(featureId != null);
-      if (featureId == widget.featureId) await _open();
+
+      activeFeatureId = featureId;
+      if (activeFeatureId == widget.featureId) await _open();
     });
   }
 
@@ -253,8 +263,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
   void _show() {
     // The activeStep might have changed by now because onOpen is asynchronous.
-    // TODO
-    //if (activeStep != widget.featureId) return;
+    if (activeFeatureId != widget.featureId) return;
 
     _openController.forward(from: 0.0);
     setState(() => _showOverlay = true);
@@ -894,8 +903,8 @@ class _ClipContent extends SingleChildRenderObjectWidget {
   void updateRenderObject(
       BuildContext context, _RenderClipContent renderObject) {
     renderObject
-      ..radius = backgroundRadius
-      ..center = backgroundPosition;
+      ..center = backgroundPosition
+      ..radius = backgroundRadius;
     super.updateRenderObject(context, renderObject);
   }
 }
@@ -910,6 +919,13 @@ class _RenderClipContent extends RenderProxyBox {
       : _center = center,
         _radius = radius;
 
+  // The inner area of the DescribedFeatureOverlay.
+  Path get innerCircle => Path()
+    ..addOval(Rect.fromCircle(
+      center: globalToLocal(_center),
+      radius: _radius,
+    ));
+
   set center(Offset center) {
     _center = center;
     markNeedsPaint();
@@ -920,18 +936,28 @@ class _RenderClipContent extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  // We need to make sure that the area outside of the background area can still be tapped
+  // in order to allow dismissal.
+  // The reason this is necessary is that the content that might be overflowing will catch
+  // the hit events even when it is clipped out in paint.
+  @override
+  bool hitTest(BoxHitTestResult result, {Offset position}) {
+    // If the hit is inside of the inner area of the DescribedFeatureOverlay,
+    // we want to catch the hit event and pass it to the children. Otherwise, we want to ignore it in order
+    // to allow the GestureDetector in DescribedFeatureOverlay to catch it.
+    if (innerCircle.contains(position) &&
+        hitTestChildren(result, position: position)) {
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
+
+    return false;
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
-    context.pushClipPath(
-        needsCompositing,
-        offset,
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        Path()
-          ..addOval(Rect.fromCircle(
-            center: globalToLocal(_center),
-            radius: _radius,
-          )),
-        super.paint);
+    context.pushClipPath(needsCompositing, offset,
+        Rect.fromLTWH(0, 0, size.width, size.height), innerCircle, super.paint);
   }
 }
 
@@ -945,6 +971,8 @@ class _RenderClipContent extends RenderProxyBox {
 ///    boundaries of the background circle.
 ///  * [clip] will not render any content that is outside the background's area,
 ///    i.e. clip the content.
+///    Additionally, it will discard any hit events that occur outside of the
+///    inner area, so you do not have to worry about that.
 ///  * [cover] will expand the background circle. The radius will be increased until
 ///    the content fits within the circle's area.
 enum OverflowMode {

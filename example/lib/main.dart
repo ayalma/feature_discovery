@@ -331,6 +331,7 @@ class _ContentState extends State<Content> {
                     'This text is just for test and we don\'t care about it at all.'),
                 child: EnsureVisible(
                   key: ensureKey2,
+                  duration: const Duration(milliseconds: 600),
                   child: const Text(
                     'Custom text',
                   ),
