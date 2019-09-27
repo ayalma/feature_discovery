@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:feature_discovery/src/bloc.dart';
 import 'package:feature_discovery/src/layout.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 part 'described_feature_overlay.dart';

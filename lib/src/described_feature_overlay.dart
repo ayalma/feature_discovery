@@ -664,7 +664,7 @@ class _TapTarget extends StatelessWidget {
   }
 }
 
-class _Content extends StatefulWidget {
+class _Content extends StatelessWidget {
   final _OverlayState state;
   final double transitionProgress;
   final Offset anchor;
@@ -707,22 +707,16 @@ class _Content extends StatefulWidget {
         assert(textColor != null),
         super(key: key);
 
-  @override
-  __ContentState createState() => __ContentState();
-}
-
-class __ContentState extends State<_Content> {
   bool isCloseToTopOrBottom(Offset position) {
-    return position.dy <= 88.0 ||
-        (widget.screenSize.height - position.dy) <= 88.0;
+    return position.dy <= 88.0 || (screenSize.height - position.dy) <= 88.0;
   }
 
   bool isOnTopHalfOfScreen(Offset position) {
-    return position.dy < (widget.screenSize.height / 2.0);
+    return position.dy < (screenSize.height / 2.0);
   }
 
   bool isOnLeftHalfOfScreen(Offset position) {
-    return position.dx < (widget.screenSize.width / 2.0);
+    return position.dx < (screenSize.width / 2.0);
   }
 
   _DescribedFeatureContentOrientation getContentOrientation(Offset position) {
@@ -737,19 +731,19 @@ class __ContentState extends State<_Content> {
   }
 
   double opacity() {
-    switch (widget.state) {
+    switch (state) {
       case _OverlayState.closed:
         return 0.0;
       case _OverlayState.opening:
         final double adjustedPercent =
             const Interval(0.6, 1.0, curve: Curves.easeOut)
-                .transform(widget.transitionProgress);
+                .transform(transitionProgress);
         return adjustedPercent;
       case _OverlayState.activating:
       case _OverlayState.dismissing:
         final double adjustedPercent =
             const Interval(0.0, 0.4, curve: Curves.easeOut)
-                .transform(widget.transitionProgress);
+                .transform(transitionProgress);
         return 1.0 - adjustedPercent;
       default:
         return 1.0;
@@ -757,47 +751,45 @@ class __ContentState extends State<_Content> {
   }
 
   Offset centerPosition() {
-    final double width = min(widget.screenSize.width, widget.screenSize.height);
-    final bool isBackgroundCentered = isCloseToTopOrBottom(widget.anchor);
+    final double width = min(screenSize.width, screenSize.height);
+    final bool isBackgroundCentered = isCloseToTopOrBottom(anchor);
 
     if (isBackgroundCentered)
-      return widget.anchor;
+      return anchor;
     else {
-      final Offset startingBackgroundPosition = widget.anchor;
+      final Offset startingBackgroundPosition = anchor;
       final Offset endingBackgroundPosition = Offset(
-          width / 2.0 + (isOnLeftHalfOfScreen(widget.anchor) ? -20.0 : 20.0),
-          widget.anchor.dy +
-              (isOnTopHalfOfScreen(widget.anchor)
+          width / 2.0 + (isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
+          anchor.dy +
+              (isOnTopHalfOfScreen(anchor)
                   ? -(width / 2) + 40.0
                   : (width / 20.0) - 40.0));
 
-      switch (widget.state) {
+      switch (state) {
         case _OverlayState.opening:
           final double adjustedPercent =
               const Interval(0.0, 0.8, curve: Curves.easeOut)
-                  .transform(widget.transitionProgress);
+                  .transform(transitionProgress);
           return Offset.lerp(startingBackgroundPosition,
               endingBackgroundPosition, adjustedPercent);
         case _OverlayState.activating:
           return endingBackgroundPosition;
         case _OverlayState.dismissing:
           return Offset.lerp(endingBackgroundPosition,
-              startingBackgroundPosition, widget.transitionProgress);
+              startingBackgroundPosition, transitionProgress);
         default:
           return endingBackgroundPosition;
       }
     }
   }
 
-  bool laidOut;
-
   @override
   Widget build(BuildContext context) {
     double contentOffsetMultiplier;
 
-    switch (widget.orientation) {
+    switch (orientation) {
       case ContentOrientation.trivial:
-        contentOffsetMultiplier = getContentOrientation(widget.anchor) ==
+        contentOffsetMultiplier = getContentOrientation(anchor) ==
                 _DescribedFeatureContentOrientation.below
             ? 1.0
             : -1.0;
@@ -810,10 +802,10 @@ class __ContentState extends State<_Content> {
         break;
     }
 
-    final double width = min(widget.screenSize.width, widget.screenSize.height);
+    final double width = min(screenSize.width, screenSize.height);
 
-    final double contentY = widget.anchor.dy +
-        contentOffsetMultiplier * (widget.touchTargetRadius + 20);
+    final double contentY =
+        anchor.dy + contentOffsetMultiplier * (touchTargetRadius + 20);
 
     final double contentFractionalOffset =
         contentOffsetMultiplier.clamp(-1.0, 0.0);
@@ -834,86 +826,112 @@ class __ContentState extends State<_Content> {
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              if (widget.title != null)
+                              if (title != null)
                                 DefaultTextStyle(
                                   style: Theme.of(context)
                                       .textTheme
                                       .title
-                                      .copyWith(color: widget.textColor),
-                                  child: widget.title,
+                                      .copyWith(color: textColor),
+                                  child: title,
                                 ),
-                              if (widget.title != null &&
-                                  widget.description != null)
+                              if (title != null && description != null)
                                 const SizedBox(height: 8.0),
-                              if (widget.description != null)
+                              if (description != null)
                                 DefaultTextStyle(
                                   style: Theme.of(context)
                                       .textTheme
                                       .body1
                                       .copyWith(
-                                          color: widget.textColor
-                                              .withOpacity(0.9)),
-                                  child: widget.description,
+                                          color: textColor.withOpacity(0.9)),
+                                  child: description,
                                 )
                             ]))))));
 
-    if (widget.overflowMode == OverflowMode.clip) {
-      // TODO(creativecreatorormaybenot) Move this into a SingleChildRenderObjectWidget as this is horrible.
-      // TODO(creativecreatorormaybenot) Move this into a SingleChildRenderObjectWidget as this is horrible.
-      // TODO(creativecreatorormaybenot) Move this into a SingleChildRenderObjectWidget as this is horrible.
-      // TODO(creativecreatorormaybenot) Move this into a SingleChildRenderObjectWidget as this is horrible.
-      // TODO(creativecreatorormaybenot) Move this into a SingleChildRenderObjectWidget as this is horrible.
-      // TODO(creativecreatorormaybenot) Move this into a SingleChildRenderObjectWidget as this is horrible.
-      // TODO(creativecreatorormaybenot) Move this into a SingleChildRenderObjectWidget as this is horrible.
-      // TODO(creativecreatorormaybenot) Move this into a SingleChildRenderObjectWidget as this is horrible.
+    if (overflowMode == OverflowMode.clip)
+      result = _ClipContent(
+        backgroundPosition: backgroundPosition,
+        backgroundRadius: backgroundRadius,
+        child: result,
+      );
 
-
-      // If we want to know the current location of our context, we will have to build it twice
-      // because the RenderObject for the current position will only be attached after the build phase.
-      // For that reason we schedule a callback after the build phase, which will render the clipper.
-      if (laidOut != true)
-        WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {
-              laidOut = true;
-            }));
-      else {
-        // The next build might change the position of our widget, so we need to reset
-        // laidOut to rebuild it in order to work with the RenderObject again.
-        laidOut = false;
-
-        // The _ContentClipper, i.e. CustomClipper's in general, work with local positions.
-        // Thus, we need to convert the global backgroundPosition to a local position.
-        final localPosition = (context.findRenderObject() as RenderBox)
-            .globalToLocal(widget.backgroundPosition);
-
-        result = ClipOval(
-            clipper: _ContentClipper(
-              radius: widget.backgroundRadius,
-              position: localPosition,
-            ),
-            child: result);
-      }
-    }
-
-    result = Positioned(top: contentY, left: contentX, child: result);
+    result = Positioned(
+      top: contentY,
+      left: contentX,
+      child: result,
+    );
 
     return result;
   }
 }
 
-class _ContentClipper extends CustomClipper<Rect> {
-  final double radius;
-  final Offset position;
+// We need a custom RenderObject widget here as we need to convert the backgroundPosition into
+// a local position. This can only be achieved using a RenderBox and using BuildContext in a
+// build method of a regular widget, you do not have access to the RenderBox of the current
+// paint call. Instead, you need to wait until the build phase is done to have access to that RenderObject.
+// This means that we would need to rebuild the widget after it has been built once (every time) to get
+// the local position, which is not only horribly inefficient, but looks choppy as well because
+// the user would see the non-clipped layout first and immediately afterwards see the correct clipped
+// layout.
+// This is the reason why we need to clip in our custom RenderBox.
+class _ClipContent extends SingleChildRenderObjectWidget {
+  final double backgroundRadius;
+  final Offset backgroundPosition;
 
-  const _ContentClipper({this.radius, this.position});
+  const _ClipContent({
+    Key key,
+    Widget child,
+    this.backgroundPosition,
+    this.backgroundRadius,
+  }) : super(key: key, child: child);
 
   @override
-  Rect getClip(Size size) {
-    return Rect.fromCircle(center: position, radius: radius);
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderClipContent(
+        center: backgroundPosition, radius: backgroundRadius);
   }
 
   @override
-  bool shouldReclip(_ContentClipper oldClipper) {
-    return oldClipper.radius != radius || oldClipper.position != position;
+  void updateRenderObject(
+      BuildContext context, _RenderClipContent renderObject) {
+    renderObject
+      ..radius = backgroundRadius
+      ..center = backgroundPosition;
+    super.updateRenderObject(context, renderObject);
+  }
+}
+
+// We use RenderProxyBox because we only want to clip and keep
+// the properties of the _Content children.
+class _RenderClipContent extends RenderProxyBox {
+  Offset _center;
+  double _radius;
+
+  _RenderClipContent({Offset center, double radius})
+      : _center = center,
+        _radius = radius;
+
+  set center(Offset center) {
+    _center = center;
+    markNeedsPaint();
+  }
+
+  set radius(double radius) {
+    _radius = radius;
+    markNeedsPaint();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    context.pushClipPath(
+        needsCompositing,
+        offset,
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        Path()
+          ..addOval(Rect.fromCircle(
+            center: globalToLocal(_center),
+            radius: _radius,
+          )),
+        super.paint);
   }
 }
 
