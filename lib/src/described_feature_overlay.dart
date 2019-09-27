@@ -1,18 +1,5 @@
 part of 'package:feature_discovery/src/feature_discovery.dart';
 
-enum DescribedFeatureContentOrientation {
-  above,
-  below,
-}
-
-enum OverlayState {
-  closed,
-  opening,
-  pulsing,
-  activating,
-  dismissing,
-}
-
 class DescribedFeatureOverlay extends StatefulWidget {
   /// This id should be unique among all the [DescribedFeatureOverlay] widgets.
   /// Otherwise, multiple overlays would show at once, which is currently
@@ -332,6 +319,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           color: widget.backgroundColor ?? Theme.of(context).primaryColor,
           screenSize: _screenSize,
           orientation: widget.contentLocation,
+          overflowMode: widget.overflowMode,
         ),
         _Content(
           state: _state,
@@ -347,6 +335,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           description: widget.description,
           orientation: widget.contentLocation,
           textColor: widget.textColor,
+          overflowMode: widget.overflowMode,
         ),
         _Pulse(
           state: _state,
@@ -385,15 +374,17 @@ class _Background extends StatelessWidget {
   final Color color;
   final Size screenSize;
   final ContentOrientation orientation;
+  final OverflowMode overflowMode;
 
   const _Background({
     Key key,
-    @required this.anchor,
-    @required this.color,
-    @required this.screenSize,
-    @required this.state,
-    @required this.transitionProgress,
-    @required this.orientation,
+    this.anchor,
+    this.color,
+    this.screenSize,
+    this.state,
+    this.transitionProgress,
+    this.orientation,
+    this.overflowMode,
   })  : assert(anchor != null),
         assert(color != null),
         assert(screenSize != null),
@@ -532,13 +523,13 @@ class _Pulse extends StatelessWidget {
   final Offset anchor;
   final Color color;
 
-  const _Pulse(
-      {Key key,
-      @required this.state,
-      @required this.transitionProgress,
-      @required this.anchor,
-      @required this.color})
-      : assert(state != null),
+  const _Pulse({
+    Key key,
+    this.state,
+    this.transitionProgress,
+    this.anchor,
+    this.color,
+  })  : assert(state != null),
         assert(transitionProgress != null),
         assert(anchor != null),
         assert(color != null),
@@ -604,15 +595,12 @@ class _TapTarget extends StatelessWidget {
 
   const _TapTarget({
     Key key,
-    @required this.anchor,
-    @required this.child,
-    // The two parameters below can technically be null, so assertions are not made for them,
-    // but they are annotated as required to not forget them during development
-    // (as this is an internal widget and those parameters should always be specified, even when null)
-    @required this.onPressed,
-    @required this.color,
-    @required this.state,
-    @required this.transitionProgress,
+    this.anchor,
+    this.child,
+    this.onPressed,
+    this.color,
+    this.state,
+    this.transitionProgress,
   })  : assert(anchor != null),
         assert(child != null),
         assert(state != null),
@@ -686,33 +674,28 @@ class _Content extends StatelessWidget {
   final Size screenSize;
   final double touchTargetRadius;
 
-  // this parameter is not used
-  // final double touchTargetToContentPadding;
-
-  /// Can be null
+  // Can be null.
   final Widget title;
 
-  /// Can be null
+  // Can be null.
   final Widget description;
 
-  // not used
-  // final double statusBarHeight;
   final ContentOrientation orientation;
   final Color textColor;
+  final OverflowMode overflowMode;
 
   const _Content({
     Key key,
-    @required this.anchor,
-    @required this.screenSize,
-    @required this.touchTargetRadius,
-    //this.touchTargetToContentPadding,
-    @required this.title,
-    @required this.description,
-    @required this.state,
-    @required this.transitionProgress,
-    //this.statusBarHeight,
-    @required this.orientation,
-    @required this.textColor,
+    this.anchor,
+    this.screenSize,
+    this.touchTargetRadius,
+    this.title,
+    this.description,
+    this.state,
+    this.transitionProgress,
+    this.orientation,
+    this.textColor,
+    this.overflowMode,
   })  : assert(anchor != null),
         assert(screenSize != null),
         assert(touchTargetRadius != null),
@@ -734,15 +717,15 @@ class _Content extends StatelessWidget {
     return position.dx < (screenSize.width / 2.0);
   }
 
-  DescribedFeatureContentOrientation getContentOrientation(Offset position) {
+  _DescribedFeatureContentOrientation getContentOrientation(Offset position) {
     if (isCloseToTopOrBottom(position))
       return isOnTopHalfOfScreen(position)
-          ? DescribedFeatureContentOrientation.below
-          : DescribedFeatureContentOrientation.above;
+          ? _DescribedFeatureContentOrientation.below
+          : _DescribedFeatureContentOrientation.above;
     else
       return isOnTopHalfOfScreen(position)
-          ? DescribedFeatureContentOrientation.above
-          : DescribedFeatureContentOrientation.below;
+          ? _DescribedFeatureContentOrientation.above
+          : _DescribedFeatureContentOrientation.below;
   }
 
   double opacity() {
@@ -800,16 +783,14 @@ class _Content extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final DescribedFeatureContentOrientation contentOrientation =
-        getContentOrientation(anchor);
     double contentOffsetMultiplier;
 
     switch (orientation) {
       case ContentOrientation.trivial:
-        contentOffsetMultiplier =
-            contentOrientation == DescribedFeatureContentOrientation.below
-                ? 1.0
-                : -1.0;
+        contentOffsetMultiplier = getContentOrientation(anchor) ==
+                _DescribedFeatureContentOrientation.below
+            ? 1.0
+            : -1.0;
         break;
       case ContentOrientation.above:
         contentOffsetMultiplier = -1.0;
@@ -897,4 +878,9 @@ enum _OverlayState {
   pulsing,
   activating,
   dismissing,
+}
+
+enum _DescribedFeatureContentOrientation {
+  above,
+  below,
 }

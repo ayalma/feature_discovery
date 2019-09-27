@@ -8,6 +8,14 @@ import 'package:provider/provider.dart';
 
 part 'described_feature_overlay.dart';
 
+/// Specifies how the content should be positioned relative to the tap target.
+///
+/// Orientations:
+///
+///  * [trivial], which lets the library decide where the content should be placed.
+///    Make sure to test this for every overlay because the trivial positioning can fail sometimes.
+///  * [above], which will layout the content above the tap target.
+///  * [below], which will layout the content below the tap target.
 enum ContentOrientation {
   above,
   below,
