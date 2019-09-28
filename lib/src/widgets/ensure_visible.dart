@@ -67,5 +67,6 @@ class EnsureVisibleState extends State<EnsureVisible> {
     );
   }
 
+  @override
   Widget build(BuildContext context) => widget.child;
 }

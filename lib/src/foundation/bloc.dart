@@ -22,7 +22,7 @@ class Bloc {
   /// This is used to retrieve the [Bloc] in [FeatureDiscovery] and [DescribedOverlayState].
   /// It can be public here because [Bloc] is not exposed when importing `feature_discovery`.
   static Bloc of(BuildContext context) {
-    Bloc bloc = Provider.of<Bloc>(context, listen: false);
+    final Bloc bloc = Provider.of<Bloc>(context, listen: false);
     assert(bloc != null,
         "Don't forget to wrap your widget tree in a [FeatureDiscovery] widget.");
     return bloc;
