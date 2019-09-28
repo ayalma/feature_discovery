@@ -187,7 +187,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   void _setDismissStream(Stream<void> newStream) {
     _dismissStreamSubscription?.cancel();
     _dismissStream = newStream;
-    _dismissStreamSubscription = _dismissStream.listen((String featureId) async {
+    _dismissStreamSubscription =
+        _dismissStream.listen((String featureId) async {
       assert(featureId != null);
       if (featureId == widget.featureId) await _dismiss();
     });
@@ -196,7 +197,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   void _setCompleteStream(Stream<void> newStream) {
     _completeStreamSubscription?.cancel();
     _completeStream = newStream;
-    _completeStreamSubscription = _completeStream.listen((String featureId) async {
+    _completeStreamSubscription =
+        _completeStream.listen((String featureId) async {
       assert(featureId != null);
       if (featureId == widget.featureId) await _complete();
     });

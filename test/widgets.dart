@@ -55,3 +55,56 @@ class TestIconState extends State<TestIcon> {
     );
   }
 }
+
+@visibleForTesting
+class OverflowingDescriptionFeature extends StatelessWidget {
+  final String featureId;
+  final IconData icon;
+
+  final void Function(BuildContext context) onContext;
+  final void Function() onTap;
+
+  final OverflowMode mode;
+
+  const OverflowingDescriptionFeature({
+    Key key,
+    this.onTap,
+    this.onContext,
+    this.featureId,
+    this.icon,
+    this.mode,
+  }) : super(key: key);
+
+  @override
+  Widget build(_) => FeatureDiscovery(
+        child: Builder(
+          builder: (context) {
+            onContext(context);
+            return MaterialApp(
+              home: Scaffold(
+                body: DescribedFeatureOverlay(
+                  featureId: featureId,
+                  tapTarget: Container(),
+                  description: Column(
+                    children: <Widget>[
+                      Builder(
+                        builder: (context) => IconButton(
+                          icon: Icon(icon),
+                          onPressed: onTap,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 542.13,
+                      ),
+                    ],
+                  ),
+                  enablePulsingAnimation: false,
+                  overflowMode: mode,
+                  child: Container(),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+}

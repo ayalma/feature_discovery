@@ -120,10 +120,6 @@ void main() {
     const IconData icon = Icons.error;
     const String featureId = 'feature';
 
-    const Widget sizedOffset = SizedBox(
-      height: 542.13,
-    );
-
     testWidgets('ignore, extendBackground & wrapBackground',
         (WidgetTester tester) async {
       // All of these should show the item that is out of the circle's area.
@@ -136,39 +132,15 @@ void main() {
       for (final OverflowMode mode in modes) {
         BuildContext context;
 
-        bool buttonPressed = false;
+        bool tapped = false;
 
         await tester.pumpWidget(
-          FeatureDiscovery(
-            child: Builder(
-              builder: (builderContext) {
-                context = builderContext;
-                return MaterialApp(
-                  home: Scaffold(
-                    body: DescribedFeatureOverlay(
-                      featureId: featureId,
-                      tapTarget: Container(),
-                      description: Column(
-                        children: <Widget>[
-                          Builder(
-                            builder: (context) => IconButton(
-                              icon: const Icon(icon),
-                              onPressed: () {
-                                buttonPressed = true;
-                              },
-                            ),
-                          ),
-                          sizedOffset,
-                        ],
-                      ),
-                      enablePulsingAnimation: false,
-                      overflowMode: mode,
-                      child: Container(),
-                    ),
-                  ),
-                );
-              },
-            ),
+          OverflowingDescriptionFeature(
+            onTap: () => tapped = true,
+            onContext: (builderContext) => context = builderContext,
+            featureId: featureId,
+            icon: icon,
+            mode: mode,
           ),
         );
 
@@ -176,46 +148,22 @@ void main() {
         await tester.pumpAndSettle();
 
         await tester.tap(find.byIcon(icon));
-        expect(buttonPressed, true);
+        expect(tapped, true);
       }
     });
 
     testWidgets('clipContent', (WidgetTester tester) async {
       BuildContext context;
 
-      bool buttonPressed = false;
+      bool tapped = false;
 
       await tester.pumpWidget(
-        FeatureDiscovery(
-          child: Builder(
-            builder: (builderContext) {
-              context = builderContext;
-              return MaterialApp(
-                home: Scaffold(
-                  body: DescribedFeatureOverlay(
-                    featureId: featureId,
-                    tapTarget: Container(),
-                    description: Column(
-                      children: <Widget>[
-                        Builder(
-                          builder: (context) => IconButton(
-                            icon: const Icon(icon),
-                            onPressed: () {
-                              buttonPressed = true;
-                            },
-                          ),
-                        ),
-                        sizedOffset,
-                      ],
-                    ),
-                    enablePulsingAnimation: false,
-                    overflowMode: OverflowMode.clipContent,
-                    child: Container(),
-                  ),
-                ),
-              );
-            },
-          ),
+        OverflowingDescriptionFeature(
+          onTap: () => tapped = true,
+          onContext: (builderContext) => context = builderContext,
+          featureId: featureId,
+          icon: icon,
+          mode: OverflowMode.clipContent,
         ),
       );
 
@@ -224,7 +172,7 @@ void main() {
 
       await tester.tap(find.byIcon(icon));
 
-      expect(buttonPressed, false);
+      expect(tapped, false);
     });
   });
 }
