@@ -1,6 +1,5 @@
 import 'package:feature_discovery/src/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 /// Specifies how the content should be positioned relative to the tap target.
 ///
@@ -56,11 +55,5 @@ class FeatureDiscovery extends StatelessWidget {
   const FeatureDiscovery({Key key, this.child}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Provider<Bloc>(
-      builder: (context) => Bloc(),
-      dispose: (context, bloc) => bloc.dispose(),
-      child: child,
-    );
-  }
+  Widget build(BuildContext context) => BlocProvider(child: child);
 }
