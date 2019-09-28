@@ -207,7 +207,6 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _startStream = newStream;
     _startStreamSubscription = _startStream.listen((String featureId) async {
       assert(featureId != null);
-
       if (featureId == widget.featureId) await _open();
     });
   }
