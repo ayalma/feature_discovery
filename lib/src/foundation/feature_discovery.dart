@@ -1,13 +1,6 @@
-import 'dart:async';
-import 'dart:math';
-
-import 'package:feature_discovery/src/bloc.dart';
-import 'package:feature_discovery/src/layout.dart';
+import 'package:feature_discovery/src/foundation/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
-
-part 'described_feature_overlay.dart';
 
 /// Specifies how the content should be positioned relative to the tap target.
 ///
@@ -55,9 +48,11 @@ class FeatureDiscovery extends StatelessWidget {
   // Deprecated methods, kept for retrocompatibility.
   @Deprecated('Use [dismiss] instead')
   static void clear(BuildContext context) => dismiss(context);
+
   @Deprecated('Use [completeCurrentStep] instead')
   static void completeStep(BuildContext context) =>
       completeCurrentStep(context);
+
   @Deprecated(
       'Use [completeCurrentStep] instead ; [stepId] argument will not be used')
   static void markStepComplete(BuildContext context, String stepId) =>
