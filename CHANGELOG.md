@@ -1,9 +1,12 @@
 ## 0.5.1
 
-* Methods `completeStep` and `markStepComplete` have been deprecated and `completeCurrentStep` should now be used.
+* Methods `completeStep` and `markStepComplete` have been deprecated
+  and `completeCurrentStep` should now be used.
 * Method `clear` is deprecated and `dismiss` should now be used.
-* Added an `OverflowMode` enum and the `overflowMode` parameter to `DescribedFeatureOverlay` to control how the overlay should handle content that exceeds the background's boundaries.
-* Made the `enablePulsingAnimation` respond to rebuilds, allowing to change it after the overlay has been shown.
+* Added an `OverflowMode` enum and the `overflowMode` parameter to `DescribedFeatureOverlay`
+  to control how the overlay should handle content that exceeds the background's boundaries.
+* Made the `enablePulsingAnimation` respond to rebuilds, allowing to change it
+  after the overlay has been shown.
 * Added GIF demo of the package to the `README.md` file of the package and the example.
 * Updated example.
 

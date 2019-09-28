@@ -52,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
     const Icon icon3 = Icon(Icons.search);
     const Icon icon4 = Icon(Icons.add);
 
-    OverflowMode feature1OverflowMode = OverflowMode.clip;
+    OverflowMode feature1OverflowMode = OverflowMode.clipContent;
     bool feature1EnablePulsingAnimation = false;
 
     return Scaffold(
@@ -117,9 +117,9 @@ class _MyHomePageState extends State<MyHomePage> {
                             .copyWith(color: Colors.white)),
                     onPressed: () => setState(() {
                           feature1OverflowMode =
-                              feature1OverflowMode == OverflowMode.clip
-                                  ? OverflowMode.overflow
-                                  : OverflowMode.clip;
+                              feature1OverflowMode == OverflowMode.clipContent
+                                  ? OverflowMode.ignore
+                                  : OverflowMode.clipContent;
                         })),
                 for (int n = 42; n > 0; n--)
                   const Text('Testing clipping (ignore or toggle)',

@@ -63,11 +63,11 @@ class DescribedFeatureOverlay extends StatefulWidget {
 
   /// Controls what happens with content that overflows the background's area.
   ///
-  /// Defaults to [OverflowMode.overflow].
+  /// Defaults to [OverflowMode.ignore].
   ///
   /// Important consideration: if your content is overflowing the inner area, it will catch hit events
   /// and if you do not handle these correctly, the user might not be able to dismiss your feature
-  /// overlay by tapping outside of the circle. If you use [OverflowMode.clip], the package takes
+  /// overlay by tapping outside of the circle. If you use [OverflowMode.clipContent], the package takes
   /// care of hit testing and allows the user to tap outside the circle even if your content would
   /// appear there without clipping.
   ///
@@ -92,7 +92,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.contentLocation = ContentOrientation.trivial,
     this.enablePulsingAnimation = true,
     this.allowShowingDuplicate = false,
-    this.overflowMode = OverflowMode.overflow,
+    this.overflowMode = OverflowMode.ignore,
   })  : assert(featureId != null),
         assert(tapTarget != null),
         assert(child != null),
@@ -861,7 +861,7 @@ class _Content extends StatelessWidget {
       ),
     );
 
-    if (overflowMode == OverflowMode.clip)
+    if (overflowMode == OverflowMode.clipContent)
       result = _ClipContent(
         backgroundPosition: backgroundPosition,
         backgroundRadius: backgroundRadius,
@@ -924,7 +924,7 @@ class _RenderClipContent extends RenderProxyBox {
       : _center = center,
         _radius = radius;
 
-  /// The inner area of the DescribedFeatureOverlay.
+  // The inner area of the DescribedFeatureOverlay.
   Path get innerCircle => Path()
     ..addOval(Rect.fromCircle(
       center: globalToLocal(_center),
@@ -968,21 +968,21 @@ class _RenderClipContent extends RenderProxyBox {
 
 /// Controls how content that overflows the background should be handled.
 ///
-/// The default for [DescribedFeatureOverlay] is [overflow].
+/// The default for [DescribedFeatureOverlay] is [ignore].
 ///
 /// Modes:
 ///
-///  * [overflow] will render the content as is, even if it exceeds the
+///  * [ignore] will render the content as is, even if it exceeds the
 ///    boundaries of the background circle.
-///  * [clip] will not render any content that is outside the background's area,
+///  * [clipContent] will not render any content that is outside the background's area,
 ///    i.e. clip the content.
 ///    Additionally, it will discard any hit events that occur outside of the
 ///    inner area, so you do not have to worry about that.
 ///  * [extendBackground] will expand the background circle. The radius will be increased until
 ///    the content fits within the circle's area.
 enum OverflowMode {
-  overflow,
-  clip,
+  ignore,
+  clipContent,
   extendBackground,
 }
 
