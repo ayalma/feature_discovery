@@ -48,6 +48,9 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
 
   @override
   bool shouldRelayout(BackgroundContentLayoutDelegate oldDelegate) {
-    return oldDelegate.overflowMode != overflowMode;
+    return oldDelegate.overflowMode != overflowMode ||
+        oldDelegate.contentPosition != contentPosition ||
+        oldDelegate.backgroundCenter != backgroundCenter ||
+        oldDelegate.backgroundRadius != backgroundRadius;
   }
 }
