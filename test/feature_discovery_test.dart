@@ -148,7 +148,7 @@ void main() {
         await tester.pumpAndSettle();
 
         await tester.tap(find.byIcon(icon));
-        expect(tapped, true);
+        expect(tapped, false);
       }
     });
 
@@ -172,7 +172,7 @@ void main() {
 
       await tester.tap(find.byIcon(icon));
 
-      expect(tapped, false);
+      expect(tapped, true);
     });
   });
 }

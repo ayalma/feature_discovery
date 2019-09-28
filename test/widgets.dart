@@ -18,9 +18,7 @@ class TestWidget extends StatelessWidget {
           ),
           body: Center(
             child: Column(
-              children: featureIds
-                  .map((featureId) => TestIcon(featureId: featureId))
-                  .toList(),
+              children: featureIds.map((featureId) => TestIcon(featureId: featureId)).toList(),
             ),
           ),
         ),
@@ -56,6 +54,9 @@ class TestIconState extends State<TestIcon> {
   }
 }
 
+/// This contains the complete tree necessary to pump it to the [WidgetTester]
+/// and contains a button that is covered by the overlay because it is overflowing.
+/// If [OverflowMode.clipContent] is used, the tester should be able to tap the button.
 @visibleForTesting
 class OverflowingDescriptionFeature extends StatelessWidget {
   final String featureId;
@@ -77,34 +78,32 @@ class OverflowingDescriptionFeature extends StatelessWidget {
 
   @override
   Widget build(_) => FeatureDiscovery(
-        child: Builder(
-          builder: (context) {
-            onContext(context);
-            return MaterialApp(
-              home: Scaffold(
-                body: DescribedFeatureOverlay(
-                  featureId: featureId,
-                  tapTarget: Container(),
-                  description: Column(
-                    children: <Widget>[
-                      Builder(
-                        builder: (context) => IconButton(
-                          icon: Icon(icon),
-                          onPressed: onTap,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 542.13,
-                      ),
-                    ],
-                  ),
-                  enablePulsingAnimation: false,
-                  overflowMode: mode,
-                  child: Container(),
-                ),
+        child: MaterialApp(
+          home: Scaffold(
+            body: Column(children: <Widget>[
+              IconButton(
+                icon: Icon(icon),
+                onPressed: onTap,
               ),
-            );
-          },
+              Builder(
+                builder: (context) {
+                  onContext(context);
+                  return DescribedFeatureOverlay(
+                    featureId: featureId,
+                    tapTarget: Container(),
+                    description: Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height,
+                      color: Color(0xff000000),
+                    ),
+                    enablePulsingAnimation: false,
+                    overflowMode: mode,
+                    child: Container(),
+                  );
+                },
+              ),
+            ]),
+          ),
         ),
       );
 }
