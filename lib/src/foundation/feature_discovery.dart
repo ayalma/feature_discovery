@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 ///    Make sure to test this for every overlay because the trivial positioning can fail sometimes.
 ///  * [above], which will layout the content above the tap target.
 ///  * [below], which will layout the content below the tap target.
-enum ContentOrientation {
+enum ContentLocation {
   above,
   below,
   trivial,

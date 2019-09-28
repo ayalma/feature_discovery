@@ -66,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 featureId: feature7,
                 tapTarget: icon1,
                 backgroundColor: Colors.blue,
-                contentLocation: ContentOrientation.below,
+                contentLocation: ContentLocation.below,
                 title: const Text('Find the fastest route'),
                 description: const Text(
                     'Get car, walking, cycling, or public transit directions to this place'),
@@ -289,7 +289,7 @@ class _ContentState extends State<Content> {
                   title: const Text('Discover Features'),
                   description: const Text(
                       'Find all available features in this application with this button.'),
-                  contentLocation: ContentOrientation.below,
+                  contentLocation: ContentLocation.below,
                   child: EnsureVisible(
                     key: ensureKey,
                     child: RaisedButton(

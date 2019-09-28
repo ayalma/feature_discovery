@@ -1,5 +1,6 @@
-## 0.5.1
+## 0.6.0
 
+* **Breaking change**: Renamed `ContentOrientation` to `ContentLocation`.
 * Methods `completeStep` and `markStepComplete` have been deprecated
   and `completeCurrentStep` should now be used.
 * Method `clear` is deprecated and `dismiss` should now be used.

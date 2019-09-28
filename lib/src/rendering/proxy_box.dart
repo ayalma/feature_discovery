@@ -7,7 +7,9 @@ class RenderClipContent extends RenderProxyBox {
   double _radius;
 
   RenderClipContent({Offset center, double radius})
-      : _center = center,
+      : assert(center != null),
+        assert(radius != null),
+        _center = center,
         _radius = radius;
 
   // The inner area of the DescribedFeatureOverlay.

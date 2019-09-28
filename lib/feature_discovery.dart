@@ -9,4 +9,4 @@ export 'src/widgets.dart'
         OverflowMode,
         EnsureVisible,
         EnsureVisibleState;
-export 'src/foundation.dart' show FeatureDiscovery, ContentOrientation;
+export 'src/foundation.dart' show FeatureDiscovery, ContentLocation;

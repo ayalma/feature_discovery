@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:feature_discovery/src/foundation.dart';
+import 'package:feature_discovery/src/rendering.dart';
 import 'package:feature_discovery/src/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -40,7 +41,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
   final Widget tapTarget;
 
   final Widget child;
-  final ContentOrientation contentLocation;
+  final ContentLocation contentLocation;
   final bool enablePulsingAnimation;
 
   /// Called just before the overlay is displayed.
@@ -95,7 +96,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.onComplete,
     this.onDismiss,
     this.onOpen,
-    this.contentLocation = ContentOrientation.trivial,
+    this.contentLocation = ContentLocation.trivial,
     this.enablePulsingAnimation = true,
     this.allowShowingDuplicate = false,
     this.overflowMode = OverflowMode.ignore,
@@ -355,7 +356,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
       Offset endingBackgroundPosition;
       switch (widget.contentLocation) {
-        case ContentOrientation.trivial:
+        case ContentLocation.trivial:
           endingBackgroundPosition = Offset(
               width / 2.0 + (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
               anchor.dy +
@@ -363,12 +364,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
                       ? -(width / 2.0) + 40.0
                       : (width / 2.0) - 40.0));
           break;
-        case ContentOrientation.above:
+        case ContentLocation.above:
           endingBackgroundPosition = Offset(
               width / 2.0 + (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
               anchor.dy - (width / 2.0) + 40.0);
           break;
-        case ContentOrientation.below:
+        case ContentLocation.below:
           endingBackgroundPosition = Offset(
               width / 2.0 + (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
               anchor.dy + (width / 2.0) - 40.0);
@@ -393,9 +394,84 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     }
   }
 
+  ContentLocation _nonTrivialContentOrientation(Offset anchor) {
+    if (widget.contentLocation != ContentLocation.trivial)
+      return widget.contentLocation;
+
+    // Calculates appropriate content location for ContentLocation.trivial.
+    if (_isCloseToTopOrBottom(anchor))
+      return _isOnTopHalfOfScreen(anchor)
+          ? ContentLocation.below
+          : ContentLocation.above;
+    else
+      return _isOnTopHalfOfScreen(anchor)
+          ? ContentLocation.above
+          : ContentLocation.below;
+  }
+
+  Offset _contentCenterPosition(Offset anchor) {
+    final double width = min(_screenSize.width, _screenSize.height);
+    final bool isBackgroundCentered = _isCloseToTopOrBottom(anchor);
+
+    if (isBackgroundCentered)
+      return anchor;
+    else {
+      final Offset startingBackgroundPosition = anchor;
+      final Offset endingBackgroundPosition = Offset(
+          width / 2.0 + (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
+          anchor.dy +
+              (_isOnTopHalfOfScreen(anchor)
+                  ? -(width / 2) + 40.0
+                  : (width / 20.0) - 40.0));
+
+      switch (_state) {
+        case FeatureOverlayState.opening:
+          final double adjustedPercent =
+              const Interval(0.0, 0.8, curve: Curves.easeOut)
+                  .transform(_transitionProgress);
+          return Offset.lerp(startingBackgroundPosition,
+              endingBackgroundPosition, adjustedPercent);
+        case FeatureOverlayState.activating:
+          return endingBackgroundPosition;
+        case FeatureOverlayState.dismissing:
+          return Offset.lerp(endingBackgroundPosition,
+              startingBackgroundPosition, _transitionProgress);
+        default:
+          return endingBackgroundPosition;
+      }
+    }
+  }
+
+  double _contentOffsetMultiplier(ContentLocation orientation) {
+    assert(orientation != ContentLocation.trivial);
+
+    if (orientation == ContentLocation.above) return -1;
+
+    return 1;
+  }
+
   Widget _buildOverlay(Offset anchor) {
-    final backgroundPosition = _backgroundPosition(anchor),
-        backgroundRadius = _backgroundRadius(anchor);
+    final Offset backgroundCenter = _backgroundPosition(anchor);
+    final double backgroundRadius = _backgroundRadius(anchor);
+
+    // This will be assigned either above or below, i.e. trivial from
+    // widget.contentLocation will be converted to above or below.
+    final ContentLocation contentLocation =
+        _nonTrivialContentOrientation(anchor);
+    assert(contentLocation != ContentLocation.trivial);
+
+    final double contentOffsetMultiplier =
+        _contentOffsetMultiplier(contentLocation);
+    final Offset contentCenterPosition = _contentCenterPosition(anchor);
+
+    final double contentWidth = min(_screenSize.width, _screenSize.height);
+
+    final double dx = contentCenterPosition.dx - contentWidth;
+    final Offset contentPosition = Offset(
+      (dx.isNegative) ? 0.0 : dx,
+      anchor.dy +
+          contentOffsetMultiplier * (44 + 20), // 44 is the tap target's radius.
+    );
 
     return Stack(
       children: <Widget>[
@@ -410,27 +486,39 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
             color: Colors.transparent,
           ),
         ),
-        _Background(
-          transitionProgress: _transitionProgress,
-          color: widget.backgroundColor ?? Theme.of(context).primaryColor,
-          state: _state,
-          overflowMode: widget.overflowMode,
-          position: backgroundPosition,
-          radius: backgroundRadius,
-        ),
-        Content(
-          state: _state,
-          transitionProgress: _transitionProgress,
-          anchor: anchor,
-          screenSize: _screenSize,
-          touchTargetRadius: 44.0,
-          title: widget.title,
-          description: widget.description,
-          orientation: widget.contentLocation,
-          textColor: widget.textColor,
-          overflowMode: widget.overflowMode,
-          backgroundPosition: backgroundPosition,
-          backgroundRadius: backgroundRadius,
+        CustomMultiChildLayout(
+          delegate: BackgroundContentLayoutDelegate(
+            overflowMode: widget.overflowMode,
+            contentPosition: contentPosition,
+            backgroundCenter: backgroundCenter,
+            backgroundRadius: backgroundRadius,
+          ),
+          children: <Widget>[
+            LayoutId(
+              id: BackgroundContentLayout.background,
+              child: _Background(
+                transitionProgress: _transitionProgress,
+                color: widget.backgroundColor ?? Theme.of(context).primaryColor,
+                state: _state,
+                overflowMode: widget.overflowMode,
+              ),
+            ),
+            LayoutId(
+              id: BackgroundContentLayout.content,
+              child: Content(
+                state: _state,
+                transitionProgress: _transitionProgress,
+                title: widget.title,
+                description: widget.description,
+                textColor: widget.textColor,
+                overflowMode: widget.overflowMode,
+                backgroundCenter: backgroundCenter,
+                backgroundRadius: backgroundRadius,
+                offsetMultiplier: contentOffsetMultiplier,
+                width: contentWidth,
+              ),
+            ),
+          ],
         ),
         _Pulse(
           state: _state,
@@ -468,25 +556,18 @@ class _Background extends StatelessWidget {
   final Color color;
   final OverflowMode overflowMode;
 
-  final double radius;
-  final Offset position;
-
   const _Background({
     Key key,
     this.color,
     this.state,
     this.transitionProgress,
     this.overflowMode,
-    this.position,
-    this.radius,
   })  : assert(color != null),
         assert(state != null),
         assert(transitionProgress != null),
-        assert(position != null),
-        assert(radius != null),
         super(key: key);
 
-  double backgroundOpacity() {
+  double get opacity {
     switch (state) {
       case FeatureOverlayState.opening:
         final double adjustedPercent =
@@ -516,16 +597,14 @@ class _Background extends StatelessWidget {
       return Container();
     }
 
-    return CenterAbout(
-      position: position,
-      child: Container(
-        width: 2 * radius,
-        height: 2 * radius,
-        decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color.withOpacity(backgroundOpacity())),
-      ),
-    );
+    return LayoutBuilder(
+        builder: (context, constraints) => Container(
+              // The size is controlled in BackgroundContentLayoutDelegate.
+              width: constraints.biggest.width,
+              height: constraints.biggest.height,
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle, color: color.withOpacity(opacity)),
+            ));
   }
 }
 
@@ -547,7 +626,7 @@ class _Pulse extends StatelessWidget {
         assert(color != null),
         super(key: key);
 
-  double radius() {
+  double get radius {
     switch (state) {
       case FeatureOverlayState.pulsing:
         double expandedPercent;
@@ -565,7 +644,7 @@ class _Pulse extends StatelessWidget {
     }
   }
 
-  double opacity() {
+  double get opacity {
     switch (state) {
       case FeatureOverlayState.pulsing:
         final double percentOpaque =
@@ -582,15 +661,15 @@ class _Pulse extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return state == FeatureOverlayState.closed
-        ? Container(height: 0, width: 0)
+        ? Container()
         : CenterAbout(
             position: anchor,
             child: Container(
-              width: radius() * 2,
-              height: radius() * 2,
+              width: radius * 2,
+              height: radius * 2,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: color.withOpacity(opacity()),
+                color: color.withOpacity(opacity),
               ),
             ),
           );

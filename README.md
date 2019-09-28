@@ -55,11 +55,11 @@ DescribedFeatureOverlay(
 
 #### `contentLocation`
 
-This is `ContentOrientation.trivial` by default, however, the package cannot always determine the correct placement for the overlay. In those cases, you can provide either of these two:
+This is `ContentLocation.trivial` by default, however, the package cannot always determine the correct placement for the overlay. In those cases, you can provide either of these two:
 
- * `ContentOrientation.below`: Text is displayed below the target.
+ * `ContentLocation.below`: Text is displayed below the target.
   
- * `ContentOrientation.above`: Text is displayed above the target.
+ * `ContentLocation.above`: Text is displayed above the target.
 
 #### `onComplete`
 
