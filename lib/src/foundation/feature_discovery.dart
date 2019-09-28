@@ -17,18 +17,11 @@ enum ContentLocation {
 }
 
 class FeatureDiscovery extends StatelessWidget {
-  static Bloc _blocOf(BuildContext context) {
-    Bloc bloc = Provider.of<Bloc>(context, listen: false);
-    assert(bloc != null,
-        "Don't forget to wrap your widget tree in a [FeatureDiscovery] widget.");
-    return bloc;
-  }
-
   /// Steps are the featureIds of the overlays.
   /// Though they can be placed in any [Iterable], it is recommended to pass them as a [Set]
   /// because this ensures that every step is only shown once.
   static void discoverFeatures(BuildContext context, Iterable<String> steps) =>
-      _blocOf(context).discoverFeatures(steps: steps.toList());
+      Bloc.of(context).discoverFeatures(steps: steps.toList());
 
   /// This will schedule completion of the current discovery step and continue
   /// onto the step after the activation animation of the current overlay if successful.
@@ -37,15 +30,15 @@ class FeatureDiscovery extends StatelessWidget {
   /// If the provided [stepId] does not match the feature that is currently shown, i.e.
   /// the currently active step, nothing will happen.
   static void completeCurrentStep(BuildContext context) =>
-      _blocOf(context).completeStep();
+      Bloc.of(context).completeStep();
 
   /// This will schedule dismissal of the current discovery step and with that
   /// of the current feature discovery. The dismissal animation will play if successful.
   /// If you want to complete the step and continue the feature discovery,
   /// call [completeCurrentStep] instead.
-  static void dismiss(BuildContext context) => _blocOf(context).dismiss();
+  static void dismiss(BuildContext context) => Bloc.of(context).dismiss();
 
-  // Deprecated methods, kept for retrocompatibility.
+  /// Deprecated methods, kept for retrocompatibility.
   @Deprecated('Use [dismiss] instead')
   static void clear(BuildContext context) => dismiss(context);
 

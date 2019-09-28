@@ -5,7 +5,6 @@ import 'package:feature_discovery/src/foundation.dart';
 import 'package:feature_discovery/src/rendering.dart';
 import 'package:feature_discovery/src/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class DescribedFeatureOverlay extends StatefulWidget {
   /// This id should be unique among all the [DescribedFeatureOverlay] widgets.
@@ -125,8 +124,6 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
   double _transitionProgress;
 
-  bool _isShowing;
-
   AnimationController _openController;
   AnimationController _completeController;
   AnimationController _dismissController;
@@ -144,8 +141,6 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _showOverlay = false;
 
     _state = FeatureOverlayState.closed;
-
-    _isShowing = false;
 
     _transitionProgress = 1;
 
@@ -178,7 +173,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final Bloc bloc = Provider.of<Bloc>(context, listen: false);
+    final Bloc bloc = Bloc.of(context);
     final Stream<String> newDismissStream = bloc.outDismiss;
     final Stream<String> newCompleteStream = bloc.outComplete;
     final Stream<String> newStartStream = bloc.outStart;
@@ -194,10 +189,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _dismissStream = newStream;
     _dismissStreamSubscription = _dismissStream.listen((featureId) async {
       assert(featureId != null);
-      if (featureId == widget.featureId) {
-        _isShowing = false;
-        await _dismiss();
-      }
+      if (featureId == widget.featureId) await _dismiss();
     });
   }
 
@@ -206,10 +198,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _completeStream = newStream;
     _completeStreamSubscription = _completeStream.listen((featureId) async {
       assert(featureId != null);
-      if (featureId == widget.featureId) {
-        _isShowing = false;
-        await _complete();
-      }
+      if (featureId == widget.featureId) await _complete();
     });
   }
 
@@ -218,10 +207,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _startStream = newStream;
     _startStreamSubscription = _startStream.listen((String featureId) async {
       assert(featureId != null);
-      if (featureId == widget.featureId) {
-        _isShowing = true;
-        await _open();
-      }
+      if (featureId == widget.featureId) await _open();
     });
   }
 
@@ -279,7 +265,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
   void _show() {
     // The activeStep might have changed by now because onOpen is asynchronous.
-    if (!_isShowing) return;
+    if (Bloc.of(context).activeStepId != widget.featureId) return;
 
     _openController.forward(from: 0.0);
     setState(() => _showOverlay = true);
@@ -354,7 +340,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     }
   }
 
-  Offset _backgroundPosition(Offset anchor) {
+  Offset _backgroundPosition(Offset anchor, ContentLocation contentLocation) {
     final double width = min(_screenSize.width, _screenSize.height);
     final bool isBackgroundCentered = _isCloseToTopOrBottom(anchor);
 
@@ -364,15 +350,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       final startingBackgroundPosition = anchor;
 
       Offset endingBackgroundPosition;
-      switch (widget.contentLocation) {
-        case ContentLocation.trivial:
-          endingBackgroundPosition = Offset(
-              width / 2.0 + (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
-              anchor.dy +
-                  (_isOnTopHalfOfScreen(anchor)
-                      ? -(width / 2.0) + 40.0
-                      : (width / 2.0) - 40.0));
-          break;
+      switch (contentLocation) {
         case ContentLocation.above:
           endingBackgroundPosition = Offset(
               width / 2.0 + (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
@@ -383,6 +361,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
               width / 2.0 + (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
               anchor.dy + (width / 2.0) - 40.0);
           break;
+        case ContentLocation.trivial:
+          throw ArgumentError.value(contentLocation);
       }
 
       switch (_state) {
@@ -460,14 +440,15 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   }
 
   Widget _buildOverlay(Offset anchor) {
-    final Offset backgroundCenter = _backgroundPosition(anchor);
-    final double backgroundRadius = _backgroundRadius(anchor);
-
     // This will be assigned either above or below, i.e. trivial from
     // widget.contentLocation will be converted to above or below.
     final ContentLocation contentLocation =
         _nonTrivialContentOrientation(anchor);
     assert(contentLocation != ContentLocation.trivial);
+
+    final Offset backgroundCenter =
+        _backgroundPosition(anchor, contentLocation);
+    final double backgroundRadius = _backgroundRadius(anchor);
 
     final double contentOffsetMultiplier =
         _contentOffsetMultiplier(contentLocation);
@@ -501,6 +482,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
             contentPosition: contentPosition,
             backgroundCenter: backgroundCenter,
             backgroundRadius: backgroundRadius,
+            anchor: anchor,
           ),
           children: <Widget>[
             LayoutId(
@@ -567,10 +549,10 @@ class _Background extends StatelessWidget {
 
   const _Background({
     Key key,
-    this.color,
-    this.state,
-    this.transitionProgress,
-    this.overflowMode,
+    @required this.color,
+    @required this.state,
+    @required this.transitionProgress,
+    @required this.overflowMode,
   })  : assert(color != null),
         assert(state != null),
         assert(transitionProgress != null),
@@ -625,10 +607,10 @@ class _Pulse extends StatelessWidget {
 
   const _Pulse({
     Key key,
-    this.state,
-    this.transitionProgress,
-    this.anchor,
-    this.color,
+    @required this.state,
+    @required this.transitionProgress,
+    @required this.anchor,
+    @required this.color,
   })  : assert(state != null),
         assert(transitionProgress != null),
         assert(anchor != null),
@@ -695,12 +677,12 @@ class _TapTarget extends StatelessWidget {
 
   const _TapTarget({
     Key key,
-    this.anchor,
-    this.child,
-    this.onPressed,
-    this.color,
-    this.state,
-    this.transitionProgress,
+    @required this.anchor,
+    @required this.child,
+    @required this.onPressed,
+    @required this.color,
+    @required this.state,
+    @required this.transitionProgress,
   })  : assert(anchor != null),
         assert(child != null),
         assert(state != null),
@@ -779,12 +761,19 @@ class _TapTarget extends StatelessWidget {
 ///    i.e. clip the content.
 ///    Additionally, it will discard any hit events that occur outside of the
 ///    inner area, so you do not have to worry about that.
-///  * [extendBackground] will expand the background circle. The radius will be increased until
-///    the content fits within the circle's area.
+///  * [extendBackground] will expand the background circle if necessary.
+///    The radius will be increased until the content fits within the circle's area
+///    and a padding of [BackgroundContentLayoutDelegate.outerContentPadding] will be added.
+///  * [wrapBackground] does what [extendBackground] does if the content is larger than the background,
+///    but it will shrink the background if it is smaller than the content additionally.
+///    This will never be smaller than the `min(screenWidth, screenHeight) + BackgroundContentLayoutDelegate.outerContentPadding`
+///    because the furthest point of empty content will be `min(screenWidth, screenHeight)` away from the center of the overlay
+///    as it is given that dimension as its width for layout reasons.
 enum OverflowMode {
   ignore,
   clipContent,
   extendBackground,
+  wrapBackground,
 }
 
 // The Flutter SDK has a State class called OverlayState.
