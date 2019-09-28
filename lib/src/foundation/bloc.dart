@@ -3,6 +3,21 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
+class BlocProvider extends StatelessWidget {
+  final Widget child;
+
+  const BlocProvider({Key key, this.child}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Provider<Bloc>(
+      child: child,
+      builder: (context) => Bloc(),
+      dispose: (context, bloc) => bloc.dispose(),
+    );
+  }
+}
+
 class Bloc {
   /// This is used to retrieve the [Bloc] in [FeatureDiscovery] and [DescribedOverlayState].
   /// It can be public here because [Bloc] is not exposed when importing `feature_discovery`.
