@@ -18,9 +18,7 @@ class TestWidget extends StatelessWidget {
           ),
           body: Center(
             child: Column(
-              children: featureIds
-                  .map((featureId) => TestIcon(featureId: featureId))
-                  .toList(),
+              children: featureIds.map((featureId) => TestIcon(featureId: featureId)).toList(),
             ),
           ),
         ),
@@ -46,7 +44,8 @@ class TestIconState extends State<TestIcon> {
     const Icon icon = Icon(Icons.more_horiz);
     return DescribedFeatureOverlay(
       featureId: widget.featureId,
-      enablePulsingAnimation: false, // mandatory to use pumpAndSettle in tests
+      enablePulsingAnimation: false,
+      // mandatory to use pumpAndSettle in tests
       child: icon,
       tapTarget: icon,
       title: const Text('This is it'),

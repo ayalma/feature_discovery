@@ -15,7 +15,7 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
   ///
   /// If there was no padding, the background circle might touch the content
   /// right at the edge, which can potentially look bad.
-  static const double outerContentPadding = 6.0;
+  static const double outerContentPadding = 4.0;
 
   final OverflowMode overflowMode;
 
@@ -54,7 +54,7 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
         contentPoint = Point(
       contentPosition.dx,
       // If the content is rendered above the tap target, it needs to be shifted up.
-      contentPosition.dy + contentOffsetMultiplier * contentSize.height,
+      contentPosition.dy + contentOffsetMultiplier.clamp(-1, 0) * contentSize.height,
     );
 
     // 75 is the radius of the pulse when fully expanded.

@@ -1,4 +1,5 @@
 import 'package:feature_discovery/feature_discovery.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -6,9 +7,7 @@ import 'widgets.dart';
 
 List<String> textsToMatch(List<String> featureIds) {
   assert(featureIds != null);
-  return featureIds
-      .map((featureId) => 'Test has passed for $featureId')
-      .toList();
+  return featureIds.map((featureId) => 'Test has passed for $featureId').toList();
 }
 
 void main() {
@@ -20,8 +19,7 @@ void main() {
       'featureIdD',
     ];
     final List<String> texts = textsToMatch(steps);
-    testWidgets('Displaying two steps and dismissing before the third',
-        (WidgetTester tester) async {
+    testWidgets('Displaying two steps and dismissing before the third', (WidgetTester tester) async {
       await tester.pumpWidget(const TestWidget(featureIds: steps));
       final Finder finder = find.byType(TestIcon);
       expect(finder, findsNWidgets(steps.length));
@@ -54,9 +52,7 @@ void main() {
   group('Non-existent featureIds', () {
     const List<String> featureIds = ['featA', 'featB', 'featC'];
     final List<String> texts = textsToMatch(featureIds);
-    testWidgets(
-        "Calling [discoverFeatures] with two ids that aren't associated with an overlay",
-        (WidgetTester tester) async {
+    testWidgets("Calling [discoverFeatures] with two ids that aren't associated with an overlay", (WidgetTester tester) async {
       await tester.pumpWidget(TestWidget(
           // Only one overlay will be placed in the tree
           featureIds: featureIds.sublist(1, 2)));
@@ -91,8 +87,7 @@ void main() {
       'featureIdC',
     ];
     final List<String> texts = textsToMatch(steps);
-    testWidgets('Two overlays have the same featureId',
-        (WidgetTester tester) async {
+    testWidgets('Two overlays have the same featureId', (WidgetTester tester) async {
       await tester.pumpWidget(const TestWidget(featureIds: featureIds));
       final Finder finder = find.byType(TestIcon);
       expect(finder, findsNWidgets(featureIds.length));
@@ -116,6 +111,113 @@ void main() {
   });
 
   group('OverflowMode', () {
-    throw UnimplementedError('@creativecreatorormaybenot');
+    const IconData icon = Icons.error;
+    const String featureId = 'feature';
+
+    const Widget sizedOffset = SizedBox(
+      height: 142.13,
+    );
+
+    testWidgets('ignore, extendBackground & wrapBackground', (WidgetTester tester) async {
+      // All of these should show the item that is out of the circle's area.
+      const List<OverflowMode> modes = <OverflowMode>[
+        OverflowMode.ignore,
+        OverflowMode.extendBackground,
+        OverflowMode.wrapBackground,
+      ];
+
+      for (final OverflowMode mode in modes) {
+        BuildContext context;
+
+        bool buttonPressed = false;
+
+        await tester.pumpWidget(
+          FeatureDiscovery(
+            child: Builder(
+              builder: (builderContext) {
+                context = builderContext;
+                return MaterialApp(
+                  home: Scaffold(
+                    body: DescribedFeatureOverlay(
+                      featureId: featureId,
+                      tapTarget: Container(),
+                      description: Column(
+                        children: <Widget>[
+                          Builder(
+                            builder: (context) => IconButton(
+                              icon: const Icon(icon),
+                              onPressed: () {
+                                buttonPressed = true;
+                              },
+                            ),
+                          ),
+                          sizedOffset,
+                        ],
+                      ),
+                      enablePulsingAnimation: false,
+                      overflowMode: mode,
+                      child: Container(),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+
+        FeatureDiscovery.discoverFeatures(context, <String>[featureId]);
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byIcon(icon));
+        expect(buttonPressed, true);
+      }
+    });
+
+    testWidgets('clipContent', (WidgetTester tester) async {
+      BuildContext context;
+
+      bool buttonPressed = false;
+
+      await tester.pumpWidget(
+        FeatureDiscovery(
+          child: Builder(
+            builder: (builderContext) {
+              context = builderContext;
+              return MaterialApp(
+                home: Scaffold(
+                  body: DescribedFeatureOverlay(
+                    featureId: featureId,
+                    tapTarget: Container(),
+                    description: Column(
+                      children: <Widget>[
+                        Builder(
+                          builder: (context) => IconButton(
+                            icon: const Icon(icon),
+                            onPressed: () {
+                              buttonPressed = true;
+                            },
+                          ),
+                        ),
+                        sizedOffset,
+                      ],
+                    ),
+                    enablePulsingAnimation: false,
+                    overflowMode: OverflowMode.clipContent,
+                    child: Container(),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      FeatureDiscovery.discoverFeatures(context, <String>[featureId]);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(icon));
+
+      expect(buttonPressed, false);
+    });
   });
 }
