@@ -18,7 +18,9 @@ class TestWidget extends StatelessWidget {
           ),
           body: Center(
             child: Column(
-              children: featureIds.map((featureId) => TestIcon(featureId: featureId)).toList(),
+              children: featureIds
+                  .map((featureId) => TestIcon(featureId: featureId))
+                  .toList(),
             ),
           ),
         ),

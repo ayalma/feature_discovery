@@ -7,7 +7,9 @@ import 'widgets.dart';
 
 List<String> textsToMatch(List<String> featureIds) {
   assert(featureIds != null);
-  return featureIds.map((featureId) => 'Test has passed for $featureId').toList();
+  return featureIds
+      .map((featureId) => 'Test has passed for $featureId')
+      .toList();
 }
 
 void main() {
@@ -19,7 +21,8 @@ void main() {
       'featureIdD',
     ];
     final List<String> texts = textsToMatch(steps);
-    testWidgets('Displaying two steps and dismissing before the third', (WidgetTester tester) async {
+    testWidgets('Displaying two steps and dismissing before the third',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const TestWidget(featureIds: steps));
       final Finder finder = find.byType(TestIcon);
       expect(finder, findsNWidgets(steps.length));
@@ -52,7 +55,9 @@ void main() {
   group('Non-existent featureIds', () {
     const List<String> featureIds = ['featA', 'featB', 'featC'];
     final List<String> texts = textsToMatch(featureIds);
-    testWidgets("Calling [discoverFeatures] with two ids that aren't associated with an overlay", (WidgetTester tester) async {
+    testWidgets(
+        "Calling [discoverFeatures] with two ids that aren't associated with an overlay",
+        (WidgetTester tester) async {
       await tester.pumpWidget(TestWidget(
           // Only one overlay will be placed in the tree
           featureIds: featureIds.sublist(1, 2)));
@@ -87,7 +92,8 @@ void main() {
       'featureIdC',
     ];
     final List<String> texts = textsToMatch(steps);
-    testWidgets('Two overlays have the same featureId', (WidgetTester tester) async {
+    testWidgets('Two overlays have the same featureId',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const TestWidget(featureIds: featureIds));
       final Finder finder = find.byType(TestIcon);
       expect(finder, findsNWidgets(featureIds.length));
@@ -118,7 +124,8 @@ void main() {
       height: 142.13,
     );
 
-    testWidgets('ignore, extendBackground & wrapBackground', (WidgetTester tester) async {
+    testWidgets('ignore, extendBackground & wrapBackground',
+        (WidgetTester tester) async {
       // All of these should show the item that is out of the circle's area.
       const List<OverflowMode> modes = <OverflowMode>[
         OverflowMode.ignore,

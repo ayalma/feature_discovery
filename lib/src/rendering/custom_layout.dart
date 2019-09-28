@@ -54,7 +54,8 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
         contentPoint = Point(
       contentPosition.dx,
       // If the content is rendered above the tap target, it needs to be shifted up.
-      contentPosition.dy + contentOffsetMultiplier.clamp(-1, 0) * contentSize.height,
+      contentPosition.dy +
+          contentOffsetMultiplier.clamp(-1, 0) * contentSize.height,
     );
 
     // 75 is the radius of the pulse when fully expanded.
