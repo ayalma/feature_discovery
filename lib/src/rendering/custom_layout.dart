@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:feature_discovery/src/widgets.dart';
 import 'package:flutter/rendering.dart';
 
@@ -29,21 +31,25 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
     assert(hasChild(BackgroundContentLayout.background));
     assert(hasChild(BackgroundContentLayout.content));
 
+    final contentSize = layoutChild(BackgroundContentLayout.content, BoxConstraints());
+    positionChild(BackgroundContentLayout.content, contentPosition);
+
+    final backgroundSize = overflowMode == OverflowMode.extendBackground
+        ? (Point(contentPosition.dx, contentPosition.dy).distanceTo(Point(backgroundCenter.dx, backgroundCenter.dy)) + max(contentSize.height, contentSize.width) * 2)
+        : backgroundRadius * 2;
+
     layoutChild(
         BackgroundContentLayout.background,
         BoxConstraints.loose(Size(
-          backgroundRadius * 2,
-          backgroundRadius * 2,
+          backgroundSize,
+          backgroundSize,
         )));
     positionChild(
         BackgroundContentLayout.background,
         Offset(
-          backgroundCenter.dx - backgroundRadius,
-          backgroundCenter.dy - backgroundRadius,
+          backgroundCenter.dx - backgroundSize / 2,
+          backgroundCenter.dy - backgroundSize / 2,
         ));
-
-    layoutChild(BackgroundContentLayout.content, BoxConstraints());
-    positionChild(BackgroundContentLayout.content, contentPosition);
   }
 
   @override
