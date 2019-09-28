@@ -125,6 +125,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
   double _transitionProgress;
 
+  bool _isShowing;
+
   AnimationController _openController;
   AnimationController _completeController;
   AnimationController _dismissController;
@@ -142,6 +144,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _showOverlay = false;
 
     _state = FeatureOverlayState.closed;
+
+    _isShowing = false;
 
     _transitionProgress = 1;
 
@@ -190,7 +194,10 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _dismissStream = newStream;
     _dismissStreamSubscription = _dismissStream.listen((featureId) async {
       assert(featureId != null);
-      if (featureId == widget.featureId) await _dismiss();
+      if (featureId == widget.featureId) {
+        _isShowing = false;
+        await _dismiss();
+      }
     });
   }
 
@@ -199,20 +206,22 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _completeStream = newStream;
     _completeStreamSubscription = _completeStream.listen((featureId) async {
       assert(featureId != null);
-      if (featureId == widget.featureId) await _complete();
+      if (featureId == widget.featureId) {
+        _isShowing = false;
+        await _complete();
+      }
     });
   }
-
-  String activeFeatureId;
 
   void _setStartStream(Stream<void> newStream) {
     _startStreamSubscription?.cancel();
     _startStream = newStream;
     _startStreamSubscription = _startStream.listen((String featureId) async {
       assert(featureId != null);
-
-      activeFeatureId = featureId;
-      if (activeFeatureId == widget.featureId) await _open();
+      if (featureId == widget.featureId) {
+        _isShowing = true;
+        await _open();
+      }
     });
   }
 
@@ -270,7 +279,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
   void _show() {
     // The activeStep might have changed by now because onOpen is asynchronous.
-    if (activeFeatureId != widget.featureId) return;
+    if (!_isShowing) return;
 
     _openController.forward(from: 0.0);
     setState(() => _showOverlay = true);
