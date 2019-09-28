@@ -289,6 +289,7 @@ class _ContentState extends State<Content> {
                   title: const Text('Discover Features'),
                   description: const Text(
                       'Find all available features in this application with this button.'),
+                  contentLocation: ContentOrientation.below,
                   child: EnsureVisible(
                     key: ensureKey,
                     child: RaisedButton(

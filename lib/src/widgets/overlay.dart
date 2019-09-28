@@ -708,8 +708,3 @@ enum FeatureOverlayState {
   activating,
   dismissing,
 }
-
-enum DescribedFeatureContentOrientation {
-  above,
-  below,
-}

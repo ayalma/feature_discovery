@@ -61,15 +61,15 @@ class Content extends StatelessWidget {
     return position.dx < (screenSize.width / 2.0);
   }
 
-  DescribedFeatureContentOrientation getContentOrientation(Offset position) {
+  _DescribedFeatureContentOrientation getContentOrientation(Offset position) {
     if (isCloseToTopOrBottom(position))
       return isOnTopHalfOfScreen(position)
-          ? DescribedFeatureContentOrientation.below
-          : DescribedFeatureContentOrientation.above;
+          ? _DescribedFeatureContentOrientation.below
+          : _DescribedFeatureContentOrientation.above;
     else
       return isOnTopHalfOfScreen(position)
-          ? DescribedFeatureContentOrientation.above
-          : DescribedFeatureContentOrientation.below;
+          ? _DescribedFeatureContentOrientation.above
+          : _DescribedFeatureContentOrientation.below;
   }
 
   double opacity() {
@@ -132,7 +132,7 @@ class Content extends StatelessWidget {
     switch (orientation) {
       case ContentOrientation.trivial:
         contentOffsetMultiplier = getContentOrientation(anchor) ==
-                DescribedFeatureContentOrientation.below
+                _DescribedFeatureContentOrientation.below
             ? 1.0
             : -1.0;
         break;
@@ -209,6 +209,11 @@ class Content extends StatelessWidget {
 
     return result;
   }
+}
+
+enum _DescribedFeatureContentOrientation {
+  above,
+  below,
 }
 
 // We need a custom RenderObject widget here as we need to convert the backgroundPosition into
