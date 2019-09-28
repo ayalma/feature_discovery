@@ -13,6 +13,9 @@ List<String> textsToMatch(List<String> featureIds) {
 }
 
 void main() {
+  final TestWidgetsFlutterBinding testWidgetsFlutterBinding =
+      TestWidgetsFlutterBinding.ensureInitialized();
+
   group('Basic behavior', () {
     const List<String> steps = [
       'featureIdA',
@@ -120,27 +123,28 @@ void main() {
     const IconData icon = Icons.error;
     const String featureId = 'feature';
 
-    testWidgets('ignore, extendBackground & wrapBackground',
-        (WidgetTester tester) async {
-      // All of these should show the item that is out of the circle's area.
-      const List<OverflowMode> modes = <OverflowMode>[
-        OverflowMode.ignore,
-        OverflowMode.extendBackground,
-        OverflowMode.wrapBackground,
-      ];
+    // Declares what OverflowMode's should allow the button to be tapped.
+    const Map<OverflowMode, bool> modes = <OverflowMode, bool>{
+      OverflowMode.ignore: false,
+      OverflowMode.extendBackground: false,
+      OverflowMode.wrapBackground: false,
+      OverflowMode.clipContent: true,
+    };
 
-      for (final OverflowMode mode in modes) {
+    for (final MapEntry<OverflowMode, bool> modeEntry in modes.entries) {
+      testWidgets(modeEntry.key.toString(), (WidgetTester tester) async {
         BuildContext context;
 
         bool tapped = false;
 
+        await testWidgetsFlutterBinding.setSurfaceSize(Size(640, 2560));
         await tester.pumpWidget(
           OverflowingDescriptionFeature(
             onTap: () => tapped = true,
             onContext: (builderContext) => context = builderContext,
             featureId: featureId,
             icon: icon,
-            mode: mode,
+            mode: modeEntry.key,
           ),
         );
 
@@ -148,31 +152,8 @@ void main() {
         await tester.pumpAndSettle();
 
         await tester.tap(find.byIcon(icon));
-        expect(tapped, false);
-      }
-    });
-
-    testWidgets('clipContent', (WidgetTester tester) async {
-      BuildContext context;
-
-      bool tapped = false;
-
-      await tester.pumpWidget(
-        OverflowingDescriptionFeature(
-          onTap: () => tapped = true,
-          onContext: (builderContext) => context = builderContext,
-          featureId: featureId,
-          icon: icon,
-          mode: OverflowMode.clipContent,
-        ),
-      );
-
-      FeatureDiscovery.discoverFeatures(context, <String>[featureId]);
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byIcon(icon));
-
-      expect(tapped, true);
-    });
+        expect(tapped, modeEntry.value);
+      });
+    }
   });
 }
