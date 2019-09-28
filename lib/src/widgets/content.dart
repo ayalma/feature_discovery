@@ -19,7 +19,6 @@ class Content extends StatelessWidget {
   final double backgroundRadius;
   final Offset backgroundCenter;
 
-  final double offsetMultiplier;
   final double width;
 
   const Content({
@@ -32,10 +31,8 @@ class Content extends StatelessWidget {
     @required this.overflowMode,
     @required this.backgroundRadius,
     @required this.backgroundCenter,
-    @required this.offsetMultiplier,
     @required this.width,
-  })  : assert(offsetMultiplier != null),
-        assert(state != null),
+  })  : assert(state != null),
         assert(width != null),
         assert(transitionProgress != null),
         assert(textColor != null),
@@ -63,44 +60,39 @@ class Content extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double contentFractionalOffset = offsetMultiplier.clamp(-1.0, 0.0);
-
-    Widget result = FractionalTranslation(
-      translation: Offset(0.0, contentFractionalOffset),
-      child: Opacity(
-        opacity: opacity(),
-        child: ConstrainedBox(
-          constraints: BoxConstraints.loose(Size(
-            width,
-            double.infinity,
-          )),
-          child: Material(
-            color: Colors.transparent,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 40.0, right: 40.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  if (title != null)
-                    DefaultTextStyle(
-                      style: Theme.of(context)
-                          .textTheme
-                          .title
-                          .copyWith(color: textColor),
-                      child: title,
-                    ),
-                  if (title != null && description != null)
-                    const SizedBox(height: 8.0),
-                  if (description != null)
-                    DefaultTextStyle(
-                      style: Theme.of(context)
-                          .textTheme
-                          .body1
-                          .copyWith(color: textColor.withOpacity(0.9)),
-                      child: description,
-                    )
-                ],
-              ),
+    Widget result = Opacity(
+      opacity: opacity(),
+      child: ConstrainedBox(
+        constraints: BoxConstraints.loose(Size(
+          width,
+          double.infinity,
+        )),
+        child: Material(
+          color: Colors.transparent,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 40.0, right: 40.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                if (title != null)
+                  DefaultTextStyle(
+                    style: Theme.of(context)
+                        .textTheme
+                        .title
+                        .copyWith(color: textColor),
+                    child: title,
+                  ),
+                if (title != null && description != null)
+                  const SizedBox(height: 8.0),
+                if (description != null)
+                  DefaultTextStyle(
+                    style: Theme.of(context)
+                        .textTheme
+                        .body1
+                        .copyWith(color: textColor.withOpacity(0.9)),
+                    child: description,
+                  )
+              ],
             ),
           ),
         ),

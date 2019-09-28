@@ -484,6 +484,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
             backgroundCenter: backgroundCenter,
             backgroundRadius: backgroundRadius,
             anchor: anchor,
+            contentOffsetMultiplier: contentOffsetMultiplier,
           ),
           children: <Widget>[
             LayoutId(
@@ -506,7 +507,6 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
                 overflowMode: widget.overflowMode,
                 backgroundCenter: backgroundCenter,
                 backgroundRadius: backgroundRadius,
-                offsetMultiplier: contentOffsetMultiplier,
                 width: contentWidth,
               ),
             ),
