@@ -121,7 +121,7 @@ void main() {
     const String featureId = 'feature';
 
     const Widget sizedOffset = SizedBox(
-      height: 142.13,
+      height: 542.13,
     );
 
     testWidgets('ignore, extendBackground & wrapBackground',
