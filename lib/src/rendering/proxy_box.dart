@@ -1,8 +1,8 @@
 import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
-// We use RenderProxyBox because we only want to clip and keep
-// the properties of the _Content children.
+/// We use [RenderProxyBox] because we only want to clip and keep
+/// the properties of the _Content children.
 class RenderClipContent extends RenderProxyBox {
   Offset _center;
   double _radius;
@@ -15,7 +15,7 @@ class RenderClipContent extends RenderProxyBox {
         _center = center,
         _radius = radius;
 
-  // The inner area of the DescribedFeatureOverlay.
+  /// The inner area of the DescribedFeatureOverlay.
   Path get innerCircle => Path()
     ..addOval(Rect.fromCircle(
       center: globalToLocal(_center),
@@ -32,10 +32,10 @@ class RenderClipContent extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  // We need to make sure that the area outside of the background area can still be tapped
-  // in order to allow dismissal.
-  // The reason this is necessary is that the content that might be overflowing will catch
-  // the hit events even when it is clipped out in paint.
+  /// We need to make sure that the area outside of the background area can still be tapped
+  /// in order to allow dismissal.
+  /// The reason this is necessary is that the content that might be overflowing will catch
+  /// the hit events even when it is clipped out in paint.
   @override
   bool hitTest(BoxHitTestResult result, {Offset position}) {
     // If the hit is inside of the inner area of the DescribedFeatureOverlay,

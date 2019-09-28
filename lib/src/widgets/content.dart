@@ -7,10 +7,10 @@ class Content extends StatelessWidget {
   final FeatureOverlayState state;
   final double transitionProgress;
 
-  // Can be null.
+  /// Can be null.
   final Widget title;
 
-  // Can be null.
+  /// Can be null.
   final Widget description;
 
   final Color textColor;

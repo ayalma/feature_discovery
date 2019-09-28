@@ -38,7 +38,7 @@ class FeatureDiscovery extends StatelessWidget {
   /// call [completeCurrentStep] instead.
   static void dismiss(BuildContext context) => Bloc.of(context).dismiss();
 
-  // Deprecated methods, kept for retrocompatibility.
+  /// Deprecated methods, kept for retrocompatibility.
   @Deprecated('Use [dismiss] instead')
   static void clear(BuildContext context) => dismiss(context);
 
