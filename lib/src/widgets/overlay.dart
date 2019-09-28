@@ -763,7 +763,7 @@ class _TapTarget extends StatelessWidget {
 ///    inner area, so you do not have to worry about that.
 ///  * [extendBackground] will expand the background circle if necessary.
 ///    The radius will be increased until the content fits within the circle's area
-///    and a padding of 6 will be added.
+///    and a padding of 4 will be added.
 ///  * [wrapBackground] does what [extendBackground] does if the content is larger than the background,
 ///    but it will shrink the background if it is smaller than the content additionally.
 ///    This will never be smaller than `min(screenWidth, screenHeight) + 4`
