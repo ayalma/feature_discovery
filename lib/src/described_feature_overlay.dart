@@ -603,7 +603,6 @@ class _TapTarget extends StatelessWidget {
     Key key,
     this.anchor,
     this.child,
-    
     this.onPressed,
     this.color,
     this.state,
