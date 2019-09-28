@@ -24,16 +24,16 @@ class Content extends StatelessWidget {
 
   const Content({
     Key key,
-    this.title,
-    this.description,
-    this.state,
-    this.transitionProgress,
-    this.textColor,
-    this.overflowMode,
-    this.backgroundRadius,
-    this.backgroundCenter,
-    this.offsetMultiplier,
-    this.width,
+    @required this.title,
+    @required this.description,
+    @required this.state,
+    @required this.transitionProgress,
+    @required this.textColor,
+    @required this.overflowMode,
+    @required this.backgroundRadius,
+    @required this.backgroundCenter,
+    @required this.offsetMultiplier,
+    @required this.width,
   })  : assert(offsetMultiplier != null),
         assert(state != null),
         assert(width != null),
@@ -69,8 +69,11 @@ class Content extends StatelessWidget {
       translation: Offset(0.0, contentFractionalOffset),
       child: Opacity(
         opacity: opacity(),
-        child: SizedBox(
-          width: width,
+        child: ConstrainedBox(
+          constraints: BoxConstraints.loose(Size(
+            width,
+            double.infinity,
+          )),
           child: Material(
             color: Colors.transparent,
             child: Padding(

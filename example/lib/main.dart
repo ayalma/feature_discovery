@@ -247,6 +247,8 @@ class _ContentState extends State<Content> {
 
   @override
   Widget build(BuildContext context) {
+    int feature6ItemCount = 0;
+
     return Stack(
       children: [
         SingleChildScrollView(
@@ -333,26 +335,42 @@ class _ContentState extends State<Content> {
                 height: 1500,
                 color: Colors.blueAccent,
               ),
-              DescribedFeatureOverlay(
-                featureId: feature6,
-                tapTarget: const Icon(Icons.drive_eta),
-                backgroundColor: Colors.green,
-                onComplete: () async =>
-                    print('Tapped tap target of $feature6.'),
-                onOpen: () async {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    ensureKey2.currentState.ensureVisible();
-                  });
-                  return true;
-                },
-                title: const Text('Title text'),
-                description: const Text(
-                    'This text is just for test and we don\'t care about it at all.'),
-                child: EnsureVisible(
-                  key: ensureKey2,
-                  duration: const Duration(milliseconds: 600),
-                  child: const Text(
-                    'Custom text',
+              StatefulBuilder(
+                builder: (context, setState) => DescribedFeatureOverlay(
+                  featureId: feature6,
+                  tapTarget: const Icon(Icons.drive_eta),
+                  backgroundColor: Colors.green,
+                  onComplete: () async =>
+                      print('Tapped tap target of $feature6.'),
+                  onOpen: () async {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      ensureKey2.currentState.ensureVisible();
+                    });
+                    return true;
+                  },
+                  description: Column(children: <Widget>[
+                    const Text(
+                        'You can test OverflowMode.wrapBackground here.'),
+                    FlatButton(
+                        padding: const EdgeInsets.all(0),
+                        child: Text('Add item',
+                            style: Theme.of(context)
+                                .textTheme
+                                .button
+                                .copyWith(color: Colors.white)),
+                        onPressed: () => setState(() {
+                              feature6ItemCount++;
+                            })),
+                    for (int n = feature6ItemCount; n > 0; n--)
+                      Text('Testing OverflowMode.wrapBackground'),
+                  ]),
+                  overflowMode: OverflowMode.wrapBackground,
+                  child: EnsureVisible(
+                    key: ensureKey2,
+                    duration: const Duration(milliseconds: 600),
+                    child: const Text(
+                      'Custom text',
+                    ),
                   ),
                 ),
               ),

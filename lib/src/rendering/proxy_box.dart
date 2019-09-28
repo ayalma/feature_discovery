@@ -1,4 +1,5 @@
 import 'package:flutter/rendering.dart';
+import 'package:meta/meta.dart';
 
 // We use RenderProxyBox because we only want to clip and keep
 // the properties of the _Content children.
@@ -6,8 +7,10 @@ class RenderClipContent extends RenderProxyBox {
   Offset _center;
   double _radius;
 
-  RenderClipContent({Offset center, double radius})
-      : assert(center != null),
+  RenderClipContent({
+    @required Offset center,
+    @required double radius,
+  })  : assert(center != null),
         assert(radius != null),
         _center = center,
         _radius = radius;
