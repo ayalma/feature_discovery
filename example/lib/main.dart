@@ -2,7 +2,13 @@ import 'package:feature_discovery/feature_discovery.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-const String feature1 = 'feature1', feature2 = 'feature2', feature3 = 'feature3', feature4 = 'feature4', feature5 = 'feature5', feature6 = 'feature6', feature7 = 'feature7';
+const String feature1 = 'feature1',
+    feature2 = 'feature2',
+    feature3 = 'feature3',
+    feature4 = 'feature4',
+    feature5 = 'feature5',
+    feature6 = 'feature6',
+    feature7 = 'feature7';
 
 void main() {
   // You can increase the timeDilation value if you want to see
@@ -39,7 +45,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    final Future<void> Function() action = () async => print('IconButton of $feature7 tapped.');
+    final Future<void> Function() action =
+        () async => print('IconButton of $feature7 tapped.');
     const Icon icon1 = Icon(Icons.drive_eta);
     const Icon icon2 = Icon(Icons.menu);
     const Icon icon3 = Icon(Icons.search);
@@ -63,7 +70,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 backgroundColor: Colors.blue,
                 contentLocation: ContentLocation.below,
                 title: const Text('Find the fastest route'),
-                description: const Text('Get car, walking, cycling, or public transit directions to this place'),
+                description: const Text(
+                    'Get car, walking, cycling, or public transit directions to this place'),
                 onComplete: action,
                 onOpen: () async {
                   print('The $feature7 overlay is about to be displayed.');
@@ -82,25 +90,42 @@ class _MyHomePageState extends State<MyHomePage> {
             featureId: feature1,
             tapTarget: icon2,
             backgroundColor: Colors.teal,
-            title: const Text('This is overly long on purpose to test OverflowMode.clip!'),
+            title: const Text(
+                'This is overly long on purpose to test OverflowMode.clip!'),
             overflowMode: feature1OverflowMode,
             enablePulsingAnimation: feature1EnablePulsingAnimation,
             description: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const Text('Also, notice how the pulsing animation is not playing because it is deactivated for this feature.'),
+                const Text(
+                    'Also, notice how the pulsing animation is not playing because it is deactivated for this feature.'),
                 FlatButton(
-                    child: Text('Toggle enablePulsingAnimation', style: Theme.of(context).textTheme.button.copyWith(color: Colors.white)),
+                    child: Text('Toggle enablePulsingAnimation',
+                        style: Theme.of(context)
+                            .textTheme
+                            .button
+                            .copyWith(color: Colors.white)),
                     onPressed: () => setState(() {
-                          feature1EnablePulsingAnimation = !feature1EnablePulsingAnimation;
+                          feature1EnablePulsingAnimation =
+                              !feature1EnablePulsingAnimation;
                         })),
-                const Text('Ignore the items below or tap the button to toggle between OverflowMode.clip and OverflowMode.doNothing!'),
+                const Text(
+                    'Ignore the items below or tap the button to toggle between OverflowMode.clip and OverflowMode.doNothing!'),
                 FlatButton(
-                    child: Text('Toggle overflowMode', style: Theme.of(context).textTheme.button.copyWith(color: Colors.white)),
+                    child: Text('Toggle overflowMode',
+                        style: Theme.of(context)
+                            .textTheme
+                            .button
+                            .copyWith(color: Colors.white)),
                     onPressed: () => setState(() {
-                          feature1OverflowMode = feature1OverflowMode == OverflowMode.clipContent ? OverflowMode.ignore : OverflowMode.clipContent;
+                          feature1OverflowMode =
+                              feature1OverflowMode == OverflowMode.clipContent
+                                  ? OverflowMode.ignore
+                                  : OverflowMode.clipContent;
                         })),
-                for (int n = 42; n > 0; n--) const Text('Testing clipping (ignore or toggle)', style: TextStyle(backgroundColor: Colors.black)),
+                for (int n = 42; n > 0; n--)
+                  const Text('Testing clipping (ignore or toggle)',
+                      style: TextStyle(backgroundColor: Colors.black)),
               ],
             ),
             child: IconButton(
@@ -118,15 +143,25 @@ class _MyHomePageState extends State<MyHomePage> {
             description: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const Text('Tap the magnifying glass to quickly scan your compounds'),
+                const Text(
+                    'Tap the magnifying glass to quickly scan your compounds'),
                 FlatButton(
                   padding: const EdgeInsets.all(0),
-                  child: Text('Understood', style: Theme.of(context).textTheme.button.copyWith(color: Colors.white)),
-                  onPressed: () => FeatureDiscovery.completeCurrentStep(context),
+                  child: Text('Understood',
+                      style: Theme.of(context)
+                          .textTheme
+                          .button
+                          .copyWith(color: Colors.white)),
+                  onPressed: () =>
+                      FeatureDiscovery.completeCurrentStep(context),
                 ),
                 FlatButton(
                   padding: const EdgeInsets.all(0),
-                  child: Text('Dismiss', style: Theme.of(context).textTheme.button.copyWith(color: Colors.white)),
+                  child: Text('Dismiss',
+                      style: Theme.of(context)
+                          .textTheme
+                          .button
+                          .copyWith(color: Colors.white)),
                   onPressed: () => FeatureDiscovery.dismiss(context),
                 ),
               ],
@@ -147,13 +182,19 @@ class _MyHomePageState extends State<MyHomePage> {
           overflowMode: OverflowMode.extendBackground,
           title: const Text('FAB feature'),
           description: Column(children: <Widget>[
-            const Text('This is overly long to test OverflowMode.extendBackground. The green circle should be large enough to cover all of the text.'),
+            const Text(
+                'This is overly long to test OverflowMode.extendBackground. The green circle should be large enough to cover all of the text.'),
             FlatButton(
-                child: Text('Add another item', style: Theme.of(context).textTheme.button.copyWith(color: Colors.white)),
+                child: Text('Add another item',
+                    style: Theme.of(context)
+                        .textTheme
+                        .button
+                        .copyWith(color: Colors.white)),
                 onPressed: () => setState(() {
                       feature3ItemCount++;
                     })),
-            for (int n = feature3ItemCount; n > 0; n--) Text('Testing OverflowMode.extendBackground'),
+            for (int n = feature3ItemCount; n > 0; n--)
+              Text('Testing OverflowMode.extendBackground'),
           ]),
           child: FloatingActionButton(
             onPressed: () {},
@@ -185,7 +226,15 @@ class _ContentState extends State<Content> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FeatureDiscovery.discoverFeatures(
         context,
-        const {feature7, feature1, feature2, feature3, feature4, feature6, feature5},
+        const {
+          feature7,
+          feature1,
+          feature2,
+          feature3,
+          feature4,
+          feature6,
+          feature5
+        },
       );
     });
     super.initState();
@@ -206,7 +255,8 @@ class _ContentState extends State<Content> {
               Container(
                 height: 200,
                 width: double.infinity,
-                child: const Text('Imagine there would be a beautiful picture here.'),
+                child: const Text(
+                    'Imagine there would be a beautiful picture here.'),
               ),
               Container(
                 width: double.infinity,
@@ -246,7 +296,8 @@ class _ContentState extends State<Content> {
                   featureId: feature5,
                   tapTarget: const Icon(Icons.drive_eta),
                   backgroundColor: Colors.green,
-                  onComplete: () async => print('Tapped tap target of $feature5.'),
+                  onComplete: () async =>
+                      print('Tapped tap target of $feature5.'),
                   onOpen: () async {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       ensureKey.currentState.ensureVisible();
@@ -254,7 +305,8 @@ class _ContentState extends State<Content> {
                     return true;
                   },
                   title: const Text('Discover Features'),
-                  description: const Text('Find all available features in this application with this button.'),
+                  description: const Text(
+                      'Find all available features in this application with this button.'),
                   contentLocation: ContentLocation.below,
                   child: EnsureVisible(
                     key: ensureKey,
@@ -263,7 +315,14 @@ class _ContentState extends State<Content> {
                       onPressed: () {
                         FeatureDiscovery.discoverFeatures(
                           context,
-                          const {feature1, feature2, feature3, feature4, feature6, feature5},
+                          const {
+                            feature1,
+                            feature2,
+                            feature3,
+                            feature4,
+                            feature6,
+                            feature5
+                          },
                         );
                       },
                     ),
@@ -278,7 +337,8 @@ class _ContentState extends State<Content> {
                 featureId: feature6,
                 tapTarget: const Icon(Icons.drive_eta),
                 backgroundColor: Colors.green,
-                onComplete: () async => print('Tapped tap target of $feature6.'),
+                onComplete: () async =>
+                    print('Tapped tap target of $feature6.'),
                 onOpen: () async {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     ensureKey2.currentState.ensureVisible();
@@ -286,7 +346,8 @@ class _ContentState extends State<Content> {
                   return true;
                 },
                 title: const Text('Title text'),
-                description: const Text('This text is just for test and we don\'t care about it at all.'),
+                description: const Text(
+                    'This text is just for test and we don\'t care about it at all.'),
                 child: EnsureVisible(
                   key: ensureKey2,
                   duration: const Duration(milliseconds: 600),
@@ -316,7 +377,8 @@ class _ContentState extends State<Content> {
                 return true;
               },
               title: const Text('Find the fastest route'),
-              description: const Text('Get car, walking, cycling or public transit directions to this place.'),
+              description: const Text(
+                  'Get car, walking, cycling or public transit directions to this place.'),
               child: FloatingActionButton(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.blue,

@@ -31,24 +31,27 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
     assert(hasChild(BackgroundContentLayout.background));
     assert(hasChild(BackgroundContentLayout.content));
 
-    final contentSize = layoutChild(BackgroundContentLayout.content, BoxConstraints());
+    final contentSize =
+        layoutChild(BackgroundContentLayout.content, BoxConstraints());
     positionChild(BackgroundContentLayout.content, contentPosition);
 
-    final backgroundSize = overflowMode == OverflowMode.extendBackground
-        ? (Point(contentPosition.dx, contentPosition.dy).distanceTo(Point(backgroundCenter.dx, backgroundCenter.dy)) + max(contentSize.height, contentSize.width) * 2)
+    final backgroundDiameter = overflowMode == OverflowMode.extendBackground
+        ? (Point(contentPosition.dx, contentPosition.dy)
+                .distanceTo(Point(backgroundCenter.dx, backgroundCenter.dy)) +
+            max(contentSize.height, contentSize.width) * 2)
         : backgroundRadius * 2;
 
     layoutChild(
         BackgroundContentLayout.background,
         BoxConstraints.loose(Size(
-          backgroundSize,
-          backgroundSize,
+          backgroundDiameter,
+          backgroundDiameter,
         )));
     positionChild(
         BackgroundContentLayout.background,
         Offset(
-          backgroundCenter.dx - backgroundSize / 2,
-          backgroundCenter.dy - backgroundSize / 2,
+          backgroundCenter.dx - backgroundDiameter / 2,
+          backgroundCenter.dy - backgroundDiameter / 2,
         ));
   }
 
