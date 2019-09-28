@@ -116,13 +116,6 @@ class DescribedFeatureOverlay extends StatefulWidget {
 
 class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     with TickerProviderStateMixin {
-  static Bloc _blocOf(BuildContext context) {
-    Bloc bloc = Provider.of<Bloc>(context, listen: false);
-    assert(bloc != null,
-        "Don't forget to wrap your widget tree in a [FeatureDiscovery] widget.");
-    return bloc;
-  }
-
   Size _screenSize;
 
   bool _showOverlay;
