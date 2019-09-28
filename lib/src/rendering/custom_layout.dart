@@ -12,6 +12,9 @@ enum BackgroundContentLayout {
 class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
   /// This padding is applied to the calculated radius of the background
   /// for [OverflowMode.extendBackground] and [OverflowMode.wrapBackground].
+  ///
+  /// If there was no padding, the background circle might touch the content
+  /// right at the edge, which can potentially look bad.
   static const double outerContentPadding = 6.0;
 
   final OverflowMode overflowMode;
