@@ -1,4 +1,4 @@
-import 'package:feature_discovery/src/foundation/bloc.dart';
+import 'package:feature_discovery/src/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
