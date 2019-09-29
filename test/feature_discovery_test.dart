@@ -129,7 +129,7 @@ void main() {
       });
     }
 
-    testWidgets('Show Overlay after duplicate has been removed',
+    testWidgets('Show other overlay after duplicate has been removed',
         (WidgetTester tester) async {
       const String featureId = 'feature';
       const IconData featureIcon = Icons.content_copy;
