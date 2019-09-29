@@ -94,8 +94,8 @@ class OverflowingDescriptionFeature extends StatelessWidget {
                         featureId: featureId,
                         tapTarget: Icon(Icons.arrow_drop_down_circle),
                         description: Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height,
+                          width: double.infinity,
+                          height: 9e3,
                           color: Color(0xff000000),
                         ),
                         contentLocation: ContentLocation.below,

@@ -122,7 +122,7 @@ void main() {
 
     // Declares what OverflowMode's should allow the button to be tapped.
     const Map<OverflowMode, bool> modes = <OverflowMode, bool>{
-      OverflowMode.ignore: false,
+//      OverflowMode.ignore: false,
       OverflowMode.extendBackground: false,
       OverflowMode.wrapBackground: false,
       OverflowMode.clipContent: true,
