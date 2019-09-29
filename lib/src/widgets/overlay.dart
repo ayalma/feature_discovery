@@ -136,8 +136,6 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     with TickerProviderStateMixin {
   Size _screenSize;
 
-  bool _showOverlay;
-
   FeatureOverlayState _state;
 
   double _transitionProgress;
@@ -156,8 +154,6 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
   @override
   void initState() {
-    _showOverlay = false;
-
     _state = FeatureOverlayState.closed;
 
     _transitionProgress = 1;
@@ -237,7 +233,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _startStream = newStream;
     _startStreamSubscription = _startStream.listen((String featureId) async {
       assert(featureId != null);
-      if (featureId == widget.featureId) await _open();
+      if (featureId == widget.featureId && _state == FeatureOverlayState.closed)
+        await _open();
     });
   }
 
@@ -276,15 +273,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           () => setState(() => _transitionProgress = _completeController.value))
       ..addStatusListener(
         (AnimationStatus status) {
-          if (status == AnimationStatus.forward) {
+          if (status == AnimationStatus.forward)
             setState(() => _state = FeatureOverlayState.activating);
-            return;
-          }
-
-          if (status == AnimationStatus.completed)
-            setState(() {
-              _state = FeatureOverlayState.closed;
-            });
         },
       );
 
@@ -294,15 +284,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           () => setState(() => _transitionProgress = _dismissController.value))
       ..addStatusListener(
         (AnimationStatus status) {
-          if (status == AnimationStatus.forward) {
+          if (status == AnimationStatus.forward)
             setState(() => _state = FeatureOverlayState.dismissing);
-            return;
-          }
-
-          if (status == AnimationStatus.completed)
-            setState(() {
-              _state = FeatureOverlayState.closed;
-            });
         },
       );
   }
@@ -311,11 +294,13 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     // The activeStep might have changed by now because onOpen is asynchronous.
     if (FeatureDiscovery.activeFeatureId(context) != widget.featureId) return;
 
+//    Bloc.of(context).activeOverlays++;
     _openController.forward(from: 0.0);
-    setState(() => _showOverlay = true);
   }
 
   Future<void> _open() async {
+//    if (!widget.allowShowingDuplicate && Bloc.of(context).activeOverlays > 0) return;
+
     if (widget.onOpen != null) {
       final bool shouldOpen = await widget.onOpen();
       assert(shouldOpen != null,
@@ -334,8 +319,11 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     if (widget.onComplete != null) await widget.onComplete();
     _openController.stop();
     _pulseController.stop();
+
     await _completeController.forward(from: 0.0);
-    setState(() => _showOverlay = false);
+    // This will be called after the animation is done because the TickerFuture
+    // from forward is completed when the animation is complete.
+    _close();
   }
 
   Future<void> _dismiss() async {
@@ -349,8 +337,17 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     }
     _openController.stop();
     _pulseController.stop();
+
     await _dismissController.forward(from: 0.0);
-    setState(() => _showOverlay = false);
+    // This will be called after the animation is done because the TickerFuture
+    // from forward is completed when the animation is complete.
+    _close();
+  }
+
+  /// This method is used by both [_dismiss] and [_complete]
+  /// to properly close the overlay after the animations are finished.
+  void _close() {
+    setState(() => _state = FeatureOverlayState.closed);
   }
 
   bool _isCloseToTopOrBottom(Offset position) {
@@ -577,7 +574,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   @override
   Widget build(BuildContext context) {
     return AnchoredOverlay(
-      showOverlay: _showOverlay,
+      showOverlay: _state != FeatureOverlayState.closed,
       overlayBuilder: (BuildContext context, Offset anchor) {
         return _buildOverlay(anchor);
       },
