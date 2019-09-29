@@ -13,10 +13,15 @@ class DescribedFeatureOverlay extends StatefulWidget {
   final String featureId;
 
   /// By default, for every feature id, i.e. for every step in the feature discovery,
-  /// there can only be a single active overlay at a time.
+  /// there can only be a single active overlay at a time as the default value
+  /// for [allowShowingDuplicate] is `false`.
+  ///
   /// This measure was taken primarily to prevent duplicate overlays from showing
   /// when the same widget is inserted into the widget tree multiple times,
   /// e.g. when there is an open [DropdownButton].
+  ///
+  /// If you want to display multiple overlays for the same step, i.e.
+  /// for the same feature id, at once, you will have to set this to `true`.
   final bool allowShowingDuplicate;
 
   /// The color of the large circle, where the text sits on.
@@ -29,7 +34,20 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// Color for title and text.
   final Color textColor;
 
+  /// This is the first content widget, i.e. it is displayed above [description].
+  ///
+  /// It is intended for this to contain a [Text] widget, however, you can pass
+  /// any [Widget].
+  /// The overlay uses a [DefaultTextStyle] for the title, which is a combination
+  /// of [TextTheme.title] from [Theme] and the [textColor].
   final Widget title;
+
+  /// This is the second content widget, i.e. it is displayed below [description].
+  ///
+  /// It is intended for this to contain a [Text] widget, however, you can pass
+  /// any [Widget].
+  /// The overlay uses a [DefaultTextStyle] for the description, which is a combination
+  /// of [TextTheme.body1] from [Theme] and the [textColor].
   final Widget description;
 
   /// This is usually an [Icon].
