@@ -236,7 +236,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _dismissStreamSubscription =
         _dismissStream.listen((String featureId) async {
       assert(featureId != null);
-      if (featureId == widget.featureId) await _dismiss();
+
+      if (featureId == widget.featureId && _state == FeatureOverlayState.opened)
+        await _dismiss();
     });
   }
 
@@ -246,7 +248,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _completeStreamSubscription =
         _completeStream.listen((String featureId) async {
       assert(featureId != null);
-      if (featureId == widget.featureId) await _complete();
+
+      if (featureId == widget.featureId && _state == FeatureOverlayState.opened)
+        await _complete();
     });
   }
 
@@ -255,6 +259,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _startStream = newStream;
     _startStreamSubscription = _startStream.listen((String featureId) async {
       assert(featureId != null);
+
       if (featureId == widget.featureId && _state == FeatureOverlayState.closed)
         await _open();
     });
@@ -267,11 +272,19 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
               () => setState(() => _transitionProgress = _openController.value))
           ..addStatusListener(
             (AnimationStatus status) {
-              if (status == AnimationStatus.forward)
+              if (status == AnimationStatus.forward &&
+                  _state == FeatureOverlayState.closed) {
                 setState(() => _state = FeatureOverlayState.opening);
-              else if (status == AnimationStatus.completed &&
-                  widget.enablePulsingAnimation == true)
-                _pulseController.forward(from: 0.0);
+                return;
+              }
+
+              if (status == AnimationStatus.completed) {
+                if (widget.enablePulsingAnimation == true)
+                  _pulseController.forward(from: 0.0);
+
+                assert(_state == FeatureOverlayState.opening);
+                setState(() => _state = FeatureOverlayState.opened);
+              }
             },
           );
 
@@ -282,9 +295,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           })
           ..addStatusListener(
             (AnimationStatus status) {
-              if (status == AnimationStatus.forward)
-                setState(() => _state = FeatureOverlayState.opened);
-              else if (status == AnimationStatus.completed)
+              if (status == AnimationStatus.completed)
                 _pulseController.forward(from: 0.0);
             },
           );
@@ -295,7 +306,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           () => setState(() => _transitionProgress = _completeController.value))
       ..addStatusListener(
         (AnimationStatus status) {
-          if (status == AnimationStatus.forward)
+          if (status == AnimationStatus.forward &&
+              _state == FeatureOverlayState.opened)
             setState(() => _state = FeatureOverlayState.activating);
         },
       );
@@ -306,7 +318,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           () => setState(() => _transitionProgress = _dismissController.value))
       ..addStatusListener(
         (AnimationStatus status) {
-          if (status == AnimationStatus.forward)
+          if (status == AnimationStatus.forward &&
+              _state == FeatureOverlayState.opened)
             setState(() => _state = FeatureOverlayState.dismissing);
         },
       );
@@ -370,6 +383,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   /// This method is used by both [_dismiss] and [_complete]
   /// to properly close the overlay after the animations are finished.
   void _close() {
+    assert(_state == FeatureOverlayState.activating ||
+        _state == FeatureOverlayState.dismissing);
     setState(() {
       _state = FeatureOverlayState.closed;
     });
