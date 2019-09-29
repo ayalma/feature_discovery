@@ -59,7 +59,9 @@ class Bloc {
   String get activeFeatureId =>
       _activeStepIndex == null ? null : _steps?.elementAt(_activeStepIndex);
 
-  /// This is used to determine if
+  /// This is used to determine if the active feature is already shown by
+  /// another [DescribedFeatureOverlay] as [DescribedFeatureOverlay.allowShowingDuplicate]
+  /// requires this.
   int _activeOverlays;
 
   int get activeOverlays => _activeOverlays;
