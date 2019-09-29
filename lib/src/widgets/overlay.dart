@@ -180,12 +180,10 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     final Stream<String> newCompleteStream = bloc.outComplete;
     final Stream<String> newStartStream = bloc.outStart;
 
-    if (_dismissStream != newDismissStream)
-      _setDismissStream(newDismissStream);
+    if (_dismissStream != newDismissStream) _setDismissStream(newDismissStream);
     if (_completeStream != newCompleteStream)
       _setCompleteStream(newCompleteStream);
-    if (_startStream != newStartStream)
-      _setStartStream(newStartStream);
+    if (_startStream != newStartStream) _setStartStream(newStartStream);
 
     // If this widget was not in the tree when the feature discovery was started,
     // we need to open it immediately because the streams will not receive
