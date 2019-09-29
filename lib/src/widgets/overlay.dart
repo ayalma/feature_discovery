@@ -145,6 +145,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _transitionProgress = 1;
 
     _initAnimationControllers();
+
     super.initState();
   }
 
@@ -173,15 +174,20 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
     final Bloc bloc = Bloc.of(context);
     final Stream<String> newDismissStream = bloc.outDismiss;
     final Stream<String> newCompleteStream = bloc.outComplete;
     final Stream<String> newStartStream = bloc.outStart;
+
     if (_dismissStream != newDismissStream) _setDismissStream(newDismissStream);
     if (_completeStream != newCompleteStream)
       _setCompleteStream(newCompleteStream);
     if (_startStream != newStartStream) _setStartStream(newStartStream);
     _screenSize = MediaQuery.of(context).size;
+
+    if (bloc.activeFeatureId == widget.featureId &&
+        _state == FeatureOverlayState.closed) _open(); // todo
   }
 
   void _setDismissStream(Stream<void> newStream) {
@@ -248,8 +254,15 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           () => setState(() => _transitionProgress = _completeController.value))
       ..addStatusListener(
         (AnimationStatus status) {
-          if (status == AnimationStatus.forward)
+          if (status == AnimationStatus.forward) {
             setState(() => _state = FeatureOverlayState.activating);
+            return;
+          }
+
+          if (status == AnimationStatus.completed)
+            setState(() {
+              _state = FeatureOverlayState.closed;
+            });
         },
       );
 
@@ -259,8 +272,15 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           () => setState(() => _transitionProgress = _dismissController.value))
       ..addStatusListener(
         (AnimationStatus status) {
-          if (status == AnimationStatus.forward)
+          if (status == AnimationStatus.forward) {
             setState(() => _state = FeatureOverlayState.dismissing);
+            return;
+          }
+
+          if (status == AnimationStatus.completed)
+            setState(() {
+              _state = FeatureOverlayState.closed;
+            });
         },
       );
   }
