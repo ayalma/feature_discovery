@@ -52,7 +52,7 @@ void main() {
     });
   });
 
-  group('Non-existent featureIds', () {
+  group('Non-existent feature ids', () {
     const List<String> featureIds = ['featA', 'featB', 'featC'];
     final List<String> texts = textsToMatch(featureIds);
     testWidgets(
@@ -79,7 +79,7 @@ void main() {
     });
   });
 
-  group('Duplicate featureIds', () {
+  group('Duplicate feature ids', () {
     const List<String> featureIds = [
       'featureIdA',
       'featureIdB',
@@ -92,28 +92,41 @@ void main() {
       'featureIdC',
     ];
     final List<String> texts = textsToMatch(steps);
-    testWidgets('Two overlays have the same featureId',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(const TestWidget(featureIds: featureIds));
-      final Finder finder = find.byType(TestIcon);
-      expect(finder, findsNWidgets(featureIds.length));
-      final BuildContext context = tester.firstState(finder).context;
-      texts.forEach((t) => expect(find.text(t), findsNothing));
-      FeatureDiscovery.discoverFeatures(context, steps);
-      await tester.pumpAndSettle();
-      // First overlay should appear.
-      expect(find.text(texts[0]), findsOneWidget);
-      FeatureDiscovery.completeCurrentStep(context);
-      await tester.pumpAndSettle();
-      // First overlay should have disappeared, and overlays 2 and 3 should be displayed.
-      expect(find.text(texts[0]), findsNothing);
-      expect(find.text(texts[1]), findsNWidgets(2));
-      FeatureDiscovery.completeCurrentStep(context);
-      await tester.pumpAndSettle();
-      // Overlays 2 and 3 should have disappeared, and the last overlay should appear.
-      expect(find.text(texts[1]), findsNothing);
-      expect(find.text(texts[2]), findsOneWidget);
-    });
+
+    for (final bool allowShowingDuplicate in <bool>[true, false]) {
+      testWidgets('allowShowingDuplicate == $allowShowingDuplicate',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(TestWidget(
+          featureIds: featureIds,
+          allowShowingDuplicate: allowShowingDuplicate,
+        ));
+
+        final Finder finder = find.byType(TestIcon);
+        expect(finder, findsNWidgets(featureIds.length));
+        final BuildContext context = tester.firstState(finder).context;
+        texts.forEach((t) => expect(find.text(t), findsNothing));
+
+        FeatureDiscovery.discoverFeatures(context, steps);
+        await tester.pumpAndSettle();
+        // First overlay should appear.
+        expect(find.text(texts[0]), findsOneWidget);
+
+        FeatureDiscovery.completeCurrentStep(context);
+        await tester.pumpAndSettle();
+        // First overlay should have disappeared, and either both
+        // overlay 2 and 3 should be displayed or just one of them
+        // depending on allowShowingDuplicate.
+        expect(find.text(texts[0]), findsNothing);
+        expect(find.text(texts[1]),
+            allowShowingDuplicate ? findsNWidgets(2) : findsOneWidget);
+
+        FeatureDiscovery.completeCurrentStep(context);
+        await tester.pumpAndSettle();
+        // Overlays 2 and 3 should have disappeared, and the last overlay should appear.
+        expect(find.text(texts[1]), findsNothing);
+        expect(find.text(texts[2]), findsOneWidget);
+      });
+    }
   });
 
   group('OverflowMode', () {

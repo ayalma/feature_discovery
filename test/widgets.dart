@@ -4,8 +4,13 @@ import 'package:flutter/material.dart';
 @visibleForTesting
 class TestWidget extends StatelessWidget {
   final Iterable<String> featureIds;
+  final bool allowShowingDuplicate;
 
-  const TestWidget({Key key, @required this.featureIds}) : super(key: key);
+  const TestWidget({
+    Key key,
+    @required this.featureIds,
+    this.allowShowingDuplicate = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +24,10 @@ class TestWidget extends StatelessWidget {
           body: Center(
             child: Column(
               children: featureIds
-                  .map((featureId) => TestIcon(featureId: featureId))
+                  .map((featureId) => TestIcon(
+                        featureId: featureId,
+                        allowShowingDuplicate: allowShowingDuplicate,
+                      ))
                   .toList(),
             ),
           ),
@@ -32,8 +40,13 @@ class TestWidget extends StatelessWidget {
 @visibleForTesting
 class TestIcon extends StatefulWidget {
   final String featureId;
+  final bool allowShowingDuplicate;
 
-  const TestIcon({Key key, @required this.featureId}) : super(key: key);
+  const TestIcon({
+    Key key,
+    @required this.featureId,
+    @required this.allowShowingDuplicate,
+  }) : super(key: key);
 
   @override
   TestIconState createState() => TestIconState();
@@ -46,8 +59,11 @@ class TestIconState extends State<TestIcon> {
     const Icon icon = Icon(Icons.more_horiz);
     return DescribedFeatureOverlay(
       featureId: widget.featureId,
+      // It is mandatory to disable the pulsing animation
+      // in order to use pumpAndSettle in tests.
+      // Otherwise, the tester can never settle as it requires frame sync.
       enablePulsingAnimation: false,
-      // mandatory to use pumpAndSettle in tests
+      allowShowingDuplicate: widget.allowShowingDuplicate,
       child: icon,
       tapTarget: icon,
       title: const Text('This is it'),
