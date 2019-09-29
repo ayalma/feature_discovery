@@ -28,27 +28,35 @@ class Bloc {
     return bloc;
   }
 
+  /// The steps consist of the feature ids of the features to be discovered.
   Iterable<String> _steps;
+
   int _activeStepIndex;
 
   // The different streams send the featureId that must display/complete.
 
   final StreamController<String> _dismissController =
       StreamController.broadcast();
+
   Stream<String> get outDismiss => _dismissController.stream;
+
   Sink<String> get _inDismiss => _dismissController.sink;
 
   final StreamController<String> _completeController =
       StreamController.broadcast();
+
   Stream<String> get outComplete => _completeController.stream;
+
   Sink<String> get _inComplete => _completeController.sink;
 
   final StreamController<String> _startController =
       StreamController.broadcast();
+
   Stream<String> get outStart => _startController.stream;
+
   Sink<String> get _inStart => _startController.sink;
 
-  String get activeStepId => _steps?.elementAt(_activeStepIndex);
+  String get activeFeatureId => _steps?.elementAt(_activeStepIndex);
 
   void dispose() {
     _dismissController.close();
@@ -60,17 +68,27 @@ class Bloc {
     assert(steps != null);
     _steps = steps;
     _activeStepIndex = 0;
-    _inStart.add(activeStepId);
+    _inStart.add(activeFeatureId);
   }
 
   void completeStep() {
     if (_steps == null) return;
-    _inComplete.add(activeStepId);
+    _inComplete.add(activeFeatureId);
     _activeStepIndex++;
-    if (_activeStepIndex < _steps.length) _inStart.add(activeStepId);
+
+    if (_activeStepIndex < _steps.length) {
+      _inStart.add(activeFeatureId);
+      return;
+    }
+
+    // The last step has been completed, so we need to clear the steps.
+    _steps = null;
+    _activeStepIndex = null;
   }
 
   void dismiss() {
-    _inDismiss.add(activeStepId);
+    _inDismiss.add(activeFeatureId);
+    _steps = null;
+    _activeStepIndex = null;
   }
 }

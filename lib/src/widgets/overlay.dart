@@ -267,7 +267,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
   void _show() {
     // The activeStep might have changed by now because onOpen is asynchronous.
-    if (Bloc.of(context).activeStepId != widget.featureId) return;
+    if (FeatureDiscovery.activeFeatureId(context) != widget.featureId) return;
 
     _openController.forward(from: 0.0);
     setState(() => _showOverlay = true);

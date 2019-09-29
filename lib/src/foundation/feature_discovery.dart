@@ -37,6 +37,11 @@ class FeatureDiscovery extends StatelessWidget {
   /// call [completeCurrentStep] instead.
   static void dismiss(BuildContext context) => Bloc.of(context).dismiss();
 
+  /// This return the feature id of the feature that is currently being displayed, i.e.
+  /// of the [DescribedFeatureOverlay] that is currently shown, or `null`.
+  static String activeFeatureId(BuildContext context) =>
+      Bloc.of(context).activeFeatureId;
+
   /// Deprecated methods, kept for retrocompatibility.
   @Deprecated('Use [dismiss] instead')
   static void clear(BuildContext context) => dismiss(context);
