@@ -23,7 +23,7 @@ class FeatureDiscovery extends StatelessWidget {
       Bloc.of(context).discoverFeatures(steps: steps.toList());
 
   /// This will schedule completion of the current discovery step and continue
-  /// onto the step after the activation animation of the current overlay if successful.
+  /// onto the step after the completion animation of the current overlay if successful.
   ///
   /// The [stepId] ensures that you are marking the correct feature for completion.
   /// If the provided [stepId] does not match the feature that is currently shown, i.e.

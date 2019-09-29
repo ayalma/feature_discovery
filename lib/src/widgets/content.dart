@@ -47,7 +47,7 @@ class Content extends StatelessWidget {
             const Interval(0.6, 1, curve: Curves.easeOut)
                 .transform(transitionProgress);
         return adjustedPercent;
-      case FeatureOverlayState.activating:
+      case FeatureOverlayState.completing:
       case FeatureOverlayState.dismissing:
         final double adjustedPercent =
             const Interval(0, 0.4, curve: Curves.easeOut)

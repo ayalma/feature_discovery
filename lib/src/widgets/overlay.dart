@@ -215,12 +215,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     // This is not done when closing the overlay because the Bloc
     // resets the activeOverlays and this would interfere with that.
     //
-    // Dismissing and activating are not considered "showing" in this case
+    // Dismissing and completing are not considered "showing" in this case
     // because the Bloc will already have dealt with the activeOverlays as
     // it triggered the completion or dismissal animation.
     if (_state != FeatureOverlayState.closed &&
         _state != FeatureOverlayState.dismissing &&
-        _state != FeatureOverlayState.activating) {
+        _state != FeatureOverlayState.completing) {
       // If the _state is anything else, this overlay has to be showing,
       // otherwise something is wrong.
       assert(bloc.activeFeatureId == widget.featureId);
@@ -334,7 +334,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _pulseController.stop();
 
     // setState will be called in the animation listener.
-    _state = FeatureOverlayState.activating;
+    _state = FeatureOverlayState.completing;
     await _completeController.forward(from: 0.0);
     // This will be called after the animation is done because the TickerFuture
     // from forward is completed when the animation is complete.
@@ -364,7 +364,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   /// This method is used by both [_dismiss] and [_complete]
   /// to properly close the overlay after the animations are finished.
   void _close() {
-    assert(_state == FeatureOverlayState.activating ||
+    assert(_state == FeatureOverlayState.completing ||
         _state == FeatureOverlayState.dismissing);
     setState(() {
       _state = FeatureOverlayState.closed;
@@ -424,7 +424,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
                   .transform(_transitionProgress);
           return Offset.lerp(startingBackgroundPosition,
               endingBackgroundPosition, adjustedPercent);
-        case FeatureOverlayState.activating:
+        case FeatureOverlayState.completing:
           return endingBackgroundPosition;
         case FeatureOverlayState.dismissing:
           return Offset.lerp(endingBackgroundPosition,
@@ -475,7 +475,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
                   .transform(_transitionProgress);
           return Offset.lerp(startingBackgroundPosition,
               endingBackgroundPosition, adjustedPercent);
-        case FeatureOverlayState.activating:
+        case FeatureOverlayState.completing:
           return endingBackgroundPosition;
         case FeatureOverlayState.dismissing:
           return Offset.lerp(endingBackgroundPosition,
@@ -626,7 +626,7 @@ class _Background extends StatelessWidget {
                 .transform(transitionProgress);
         return 0.96 * adjustedPercent;
 
-      case FeatureOverlayState.activating:
+      case FeatureOverlayState.completing:
         final double adjustedPercent =
             const Interval(0.1, 0.6, curve: Curves.easeOut)
                 .transform(transitionProgress);
@@ -691,7 +691,7 @@ class _Pulse extends StatelessWidget {
         }
         return 44.0 + (35.0 * expandedPercent);
       case FeatureOverlayState.dismissing:
-      case FeatureOverlayState.activating:
+      case FeatureOverlayState.completing:
         return 0; //(44.0 + 35.0) * (1.0 - transitionProgress);
       case FeatureOverlayState.opening:
       case FeatureOverlayState.closed:
@@ -706,7 +706,7 @@ class _Pulse extends StatelessWidget {
         final double percentOpaque =
             1 - ((transitionProgress.clamp(0.3, 0.8) - 0.3) / 0.5);
         return (percentOpaque * 0.75).clamp(0, 1);
-      case FeatureOverlayState.activating:
+      case FeatureOverlayState.completing:
       case FeatureOverlayState.dismissing:
         return 0; //((1.0 - transitionProgress) * 0.5).clamp(0.0, 1.0);
       case FeatureOverlayState.opening:
@@ -762,7 +762,7 @@ class _TapTarget extends StatelessWidget {
       case FeatureOverlayState.opening:
         return const Interval(0, 0.3, curve: Curves.easeOut)
             .transform(transitionProgress);
-      case FeatureOverlayState.activating:
+      case FeatureOverlayState.completing:
       case FeatureOverlayState.dismissing:
         return 1 -
             const Interval(0.7, 1, curve: Curves.easeOut)
@@ -790,7 +790,7 @@ class _TapTarget extends StatelessWidget {
         else
           expandedPercent = 0;
         return 44 + (20 * expandedPercent);
-      case FeatureOverlayState.activating:
+      case FeatureOverlayState.completing:
       case FeatureOverlayState.dismissing:
         return 20 + 24 * (1 - transitionProgress);
     }
@@ -851,6 +851,6 @@ enum FeatureOverlayState {
   closed,
   opening,
   opened,
-  activating,
+  completing,
   dismissing,
 }
