@@ -152,6 +152,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   StreamSubscription<String> _dismissStreamSubscription;
   StreamSubscription<String> _completeStreamSubscription;
 
+  /// The local reference to the [Bloc] is needed because it is used in [dispose].
+  Bloc bloc;
+
   @override
   void initState() {
     _state = FeatureOverlayState.closed;
@@ -181,8 +184,13 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     // it triggered the completion or dismissal animation.
     if (_state != FeatureOverlayState.closed &&
         _state != FeatureOverlayState.dismissing &&
-        _state != FeatureOverlayState.activating)
-      Bloc.of(context).activeOverlays--;
+        _state != FeatureOverlayState.activating) {
+      // If the _state is anything else, this overlay has to be showing,
+      // otherwise something is wrong.
+      assert(bloc.activeFeatureId == widget.featureId);
+
+      bloc.activeOverlays--;
+    }
     super.dispose();
   }
 
@@ -203,7 +211,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   void didChangeDependencies() {
     _screenSize = MediaQuery.of(context).size;
 
-    final Bloc bloc = Bloc.of(context);
+    bloc = Bloc.of(context);
     final Stream<String> newDismissStream = bloc.outDismiss;
     final Stream<String> newCompleteStream = bloc.outComplete;
     final Stream<String> newStartStream = bloc.outStart;
@@ -312,10 +320,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   }
 
   Future<void> _open() async {
-    if (!widget.allowShowingDuplicate && Bloc.of(context).activeOverlays > 0)
-      return;
+    if (!widget.allowShowingDuplicate && bloc.activeOverlays > 0) return;
 
-    Bloc.of(context).activeOverlays++;
+    bloc.activeOverlays++;
 
     if (widget.onOpen != null) {
       final bool shouldOpen = await widget.onOpen();
