@@ -169,6 +169,20 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _completeController.dispose();
     _dismissController.dispose();
     _pulseController.dispose();
+
+    // If this widget is disposed while still showing an overlay,
+    // it needs to remove itself from the active overlays.
+    //
+    // This is not done when closing the overlay because the Bloc
+    // resets the activeOverlays and this would interfere with that.
+    //
+    // Dismissing and activating are not considered "showing" in this case
+    // because the Bloc will already have dealt with the activeOverlays as
+    // it triggered the completion or dismissal animation.
+    if (_state != FeatureOverlayState.closed &&
+        _state != FeatureOverlayState.dismissing &&
+        _state != FeatureOverlayState.activating)
+      Bloc.of(context).activeOverlays--;
     super.dispose();
   }
 
@@ -294,12 +308,13 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     // The activeStep might have changed by now because onOpen is asynchronous.
     if (FeatureDiscovery.activeFeatureId(context) != widget.featureId) return;
 
-//    Bloc.of(context).activeOverlays++;
+    Bloc.of(context).activeOverlays++;
     _openController.forward(from: 0.0);
   }
 
   Future<void> _open() async {
-//    if (!widget.allowShowingDuplicate && Bloc.of(context).activeOverlays > 0) return;
+    if (!widget.allowShowingDuplicate && Bloc.of(context).activeOverlays > 0)
+      return;
 
     if (widget.onOpen != null) {
       final bool shouldOpen = await widget.onOpen();
@@ -347,7 +362,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   /// This method is used by both [_dismiss] and [_complete]
   /// to properly close the overlay after the animations are finished.
   void _close() {
-    setState(() => _state = FeatureOverlayState.closed);
+    setState(() {
+      _state = FeatureOverlayState.closed;
+    });
   }
 
   bool _isCloseToTopOrBottom(Offset position) {
@@ -732,7 +749,7 @@ class _TapTarget extends StatelessWidget {
         assert(color != null),
         super(key: key);
 
-  double opacity() {
+  double get opacity {
     switch (state) {
       case FeatureOverlayState.opening:
         return const Interval(0.0, 0.3, curve: Curves.easeOut)
@@ -747,7 +764,7 @@ class _TapTarget extends StatelessWidget {
     }
   }
 
-  double radius() {
+  double get radius {
     switch (state) {
       case FeatureOverlayState.closed:
         return 0.0;
@@ -775,10 +792,10 @@ class _TapTarget extends StatelessWidget {
     return CenterAbout(
       position: anchor,
       child: Container(
-        height: 2 * radius(),
-        width: 2 * radius(),
+        height: 2 * radius,
+        width: 2 * radius,
         child: Opacity(
-          opacity: opacity(),
+          opacity: opacity,
           child: RawMaterialButton(
             fillColor: color,
             shape: const CircleBorder(),

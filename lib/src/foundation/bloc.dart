@@ -28,11 +28,6 @@ class Bloc {
     return bloc;
   }
 
-  /// The steps consist of the feature ids of the features to be discovered.
-  Iterable<String> _steps;
-
-  int _activeStepIndex;
-
   // The different streams send the featureId that must display/complete.
 
   final StreamController<String> _dismissController =
@@ -56,8 +51,39 @@ class Bloc {
 
   Sink<String> get _inStart => _startController.sink;
 
+  /// The steps consist of the feature ids of the features to be discovered.
+  Iterable<String> _steps;
+
+  int _activeStepIndex;
+
   String get activeFeatureId =>
       _activeStepIndex == null ? null : _steps?.elementAt(_activeStepIndex);
+
+  /// This is used to determine if
+  int _activeOverlays;
+
+  int get activeOverlays => _activeOverlays;
+
+  /// [DescribedFeatureOverlay]s use either `activeOverlays++` to add themselves
+  /// to the active overlays or `activeOverlays--` to remove themselves.
+  set activeOverlays(activeOverlays) {
+    // Callers (DescribedFeatureOverlay's) can only either add or remove
+    // themselves, i.e. the difference will always be 1.
+    assert((_activeOverlays - activeOverlays).abs() == 1);
+
+    _activeOverlays = activeOverlays;
+
+    // There is the possibility that two DescribedFeatureOverlays with the same
+    // feature id were active when the feature id was added to _inStart initially.
+    // However, any of them could have had allowShowingDuplicate set to false,
+    // in which case that overlay would not have been opened.
+    //
+    // If the overlay that was showing the active step was disposed now,
+    // which is the only possible cause for activeOverlays == 0 in the setter,
+    // then we can possibly show that other overlay again because it is not
+    // a duplicate anymore.
+    if (activeOverlays == 0) _inStart.add(activeFeatureId);
+  }
 
   void dispose() {
     _dismissController.close();
@@ -69,13 +95,17 @@ class Bloc {
     assert(steps != null);
     _steps = steps;
     _activeStepIndex = 0;
+    _activeOverlays = 0;
+
     _inStart.add(activeFeatureId);
   }
 
   void completeStep() {
     if (_steps == null) return;
     _inComplete.add(activeFeatureId);
+
     _activeStepIndex++;
+    _activeOverlays = 0;
 
     if (_activeStepIndex < _steps.length) {
       _inStart.add(activeFeatureId);
@@ -88,8 +118,10 @@ class Bloc {
   }
 
   void dismiss() {
-    _inDismiss.add(activeFeatureId);
     _steps = null;
     _activeStepIndex = null;
+    _activeOverlays = 0;
+
+    _inDismiss.add(activeFeatureId);
   }
 }
