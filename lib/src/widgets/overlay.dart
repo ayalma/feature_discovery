@@ -804,8 +804,8 @@ class _TapTarget extends StatelessWidget {
 ///    boundaries of the background circle.
 ///  * [clipContent] will not render any content that is outside the background's area,
 ///    i.e. clip the content.
-///    Additionally, it will discard any hit events that occur outside of the
-///    inner area, so you do not have to worry about that.
+///    Additionally, it will pass any hit events that occur outside of the inner area
+///    to the UI below the overlay, so you do not have to worry about that.
 ///  * [extendBackground] will expand the background circle if necessary.
 ///    The radius will be increased until the content fits within the circle's area
 ///    and a padding of 4 will be added.
