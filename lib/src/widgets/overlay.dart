@@ -236,7 +236,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           ..addStatusListener(
             (AnimationStatus status) {
               if (status == AnimationStatus.forward)
-                setState(() => _state = FeatureOverlayState.pulsing);
+                setState(() => _state = FeatureOverlayState.opened);
               else if (status == AnimationStatus.completed)
                 _pulseController.forward(from: 0.0);
             },
@@ -486,6 +486,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
             backgroundRadius: backgroundRadius,
             anchor: anchor,
             contentOffsetMultiplier: contentOffsetMultiplier,
+            state: _state,
           ),
           children: <Widget>[
             LayoutId(
@@ -621,7 +622,7 @@ class _Pulse extends StatelessWidget {
 
   double get radius {
     switch (state) {
-      case FeatureOverlayState.pulsing:
+      case FeatureOverlayState.opened:
         double expandedPercent;
         if (transitionProgress >= 0.3 && transitionProgress <= 0.8) {
           expandedPercent = (transitionProgress - 0.3) / 0.5;
@@ -639,7 +640,7 @@ class _Pulse extends StatelessWidget {
 
   double get opacity {
     switch (state) {
-      case FeatureOverlayState.pulsing:
+      case FeatureOverlayState.opened:
         final double percentOpaque =
             1.0 - ((transitionProgress.clamp(0.3, 0.8) - 0.3) / 0.5);
         return (percentOpaque * 0.75).clamp(0.0, 1.0);
@@ -713,7 +714,7 @@ class _TapTarget extends StatelessWidget {
         return 0.0;
       case FeatureOverlayState.opening:
         return 20.0 + 24.0 * transitionProgress;
-      case FeatureOverlayState.pulsing:
+      case FeatureOverlayState.opened:
         double expandedPercent;
         if (transitionProgress < 0.3)
           expandedPercent = transitionProgress / 0.3;
@@ -783,7 +784,7 @@ enum OverflowMode {
 enum FeatureOverlayState {
   closed,
   opening,
-  pulsing,
+  opened,
   activating,
   dismissing,
 }

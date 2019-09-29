@@ -56,7 +56,8 @@ class Bloc {
 
   Sink<String> get _inStart => _startController.sink;
 
-  String get activeFeatureId => _activeStepIndex == null ? null : _steps?.elementAt(_activeStepIndex);
+  String get activeFeatureId =>
+      _activeStepIndex == null ? null : _steps?.elementAt(_activeStepIndex);
 
   void dispose() {
     _dismissController.close();

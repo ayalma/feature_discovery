@@ -27,6 +27,8 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
 
   final Offset anchor;
 
+  final FeatureOverlayState state;
+
   BackgroundContentLayoutDelegate({
     @required this.overflowMode,
     @required this.contentPosition,
@@ -34,10 +36,12 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
     @required this.backgroundRadius,
     @required this.anchor,
     @required this.contentOffsetMultiplier,
+    @required this.state,
   })  : assert(overflowMode != null),
         assert(contentPosition != null),
         assert(backgroundCenter != null),
         assert(backgroundRadius != null),
+        assert(state != null),
         assert(anchor != null);
 
   @override
@@ -58,20 +62,29 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
           contentOffsetMultiplier.clamp(-1, 0) * contentSize.height,
     );
 
-    // 75 is the radius of the pulse when fully expanded.
-    // Calculating the distance here is easy because the pulse is a circle.
-    final distanceToOuterPulse = anchorPoint.distanceTo(backgroundPoint) + 75;
+    double matchedRadius;
 
-    // Calculate distance to the furthest point of the content.
-    final Rect contentArea = Rect.fromLTWH(
-        contentPoint.x, contentPoint.y, contentSize.width, contentSize.height);
-    // This is equal to finding the max out of the distances to the corners of the Rect.
-    // It is just the more Math-esque approach.
-    // See the commented out code below for an intuitive approach.
-    final double contentDx = max((contentArea.left - backgroundPoint.x).abs(),
-            (contentArea.right - backgroundPoint.x)),
-        contentDy = max((contentArea.top - backgroundPoint.y).abs(),
-            (contentArea.bottom - backgroundPoint.y).abs());
+    // The background radius is not affected during opening or closing the overlay and is
+    // also not affected when the overflow mode is ignore or clipContent.
+    if (state != FeatureOverlayState.opened ||
+        overflowMode == OverflowMode.ignore ||
+        overflowMode == OverflowMode.clipContent)
+      matchedRadius = backgroundRadius;
+    else {
+      // 75 is the radius of the pulse when fully expanded.
+      // Calculating the distance here is easy because the pulse is a circle.
+      final distanceToOuterPulse = anchorPoint.distanceTo(backgroundPoint) + 75;
+
+      // Calculate distance to the furthest point of the content.
+      final Rect contentArea = Rect.fromLTWH(contentPoint.x, contentPoint.y,
+          contentSize.width, contentSize.height);
+      // This is equal to finding the max out of the distances to the corners of the Rect.
+      // It is just the more Math-esque approach.
+      // See the commented out code below for an intuitive approach.
+      final double contentDx = max((contentArea.left - backgroundPoint.x).abs(),
+              (contentArea.right - backgroundPoint.x)),
+          contentDy = max((contentArea.top - backgroundPoint.y).abs(),
+              (contentArea.bottom - backgroundPoint.y).abs());
 //    // We take the corners of the content because these are the furthest away in every scenario.
 //    final List<Point> contentAreaCorners = <Offset>[
 //      contentArea.topRight,
@@ -83,19 +96,21 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
 //    final double distanceToOuterContent = contentAreaCorners
 //        .map<double>((point) => point.distanceTo(backgroundPoint))
 //        .reduce(max);
-    final distanceToOuterContent =
-        sqrt(contentDx * contentDx + contentDy * contentDy);
+      final distanceToOuterContent =
+          sqrt(contentDx * contentDx + contentDy * contentDy);
 
-    final calculatedRadius =
-        max(distanceToOuterContent, distanceToOuterPulse) + outerContentPadding;
+      final calculatedRadius =
+          max(distanceToOuterContent, distanceToOuterPulse) +
+              outerContentPadding;
 
-    final double matchedRadius = (calculatedRadius > backgroundRadius &&
-                (overflowMode == OverflowMode.extendBackground ||
-                    overflowMode == OverflowMode.wrapBackground)) ||
-            (calculatedRadius < backgroundRadius &&
-                overflowMode == OverflowMode.wrapBackground)
-        ? calculatedRadius
-        : backgroundRadius;
+      matchedRadius = (calculatedRadius > backgroundRadius &&
+                  (overflowMode == OverflowMode.extendBackground ||
+                      overflowMode == OverflowMode.wrapBackground)) ||
+              (calculatedRadius < backgroundRadius &&
+                  overflowMode == OverflowMode.wrapBackground)
+          ? calculatedRadius
+          : backgroundRadius;
+    }
 
     layoutChild(
         BackgroundContentLayout.background,
