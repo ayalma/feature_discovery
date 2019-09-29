@@ -173,21 +173,27 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
   @override
   void didChangeDependencies() {
-    super.didChangeDependencies();
+    _screenSize = MediaQuery.of(context).size;
 
     final Bloc bloc = Bloc.of(context);
     final Stream<String> newDismissStream = bloc.outDismiss;
     final Stream<String> newCompleteStream = bloc.outComplete;
     final Stream<String> newStartStream = bloc.outStart;
 
-    if (_dismissStream != newDismissStream) _setDismissStream(newDismissStream);
+    if (_dismissStream != newDismissStream)
+      _setDismissStream(newDismissStream);
     if (_completeStream != newCompleteStream)
       _setCompleteStream(newCompleteStream);
-    if (_startStream != newStartStream) _setStartStream(newStartStream);
-    _screenSize = MediaQuery.of(context).size;
+    if (_startStream != newStartStream)
+      _setStartStream(newStartStream);
 
+    // If this widget was not in the tree when the feature discovery was started,
+    // we need to open it immediately because the streams will not receive
+    // any further events that could open the overlay.
     if (bloc.activeFeatureId == widget.featureId &&
-        _state == FeatureOverlayState.closed) _open(); // todo
+        _state == FeatureOverlayState.closed) _open();
+
+    super.didChangeDependencies();
   }
 
   void _setDismissStream(Stream<void> newStream) {
