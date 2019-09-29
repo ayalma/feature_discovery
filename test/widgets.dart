@@ -59,6 +59,8 @@ class TestIconState extends State<TestIcon> {
 /// This contains the complete tree necessary to pump it to the [WidgetTester]
 /// and contains an icon that is covered by the overlay because it is overflowing.
 /// If [OverflowMode.clipContent] is used, the tester should be able to trigger dismissal.
+///
+/// This works properly using [TestWidgetsFlutterBinding.setSurfaceSize] with `Size(3e2, 4e3)`.
 @visibleForTesting
 class OverflowingDescriptionFeature extends StatelessWidget {
   final String featureId;
@@ -89,7 +91,7 @@ class OverflowingDescriptionFeature extends StatelessWidget {
                 return Stack(
                   children: <Widget>[
                     Align(
-                      alignment: Alignment.topLeft,
+                      alignment: Alignment.topCenter,
                       child: DescribedFeatureOverlay(
                         featureId: featureId,
                         tapTarget: Icon(Icons.arrow_drop_down_circle),
@@ -113,7 +115,7 @@ class OverflowingDescriptionFeature extends StatelessWidget {
                       ),
                     ),
                     Align(
-                      alignment: Alignment.bottomRight,
+                      alignment: Alignment.bottomCenter,
                       child: Icon(icon),
                     ),
                   ],

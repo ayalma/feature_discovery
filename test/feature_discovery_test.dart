@@ -122,7 +122,7 @@ void main() {
 
     // Declares what OverflowMode's should allow the button to be tapped.
     const Map<OverflowMode, bool> modes = <OverflowMode, bool>{
-//      OverflowMode.ignore: false,
+      OverflowMode.ignore: false,
       OverflowMode.extendBackground: false,
       OverflowMode.wrapBackground: false,
       OverflowMode.clipContent: true,
@@ -133,6 +133,12 @@ void main() {
         BuildContext context;
 
         bool triggered = false;
+
+        // The surface size is set to ensure that the minimum overlay background size
+        // does not cover the button, but the content does.
+        await (TestWidgetsFlutterBinding.ensureInitialized()
+                as TestWidgetsFlutterBinding)
+            .setSurfaceSize(Size(3e2, 4e3));
 
         await tester.pumpWidget(
           OverflowingDescriptionFeature(
