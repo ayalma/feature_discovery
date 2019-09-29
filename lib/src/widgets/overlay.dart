@@ -167,34 +167,6 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   }
 
   @override
-  void dispose() {
-    _openController.dispose();
-    _completeController.dispose();
-    _dismissController.dispose();
-    _pulseController.dispose();
-
-    // If this widget is disposed while still showing an overlay,
-    // it needs to remove itself from the active overlays.
-    //
-    // This is not done when closing the overlay because the Bloc
-    // resets the activeOverlays and this would interfere with that.
-    //
-    // Dismissing and activating are not considered "showing" in this case
-    // because the Bloc will already have dealt with the activeOverlays as
-    // it triggered the completion or dismissal animation.
-    if (_state != FeatureOverlayState.closed &&
-        _state != FeatureOverlayState.dismissing &&
-        _state != FeatureOverlayState.activating) {
-      // If the _state is anything else, this overlay has to be showing,
-      // otherwise something is wrong.
-      assert(bloc.activeFeatureId == widget.featureId);
-
-      bloc.activeOverlays--;
-    }
-    super.dispose();
-  }
-
-  @override
   void didUpdateWidget(DescribedFeatureOverlay oldWidget) {
     if (oldWidget.enablePulsingAnimation != widget.enablePulsingAnimation) {
       if (widget.enablePulsingAnimation)
@@ -230,15 +202,42 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     super.didChangeDependencies();
   }
 
-  void _setDismissStream(Stream<void> newStream) {
-    _dismissStreamSubscription?.cancel();
-    _dismissStream = newStream;
-    _dismissStreamSubscription =
-        _dismissStream.listen((String featureId) async {
+  @override
+  void dispose() {
+    _openController.dispose();
+    _completeController.dispose();
+    _dismissController.dispose();
+    _pulseController.dispose();
+
+    // If this widget is disposed while still showing an overlay,
+    // it needs to remove itself from the active overlays.
+    //
+    // This is not done when closing the overlay because the Bloc
+    // resets the activeOverlays and this would interfere with that.
+    //
+    // Dismissing and activating are not considered "showing" in this case
+    // because the Bloc will already have dealt with the activeOverlays as
+    // it triggered the completion or dismissal animation.
+    if (_state != FeatureOverlayState.closed &&
+        _state != FeatureOverlayState.dismissing &&
+        _state != FeatureOverlayState.activating) {
+      // If the _state is anything else, this overlay has to be showing,
+      // otherwise something is wrong.
+      assert(bloc.activeFeatureId == widget.featureId);
+
+      bloc.activeOverlays--;
+    }
+    super.dispose();
+  }
+
+  void _setStartStream(Stream<void> newStream) {
+    _startStreamSubscription?.cancel();
+    _startStream = newStream;
+    _startStreamSubscription = _startStream.listen((String featureId) async {
       assert(featureId != null);
 
-      if (featureId == widget.featureId && _state == FeatureOverlayState.opened)
-        await _dismiss();
+      if (featureId == widget.featureId && _state == FeatureOverlayState.closed)
+        await _open();
     });
   }
 
@@ -254,82 +253,44 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     });
   }
 
-  void _setStartStream(Stream<void> newStream) {
-    _startStreamSubscription?.cancel();
-    _startStream = newStream;
-    _startStreamSubscription = _startStream.listen((String featureId) async {
+  void _setDismissStream(Stream<void> newStream) {
+    _dismissStreamSubscription?.cancel();
+    _dismissStream = newStream;
+    _dismissStreamSubscription =
+        _dismissStream.listen((String featureId) async {
       assert(featureId != null);
 
-      if (featureId == widget.featureId && _state == FeatureOverlayState.closed)
-        await _open();
+      if (featureId == widget.featureId && _state == FeatureOverlayState.opened)
+        await _dismiss();
     });
   }
 
   void _initAnimationControllers() {
-    _openController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
-          ..addListener(
-              () => setState(() => _transitionProgress = _openController.value))
-          ..addStatusListener(
-            (AnimationStatus status) {
-              if (status == AnimationStatus.forward &&
-                  _state == FeatureOverlayState.closed) {
-                setState(() => _state = FeatureOverlayState.opening);
-                return;
-              }
-
-              if (status == AnimationStatus.completed) {
-                if (widget.enablePulsingAnimation == true)
-                  _pulseController.forward(from: 0.0);
-
-                assert(_state == FeatureOverlayState.opening);
-                setState(() => _state = FeatureOverlayState.opened);
-              }
-            },
-          );
-
-    _pulseController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 1000))
-          ..addListener(() {
-            setState(() => _transitionProgress = _pulseController.value);
-          })
-          ..addStatusListener(
-            (AnimationStatus status) {
-              if (status == AnimationStatus.completed)
-                _pulseController.forward(from: 0.0);
-            },
-          );
-
-    _completeController = AnimationController(
+    _openController = AnimationController(
         vsync: this, duration: Duration(milliseconds: 250))
       ..addListener(
-          () => setState(() => _transitionProgress = _completeController.value))
+          () => setState(() => _transitionProgress = _openController.value));
+
+    _pulseController = AnimationController(
+        vsync: this, duration: Duration(milliseconds: 1000))
+      ..addListener(
+          () => setState(() => _transitionProgress = _pulseController.value))
       ..addStatusListener(
         (AnimationStatus status) {
-          if (status == AnimationStatus.forward &&
-              _state == FeatureOverlayState.opened)
-            setState(() => _state = FeatureOverlayState.activating);
+          if (status == AnimationStatus.completed)
+            _pulseController.forward(from: 0.0);
         },
       );
+
+    _completeController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
+          ..addListener(() =>
+              setState(() => _transitionProgress = _completeController.value));
 
     _dismissController = AnimationController(
         vsync: this, duration: Duration(milliseconds: 250))
       ..addListener(
-          () => setState(() => _transitionProgress = _dismissController.value))
-      ..addStatusListener(
-        (AnimationStatus status) {
-          if (status == AnimationStatus.forward &&
-              _state == FeatureOverlayState.opened)
-            setState(() => _state = FeatureOverlayState.dismissing);
-        },
-      );
-  }
-
-  void _show() {
-    // The activeStep might have changed by now because onOpen is asynchronous.
-    if (FeatureDiscovery.activeFeatureId(context) != widget.featureId) return;
-
-    _openController.forward(from: 0.0);
+          () => setState(() => _transitionProgress = _dismissController.value));
   }
 
   Future<void> _open() async {
@@ -349,6 +310,22 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       _show();
   }
 
+  void _show() async {
+    // The activeStep might have changed by now because onOpen is asynchronous.
+    // For example, the step might have been completed programmatically.
+    if (FeatureDiscovery.activeFeatureId(context) != widget.featureId) return;
+
+    // setState will be called in the animation listener.
+    _state = FeatureOverlayState.opening;
+    await _openController.forward(from: 0.0);
+    // This will be called after the animation is done because the TickerFuture
+    // from forward is completed when the animation is complete.
+    setState(() => _state = FeatureOverlayState.opened);
+
+    if (widget.enablePulsingAnimation == true)
+      _pulseController.forward(from: 0.0);
+  }
+
   Future<void> _complete() async {
     if (_completeController.isAnimating) return;
 
@@ -356,6 +333,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _openController.stop();
     _pulseController.stop();
 
+    // setState will be called in the animation listener.
+    _state = FeatureOverlayState.activating;
     await _completeController.forward(from: 0.0);
     // This will be called after the animation is done because the TickerFuture
     // from forward is completed when the animation is complete.
@@ -374,6 +353,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _openController.stop();
     _pulseController.stop();
 
+    // setState will be called in the animation listener.
+    _state = FeatureOverlayState.dismissing;
     await _dismissController.forward(from: 0.0);
     // This will be called after the animation is done because the TickerFuture
     // from forward is completed when the animation is complete.
