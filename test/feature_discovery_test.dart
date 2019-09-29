@@ -80,20 +80,21 @@ void main() {
   });
 
   group('Duplicate feature ids', () {
-    const List<String> featureIds = [
-      'featureIdA',
-      'featureIdB',
-      'featureIdB',
-      'featureIdC',
-    ];
-    const List<String> steps = [
-      'featureIdA',
-      'featureIdB',
-      'featureIdC',
-    ];
-    final List<String> texts = textsToMatch(steps);
-
     for (final bool allowShowingDuplicate in <bool>[true, false]) {
+      const List<String> featureIds = [
+        'featureIdA',
+        'featureIdB',
+        'featureIdB',
+        'featureIdC',
+      ],
+          steps = [
+        'featureIdA',
+        'featureIdB',
+        'featureIdC',
+      ];
+
+      final List<String> texts = textsToMatch(steps);
+
       testWidgets('allowShowingDuplicate == $allowShowingDuplicate',
           (WidgetTester tester) async {
         await tester.pumpWidget(TestWidget(
@@ -127,6 +128,52 @@ void main() {
         expect(find.text(texts[2]), findsOneWidget);
       });
     }
+
+    testWidgets('Show Overlay after duplicate has been removed',
+        (WidgetTester tester) async {
+      const String featureId = 'feature';
+      const IconData featureIcon = Icons.content_copy;
+
+      String staticFeatureTitle = 'Static',
+          disposableFeatureTitle = 'Disposable';
+
+      await tester.pumpWidget(WidgetWithDisposableFeature(
+        featureId: featureId,
+        featureIcon: featureIcon,
+        staticFeatureTitle: staticFeatureTitle,
+        disposableFeatureTitle: disposableFeatureTitle,
+      ));
+
+      final Finder stateFinder = find.byType(WidgetWithDisposableFeature);
+      expect(stateFinder, findsOneWidget);
+      final WidgetWithDisposableFeatureState state =
+          tester.firstState(stateFinder);
+
+      // Need some widget to return a context that has the Bloc widget as an ancestor.
+      final Finder overlayFinder = find.byType(DescribedFeatureOverlay);
+      final BuildContext context = tester.firstState(overlayFinder).context;
+
+      // Feature titles should only be visible once feature discovery has been started.
+      expect(find.text(staticFeatureTitle), findsNothing);
+      expect(find.text(disposableFeatureTitle), findsNothing);
+
+      FeatureDiscovery.discoverFeatures(context, <String>[featureId]);
+      await tester.pumpAndSettle();
+
+      // Only one of the overlays should be displayed as allowShowingDuplicate is false.
+      expect(find.byIcon(featureIcon), findsOneWidget);
+      // That overlay should be the disposable one because that should be notified first.
+      // The reason that should happen is because the disposable widget is first in the Column children list.
+      expect(find.text(disposableFeatureTitle), findsOneWidget);
+      expect(find.text(staticFeatureTitle), findsNothing);
+
+      // The disposable feature will now be disposed, which should show the static feature.
+      state.disposeFeature();
+      await tester.pumpAndSettle();
+
+      expect(find.text(disposableFeatureTitle), findsNothing);
+      expect(find.text(staticFeatureTitle), findsOneWidget);
+    });
   });
 
   group('OverflowMode', () {
