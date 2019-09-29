@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/animation.dart';
 import 'package:meta/meta.dart';
 
 import 'package:feature_discovery/src/widgets.dart';
@@ -23,11 +24,20 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
   final double contentOffsetMultiplier;
 
   final Offset backgroundCenter;
+
+  /// This radius does not reflect the rendered value.
+  /// Instead, it is a default value that is used for [OverflowMode.ignore],
+  /// [OverflowMode.clipContent], and considered for [OverflowMode.extendBackground].
+  ///
+  /// [OverflowMode.wrapBackground] completely ignores this value.
+  ///
+  /// Furthermore, the value is further adjusted based on [transitionProgress] and [state].
   final double backgroundRadius;
 
   final Offset anchor;
 
   final FeatureOverlayState state;
+  final double transitionProgress;
 
   BackgroundContentLayoutDelegate({
     @required this.overflowMode,
@@ -37,6 +47,7 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
     @required this.anchor,
     @required this.contentOffsetMultiplier,
     @required this.state,
+    @required this.transitionProgress,
   })  : assert(overflowMode != null),
         assert(contentPosition != null),
         assert(backgroundCenter != null),
@@ -64,10 +75,8 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
 
     double matchedRadius;
 
-    // The background radius is not affected during opening or closing the overlay and is
-    // also not affected when the overflow mode is ignore or clipContent.
-    if (state != FeatureOverlayState.opened ||
-        overflowMode == OverflowMode.ignore ||
+    // The background radius is not affected when the overflow mode is ignore or clipContent.
+    if (overflowMode == OverflowMode.ignore ||
         overflowMode == OverflowMode.clipContent)
       matchedRadius = backgroundRadius;
     else {
@@ -110,6 +119,29 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
                   overflowMode == OverflowMode.wrapBackground)
           ? calculatedRadius
           : backgroundRadius;
+    }
+
+    // This transforms the matched radius based on the current overlay
+    // state and transition progress.
+    switch (state) {
+      case FeatureOverlayState.opening:
+        matchedRadius *= const Interval(0, 0.8, curve: Curves.easeOut)
+            .transform(transitionProgress);
+        break;
+      case FeatureOverlayState.activating:
+        matchedRadius += transitionProgress * 40;
+        break;
+      case FeatureOverlayState.dismissing:
+        matchedRadius *= 1 - transitionProgress;
+        break;
+      case FeatureOverlayState.opened:
+        break;
+      case FeatureOverlayState.closed:
+        matchedRadius = 0;
+        break;
+      default:
+        // The switch statement should be exhaustive.
+        throw ArgumentError.value(state);
     }
 
     layoutChild(

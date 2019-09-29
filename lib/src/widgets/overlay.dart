@@ -402,26 +402,13 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     return position.dx < (_screenSize.width / 2.0);
   }
 
+  /// The value returned from here will be adjusted in [BackgroundContentLayoutDelegate]
+  /// in order to match the transition progress and overlay state.
   double _backgroundRadius(Offset anchor) {
     final bool isBackgroundCentered = _isCloseToTopOrBottom(anchor);
     final double backgroundRadius = min(_screenSize.width, _screenSize.height) *
         (isBackgroundCentered ? 1.0 : 0.7);
-    switch (_state) {
-      case FeatureOverlayState.opening:
-        final double adjustedPercent =
-            const Interval(0.0, 0.8, curve: Curves.easeOut)
-                .transform(_transitionProgress);
-        return backgroundRadius * adjustedPercent;
-      case FeatureOverlayState.activating:
-        return backgroundRadius + _transitionProgress * 40.0;
-      case FeatureOverlayState.dismissing:
-        return backgroundRadius * (1 - _transitionProgress);
-      case FeatureOverlayState.opened:
-        return backgroundRadius;
-      case FeatureOverlayState.closed:
-        return 0;
-    }
-    throw ArgumentError.value(_state);
+    return backgroundRadius;
   }
 
   Offset _backgroundPosition(Offset anchor, ContentLocation contentLocation) {
@@ -575,6 +562,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
             anchor: anchor,
             contentOffsetMultiplier: contentOffsetMultiplier,
             state: _state,
+            transitionProgress: _transitionProgress,
           ),
           children: <Widget>[
             LayoutId(
