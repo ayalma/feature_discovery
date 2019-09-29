@@ -120,10 +120,10 @@ class Bloc {
   }
 
   void dismiss() {
+    _inDismiss.add(activeFeatureId);
+
     _steps = null;
     _activeStepIndex = null;
     _activeOverlays = 0;
-
-    _inDismiss.add(activeFeatureId);
   }
 }
