@@ -308,13 +308,14 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     // The activeStep might have changed by now because onOpen is asynchronous.
     if (FeatureDiscovery.activeFeatureId(context) != widget.featureId) return;
 
-    Bloc.of(context).activeOverlays++;
     _openController.forward(from: 0.0);
   }
 
   Future<void> _open() async {
     if (!widget.allowShowingDuplicate && Bloc.of(context).activeOverlays > 0)
       return;
+
+    Bloc.of(context).activeOverlays++;
 
     if (widget.onOpen != null) {
       final bool shouldOpen = await widget.onOpen();
