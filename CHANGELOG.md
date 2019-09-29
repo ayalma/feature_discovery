@@ -1,7 +1,15 @@
-## 0.5.1
+## 0.6.0
 
-* Methods `completeStep` and `markStepComplete` have been deprecated and `completeCurrentStep` should now be used.
+* **Breaking change**: Renamed `ContentOrientation` to `ContentLocation`.
+* Methods `completeStep` and `markStepComplete` have been deprecated
+  and `completeCurrentStep` should now be used.
 * Method `clear` is deprecated and `dismiss` should now be used.
+* Added an `OverflowMode` enum and the `overflowMode` parameter to `DescribedFeatureOverlay`
+  to control how the overlay should handle content that exceeds the background's boundaries.
+* Made the `enablePulsingAnimation` respond to rebuilds, allowing to change it
+  after the overlay has been shown.
+* Added GIF demo of the package to the `README.md` file of the package and the example.
+* Updated example.
 
 ## 0.5.0
 
@@ -12,7 +20,7 @@
 * **Breaking change**: `title` and `description` parameters now take a `Widget`.
 * **Breaking change**: Callbacks are now `onOpen`, `onDismiss`, and `onComplete`.
   `onOpen` and `onDismiss` need to return `Future<bool>` when specified to decide
-  if the step should be open or dimissed respectively.
+  if the step should be open or dismissed respectively.
 * Fixed `DescribedFeatureOverlay`'s constantly rebuilding even if they were never displayed.
 * Fixed `DescribedFeatureOverlay`'s rebuilding after dismissing them.
 * **Warning**: `Theme.of(context)` is now used to determine text styles

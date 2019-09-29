@@ -2,7 +2,10 @@
 
 This Flutter package implements Feature Discovery following the [Material Design guidelines](https://material.io/archive/guidelines/growth-communications/feature-discovery.html).  
 
-With Feature Discovery, you can add context to any UI element, i.e. any `Widget` in your Flutter app. 
+With Feature Discovery, you can add context to any UI element, i.e. any `Widget` in your Flutter app.  
+Here is a small demo of the [`example` app](https://pub.dev/packages/feature_discovery#-example-tab-):
+
+[![](https://media.giphy.com/media/TJlOkURETOPiucHNRC/giphy.gif)](https://media.giphy.com/media/TJlOkURETOPiucHNRC/giphy.gif)
 
 ## Installing
 
@@ -52,11 +55,11 @@ DescribedFeatureOverlay(
 
 #### `contentLocation`
 
-This is `ContentOrientation.trivial` by default, however, the package cannot always determine the correct placement for the overlay. In those cases, you can provide either of these two:
+This is `ContentLocation.trivial` by default, however, the package cannot always determine the correct placement for the overlay. In those cases, you can provide either of these two:
 
- * `ContentOrientation.below`: Text is displayed below the target.
+ * `ContentLocation.below`: Text is displayed below the target.
   
- * `ContentOrientation.above`: Text is displayed above the target.
+ * `ContentLocation.above`: Text is displayed above the target.
 
 #### `onComplete`
 

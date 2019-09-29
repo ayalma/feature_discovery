@@ -1,4 +1,5 @@
 import 'package:feature_discovery/feature_discovery.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -12,15 +13,15 @@ List<String> textsToMatch(List<String> featureIds) {
 }
 
 void main() {
-  group("Basic behavior", () {
+  group('Basic behavior', () {
     const List<String> steps = [
-      "featureIdA",
-      "featureIdB",
-      "featureIdC",
-      "featureIdD",
+      'featureIdA',
+      'featureIdB',
+      'featureIdC',
+      'featureIdD',
     ];
     final List<String> texts = textsToMatch(steps);
-    testWidgets("Displaying two steps and dismissing before the third",
+    testWidgets('Displaying two steps and dismissing before the third',
         (WidgetTester tester) async {
       await tester.pumpWidget(const TestWidget(featureIds: steps));
       final Finder finder = find.byType(TestIcon);
@@ -51,8 +52,8 @@ void main() {
     });
   });
 
-  group("Non-existent featureIds", () {
-    const List<String> featureIds = ["featA", "featB", "featC"];
+  group('Non-existent featureIds', () {
+    const List<String> featureIds = ['featA', 'featB', 'featC'];
     final List<String> texts = textsToMatch(featureIds);
     testWidgets(
         "Calling [discoverFeatures] with two ids that aren't associated with an overlay",
@@ -78,20 +79,20 @@ void main() {
     });
   });
 
-  group("Duplicated featureIds", () {
+  group('Duplicate featureIds', () {
     const List<String> featureIds = [
-      "featureIdA",
-      "featureIdB",
-      "featureIdB",
-      "featureIdC",
+      'featureIdA',
+      'featureIdB',
+      'featureIdB',
+      'featureIdC',
     ];
     const List<String> steps = [
-      "featureIdA",
-      "featureIdB",
-      "featureIdC",
+      'featureIdA',
+      'featureIdB',
+      'featureIdC',
     ];
     final List<String> texts = textsToMatch(steps);
-    testWidgets("Two overlays have the same featureId",
+    testWidgets('Two overlays have the same featureId',
         (WidgetTester tester) async {
       await tester.pumpWidget(const TestWidget(featureIds: featureIds));
       final Finder finder = find.byType(TestIcon);
@@ -100,18 +101,58 @@ void main() {
       texts.forEach((t) => expect(find.text(t), findsNothing));
       FeatureDiscovery.discoverFeatures(context, steps);
       await tester.pumpAndSettle();
-      // First overlay should appear
+      // First overlay should appear.
       expect(find.text(texts[0]), findsOneWidget);
       FeatureDiscovery.completeCurrentStep(context);
       await tester.pumpAndSettle();
-      // First overlay should have disappeared, and overlays 2 and 3 should be displayed
+      // First overlay should have disappeared, and overlays 2 and 3 should be displayed.
       expect(find.text(texts[0]), findsNothing);
       expect(find.text(texts[1]), findsNWidgets(2));
       FeatureDiscovery.completeCurrentStep(context);
       await tester.pumpAndSettle();
-      // Overlays 2 and 3 should have disappeared, and the last overlay should appear
+      // Overlays 2 and 3 should have disappeared, and the last overlay should appear.
       expect(find.text(texts[1]), findsNothing);
       expect(find.text(texts[2]), findsOneWidget);
     });
+  });
+
+  group('OverflowMode', () {
+    const IconData icon = Icons.error;
+    const String featureId = 'feature';
+
+    // Declares what OverflowMode's should allow the button to be tapped.
+    const Map<OverflowMode, bool> modes = <OverflowMode, bool>{
+//      OverflowMode.ignore: false,
+      OverflowMode.extendBackground: false,
+      OverflowMode.wrapBackground: false,
+      OverflowMode.clipContent: true,
+    };
+
+    for (final MapEntry<OverflowMode, bool> modeEntry in modes.entries) {
+      testWidgets(modeEntry.key.toString(), (WidgetTester tester) async {
+        BuildContext context;
+
+        bool triggered = false;
+
+        await tester.pumpWidget(
+          OverflowingDescriptionFeature(
+            // This will be called when the content does not cover the icon.
+            onDismiss: () {
+              triggered = true;
+            },
+            onContext: (builderContext) => context = builderContext,
+            featureId: featureId,
+            icon: icon,
+            mode: modeEntry.key,
+          ),
+        );
+
+        FeatureDiscovery.discoverFeatures(context, <String>[featureId]);
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byIcon(icon));
+        expect(triggered, modeEntry.value);
+      });
+    }
   });
 }

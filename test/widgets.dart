@@ -46,11 +46,81 @@ class TestIconState extends State<TestIcon> {
     const Icon icon = Icon(Icons.more_horiz);
     return DescribedFeatureOverlay(
       featureId: widget.featureId,
-      enablePulsingAnimation: false, // mandatory to use pumpAndSettle in tests
+      enablePulsingAnimation: false,
+      // mandatory to use pumpAndSettle in tests
       child: icon,
       tapTarget: icon,
       title: const Text('This is it'),
       description: Text('Test has passed for ${widget.featureId}'),
     );
   }
+}
+
+/// This contains the complete tree necessary to pump it to the [WidgetTester]
+/// and contains an icon that is covered by the overlay because it is overflowing.
+/// If [OverflowMode.clipContent] is used, the tester should be able to trigger dismissal.
+@visibleForTesting
+class OverflowingDescriptionFeature extends StatelessWidget {
+  final String featureId;
+  final IconData icon;
+
+  final void Function(BuildContext context) onContext;
+  final void Function() onDismiss;
+
+  final OverflowMode mode;
+
+  const OverflowingDescriptionFeature({
+    Key key,
+    this.onContext,
+    this.featureId,
+    this.icon,
+    this.mode,
+    this.onDismiss,
+  }) : super(key: key);
+
+  @override
+  Widget build(_) => FeatureDiscovery(
+        child: MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) {
+                onContext(context);
+
+                return Stack(
+                  children: <Widget>[
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: DescribedFeatureOverlay(
+                        featureId: featureId,
+                        tapTarget: Icon(Icons.arrow_drop_down_circle),
+                        description: Container(
+                          width: double.infinity,
+                          height: 9e3,
+                          color: Color(0xff000000),
+                        ),
+                        contentLocation: ContentLocation.below,
+                        enablePulsingAnimation: false,
+                        overflowMode: mode,
+                        onDismiss: () async {
+                          onDismiss?.call();
+                          return true;
+                        },
+                        child: Container(
+                          width: 1e2,
+                          height: 1e2,
+                          color: Color(0xfffffff),
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Icon(icon),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      );
 }

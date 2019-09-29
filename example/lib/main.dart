@@ -51,6 +51,12 @@ class _MyHomePageState extends State<MyHomePage> {
     const Icon icon2 = Icon(Icons.menu);
     const Icon icon3 = Icon(Icons.search);
     const Icon icon4 = Icon(Icons.add);
+
+    OverflowMode feature1OverflowMode = OverflowMode.clipContent;
+    bool feature1EnablePulsingAnimation = false;
+
+    int feature3ItemCount = 15;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -62,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 featureId: feature7,
                 tapTarget: icon1,
                 backgroundColor: Colors.blue,
-                contentLocation: ContentOrientation.below,
+                contentLocation: ContentLocation.below,
                 title: const Text('Find the fastest route'),
                 description: const Text(
                     'Get car, walking, cycling, or public transit directions to this place'),
@@ -79,40 +85,53 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         ),
-        leading: DescribedFeatureOverlay(
-          featureId: feature1,
-          tapTarget: icon2,
-          backgroundColor: Colors.teal,
-          title: const Text('Just how you want it'),
-          description: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const Text(
-                  'Tap the menu icon to switch accounts, change settings & more.'),
-              const SizedBox(height: 12),
-              FlatButton(
-                padding: const EdgeInsets.all(0),
-                child: Text('Understood',
-                    style: Theme.of(context)
-                        .textTheme
-                        .button
-                        .copyWith(color: Colors.white)),
-                onPressed: () => FeatureDiscovery.completeCurrentStep(context),
-              ),
-              FlatButton(
-                padding: const EdgeInsets.all(0),
-                child: Text('Dismiss',
-                    style: Theme.of(context)
-                        .textTheme
-                        .button
-                        .copyWith(color: Colors.white)),
-                onPressed: () => FeatureDiscovery.dismiss(context),
-              ),
-            ],
-          ),
-          child: IconButton(
-            icon: icon2,
-            onPressed: () {},
+        leading: StatefulBuilder(
+          builder: (context, setState) => DescribedFeatureOverlay(
+            featureId: feature1,
+            tapTarget: icon2,
+            backgroundColor: Colors.teal,
+            title: const Text(
+                'This is overly long on purpose to test OverflowMode.clip!'),
+            overflowMode: feature1OverflowMode,
+            enablePulsingAnimation: feature1EnablePulsingAnimation,
+            description: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text(
+                    'Also, notice how the pulsing animation is not playing because it is deactivated for this feature.'),
+                FlatButton(
+                    child: Text('Toggle enablePulsingAnimation',
+                        style: Theme.of(context)
+                            .textTheme
+                            .button
+                            .copyWith(color: Colors.white)),
+                    onPressed: () => setState(() {
+                          feature1EnablePulsingAnimation =
+                              !feature1EnablePulsingAnimation;
+                        })),
+                const Text(
+                    'Ignore the items below or tap the button to toggle between OverflowMode.clip and OverflowMode.doNothing!'),
+                FlatButton(
+                    child: Text('Toggle overflowMode',
+                        style: Theme.of(context)
+                            .textTheme
+                            .button
+                            .copyWith(color: Colors.white)),
+                    onPressed: () => setState(() {
+                          feature1OverflowMode =
+                              feature1OverflowMode == OverflowMode.clipContent
+                                  ? OverflowMode.ignore
+                                  : OverflowMode.clipContent;
+                        })),
+                for (int n = 42; n > 0; n--)
+                  const Text('Testing clipping (ignore or toggle)',
+                      style: TextStyle(backgroundColor: Colors.black)),
+              ],
+            ),
+            child: IconButton(
+              icon: icon2,
+              onPressed: () {},
+            ),
           ),
         ),
         actions: <Widget>[
@@ -121,8 +140,32 @@ class _MyHomePageState extends State<MyHomePage> {
             tapTarget: icon3,
             backgroundColor: Colors.green,
             title: const Text('Search your compounds'),
-            description: const Text(
-                'Tap the magnifying glass to quickly scan your compounds'),
+            description: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text(
+                    'Tap the magnifying glass to quickly scan your compounds'),
+                FlatButton(
+                  padding: const EdgeInsets.all(0),
+                  child: Text('Understood',
+                      style: Theme.of(context)
+                          .textTheme
+                          .button
+                          .copyWith(color: Colors.white)),
+                  onPressed: () =>
+                      FeatureDiscovery.completeCurrentStep(context),
+                ),
+                FlatButton(
+                  padding: const EdgeInsets.all(0),
+                  child: Text('Dismiss',
+                      style: Theme.of(context)
+                          .textTheme
+                          .button
+                          .copyWith(color: Colors.white)),
+                  onPressed: () => FeatureDiscovery.dismiss(context),
+                ),
+              ],
+            ),
             child: IconButton(
               icon: icon3,
               onPressed: () {},
@@ -131,17 +174,33 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       body: const Content(),
-      floatingActionButton: DescribedFeatureOverlay(
-        featureId: feature3,
-        tapTarget: icon4,
-        backgroundColor: Colors.green,
-        title: const Text('FAB feature'),
-        description:
-            const Text('This is a floating action button and it does stuff.'),
-        child: FloatingActionButton(
-          onPressed: () {},
-          tooltip: 'Increment',
-          child: icon4,
+      floatingActionButton: StatefulBuilder(
+        builder: (context, setState) => DescribedFeatureOverlay(
+          featureId: feature3,
+          tapTarget: icon4,
+          backgroundColor: Colors.green,
+          overflowMode: OverflowMode.extendBackground,
+          title: const Text('FAB feature'),
+          description: Column(children: <Widget>[
+            const Text(
+                'This is overly long to test OverflowMode.extendBackground. The green circle should be large enough to cover all of the text.'),
+            FlatButton(
+                child: Text('Add another item',
+                    style: Theme.of(context)
+                        .textTheme
+                        .button
+                        .copyWith(color: Colors.white)),
+                onPressed: () => setState(() {
+                      feature3ItemCount++;
+                    })),
+            for (int n = feature3ItemCount; n > 0; n--)
+              Text('Testing OverflowMode.extendBackground'),
+          ]),
+          child: FloatingActionButton(
+            onPressed: () {},
+            tooltip: 'Increment',
+            child: icon4,
+          ),
         ),
       ),
     );
@@ -188,6 +247,8 @@ class _ContentState extends State<Content> {
 
   @override
   Widget build(BuildContext context) {
+    int feature6ItemCount = 0;
+
     return Stack(
       children: [
         SingleChildScrollView(
@@ -248,6 +309,7 @@ class _ContentState extends State<Content> {
                   title: const Text('Discover Features'),
                   description: const Text(
                       'Find all available features in this application with this button.'),
+                  contentLocation: ContentLocation.below,
                   child: EnsureVisible(
                     key: ensureKey,
                     child: RaisedButton(
@@ -273,25 +335,42 @@ class _ContentState extends State<Content> {
                 height: 1500,
                 color: Colors.blueAccent,
               ),
-              DescribedFeatureOverlay(
-                featureId: feature6,
-                tapTarget: const Icon(Icons.drive_eta),
-                backgroundColor: Colors.green,
-                onComplete: () async =>
-                    print('Tapped tap target of $feature6.'),
-                onOpen: () async {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    ensureKey2.currentState.ensureVisible();
-                  });
-                  return true;
-                },
-                title: const Text('Title text'),
-                description: const Text(
-                    'This text is just for test and we don\'t care about it at all.'),
-                child: EnsureVisible(
-                  key: ensureKey2,
-                  child: const Text(
-                    'Custom text',
+              StatefulBuilder(
+                builder: (context, setState) => DescribedFeatureOverlay(
+                  featureId: feature6,
+                  tapTarget: const Icon(Icons.drive_eta),
+                  backgroundColor: Colors.green,
+                  onComplete: () async =>
+                      print('Tapped tap target of $feature6.'),
+                  onOpen: () async {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      ensureKey2.currentState.ensureVisible();
+                    });
+                    return true;
+                  },
+                  description: Column(children: <Widget>[
+                    const Text(
+                        'You can test OverflowMode.wrapBackground here.'),
+                    FlatButton(
+                        padding: const EdgeInsets.all(0),
+                        child: Text('Add item',
+                            style: Theme.of(context)
+                                .textTheme
+                                .button
+                                .copyWith(color: Colors.white)),
+                        onPressed: () => setState(() {
+                              feature6ItemCount++;
+                            })),
+                    for (int n = feature6ItemCount; n > 0; n--)
+                      Text('Testing OverflowMode.wrapBackground'),
+                  ]),
+                  overflowMode: OverflowMode.wrapBackground,
+                  child: EnsureVisible(
+                    key: ensureKey2,
+                    duration: const Duration(milliseconds: 600),
+                    child: const Text(
+                      'Custom text',
+                    ),
                   ),
                 ),
               ),
