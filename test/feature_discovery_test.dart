@@ -13,9 +13,6 @@ List<String> textsToMatch(List<String> featureIds) {
 }
 
 void main() {
-  final TestWidgetsFlutterBinding testWidgetsFlutterBinding =
-      TestWidgetsFlutterBinding.ensureInitialized();
-
   group('Basic behavior', () {
     const List<String> steps = [
       'featureIdA',
@@ -135,12 +132,14 @@ void main() {
       testWidgets(modeEntry.key.toString(), (WidgetTester tester) async {
         BuildContext context;
 
-        bool tapped = false;
+        bool triggered = false;
 
-        await testWidgetsFlutterBinding.setSurfaceSize(Size(640, 2560));
         await tester.pumpWidget(
           OverflowingDescriptionFeature(
-            onTap: () => tapped = true,
+            // This will be called when the content does not cover the icon.
+            onDismiss: () {
+              triggered = true;
+            },
             onContext: (builderContext) => context = builderContext,
             featureId: featureId,
             icon: icon,
@@ -152,7 +151,7 @@ void main() {
         await tester.pumpAndSettle();
 
         await tester.tap(find.byIcon(icon));
-        expect(tapped, modeEntry.value);
+        expect(triggered, modeEntry.value);
       });
     }
   });

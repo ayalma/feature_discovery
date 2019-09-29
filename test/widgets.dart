@@ -57,30 +57,25 @@ class TestIconState extends State<TestIcon> {
 }
 
 /// This contains the complete tree necessary to pump it to the [WidgetTester]
-/// and contains a button that is covered by the overlay because it is overflowing.
-/// If [OverflowMode.clipContent] is used, the tester should be able to tap the button.
-///
-/// One dimension of the surface size needs to be way greater than the other to allow
-/// the button to sit outside of the minimum background area.
-/// While testing, this can be achieved using [TestWidgetsFlutterBinding.setSurfaceSize].
-/// This widget assumes that the surface has a way greater height than width.
+/// and contains an icon that is covered by the overlay because it is overflowing.
+/// If [OverflowMode.clipContent] is used, the tester should be able to trigger dismissal.
 @visibleForTesting
 class OverflowingDescriptionFeature extends StatelessWidget {
   final String featureId;
   final IconData icon;
 
   final void Function(BuildContext context) onContext;
-  final void Function() onTap;
+  final void Function() onDismiss;
 
   final OverflowMode mode;
 
   const OverflowingDescriptionFeature({
     Key key,
-    this.onTap,
     this.onContext,
     this.featureId,
     this.icon,
     this.mode,
+    this.onDismiss,
   }) : super(key: key);
 
   @override
@@ -90,27 +85,36 @@ class OverflowingDescriptionFeature extends StatelessWidget {
             body: Builder(
               builder: (context) {
                 onContext(context);
-                return Column(
+
+                return Stack(
                   children: <Widget>[
-                    DescribedFeatureOverlay(
-                      featureId: featureId,
-                      tapTarget: Container(),
-                      description: Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        color: Color(0xff000000),
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: DescribedFeatureOverlay(
+                        featureId: featureId,
+                        tapTarget: Icon(Icons.arrow_drop_down_circle),
+                        description: Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                          color: Color(0xff000000),
+                        ),
+                        contentLocation: ContentLocation.below,
+                        enablePulsingAnimation: false,
+                        overflowMode: mode,
+                        onDismiss: () async {
+                          onDismiss?.call();
+                          return true;
+                        },
+                        child: Container(
+                          width: 1e2,
+                          height: 1e2,
+                          color: Color(0xfffffff),
+                        ),
                       ),
-                      enablePulsingAnimation: false,
-                      overflowMode: mode,
-                      child: Container(),
                     ),
-                    SizedBox(
-                      // Needs to be away from the minimum background size.
-                      height: MediaQuery.of(context).size.width,
-                    ),
-                    IconButton(
-                      icon: Icon(icon),
-                      onPressed: onTap,
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Icon(icon),
                     ),
                   ],
                 );
