@@ -1,4 +1,4 @@
-name: Flutter Tests
+name: Flutter Unit Testing, Format & Analysis
 
 on:
   push:
