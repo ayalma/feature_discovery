@@ -416,9 +416,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         return backgroundRadius + _transitionProgress * 40.0;
       case FeatureOverlayState.dismissing:
         return backgroundRadius * (1 - _transitionProgress);
-      default:
+      case FeatureOverlayState.opened:
         return backgroundRadius;
+      case FeatureOverlayState.closed:
+        return 0;
     }
+    throw ArgumentError.value(_state);
   }
 
   Offset _backgroundPosition(Offset anchor, ContentLocation contentLocation) {
@@ -458,9 +461,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         case FeatureOverlayState.dismissing:
           return Offset.lerp(endingBackgroundPosition,
               startingBackgroundPosition, _transitionProgress);
-        default:
+        case FeatureOverlayState.opened:
           return endingBackgroundPosition;
+        case FeatureOverlayState.closed:
+          return startingBackgroundPosition;
       }
+      throw ArgumentError.value(_state);
     }
   }
 
@@ -506,9 +512,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         case FeatureOverlayState.dismissing:
           return Offset.lerp(endingBackgroundPosition,
               startingBackgroundPosition, _transitionProgress);
-        default:
+        case FeatureOverlayState.opened:
           return endingBackgroundPosition;
+        case FeatureOverlayState.closed:
+          return startingBackgroundPosition;
       }
+      throw ArgumentError.value(_state);
     }
   }
 
@@ -659,9 +668,12 @@ class _Background extends StatelessWidget {
             const Interval(0.2, 1.0, curve: Curves.easeOut)
                 .transform(transitionProgress);
         return 0.96 * (1 - adjustedPercent);
-      default:
+      case FeatureOverlayState.opened:
         return 0.96;
+      case FeatureOverlayState.closed:
+        return 0;
     }
+    throw ArgumentError.value(state);
   }
 
   @override
@@ -711,24 +723,28 @@ class _Pulse extends StatelessWidget {
         return 44.0 + (35.0 * expandedPercent);
       case FeatureOverlayState.dismissing:
       case FeatureOverlayState.activating:
-        return 0.0; //(44.0 + 35.0) * (1.0 - transitionProgress);
-      default:
-        return 0.0;
+        return 0; //(44.0 + 35.0) * (1.0 - transitionProgress);
+      case FeatureOverlayState.opening:
+      case FeatureOverlayState.closed:
+        return 0;
     }
+    throw ArgumentError.value(state);
   }
 
   double get opacity {
     switch (state) {
       case FeatureOverlayState.opened:
         final double percentOpaque =
-            1.0 - ((transitionProgress.clamp(0.3, 0.8) - 0.3) / 0.5);
-        return (percentOpaque * 0.75).clamp(0.0, 1.0);
+            1 - ((transitionProgress.clamp(0.3, 0.8) - 0.3) / 0.5);
+        return (percentOpaque * 0.75).clamp(0, 1);
       case FeatureOverlayState.activating:
       case FeatureOverlayState.dismissing:
-        return 0.0; //((1.0 - transitionProgress) * 0.5).clamp(0.0, 1.0);
-      default:
-        return 0.0;
+        return 0; //((1.0 - transitionProgress) * 0.5).clamp(0.0, 1.0);
+      case FeatureOverlayState.opening:
+      case FeatureOverlayState.closed:
+        return 0;
     }
+    throw ArgumentError.value(state);
   }
 
   @override
@@ -775,39 +791,41 @@ class _TapTarget extends StatelessWidget {
   double get opacity {
     switch (state) {
       case FeatureOverlayState.opening:
-        return const Interval(0.0, 0.3, curve: Curves.easeOut)
+        return const Interval(0, 0.3, curve: Curves.easeOut)
             .transform(transitionProgress);
       case FeatureOverlayState.activating:
       case FeatureOverlayState.dismissing:
-        return 1.0 -
-            const Interval(0.7, 1.0, curve: Curves.easeOut)
+        return 1 -
+            const Interval(0.7, 1, curve: Curves.easeOut)
                 .transform(transitionProgress);
-      default:
-        return 1.0;
+      case FeatureOverlayState.closed:
+        return 0;
+      case FeatureOverlayState.opened:
+        return 1;
     }
+    throw ArgumentError.value(state);
   }
 
   double get radius {
     switch (state) {
       case FeatureOverlayState.closed:
-        return 0.0;
+        return 0;
       case FeatureOverlayState.opening:
-        return 20.0 + 24.0 * transitionProgress;
+        return 20 + 24 * transitionProgress;
       case FeatureOverlayState.opened:
         double expandedPercent;
         if (transitionProgress < 0.3)
           expandedPercent = transitionProgress / 0.3;
         else if (transitionProgress < 0.6)
-          expandedPercent = 1.0 - ((transitionProgress - 0.3) / 0.3);
+          expandedPercent = 1 - ((transitionProgress - 0.3) / 0.3);
         else
-          expandedPercent = 0.0;
-        return 44.0 + (20.0 * expandedPercent);
+          expandedPercent = 0;
+        return 44 + (20 * expandedPercent);
       case FeatureOverlayState.activating:
       case FeatureOverlayState.dismissing:
-        return 20.0 + 24.0 * (1 - transitionProgress);
-      default:
-        return 44.0;
+        return 20 + 24 * (1 - transitionProgress);
     }
+    throw ArgumentError.value(state);
   }
 
   @override

@@ -38,30 +38,31 @@ class Content extends StatelessWidget {
         assert(textColor != null),
         super(key: key);
 
-  double opacity() {
+  double get opacity {
     switch (state) {
       case FeatureOverlayState.closed:
-        return 0.0;
+        return 0;
       case FeatureOverlayState.opening:
         final double adjustedPercent =
-            const Interval(0.6, 1.0, curve: Curves.easeOut)
+            const Interval(0.6, 1, curve: Curves.easeOut)
                 .transform(transitionProgress);
         return adjustedPercent;
       case FeatureOverlayState.activating:
       case FeatureOverlayState.dismissing:
         final double adjustedPercent =
-            const Interval(0.0, 0.4, curve: Curves.easeOut)
+            const Interval(0, 0.4, curve: Curves.easeOut)
                 .transform(transitionProgress);
-        return 1.0 - adjustedPercent;
-      default:
-        return 1.0;
+        return 1 - adjustedPercent;
+      case FeatureOverlayState.opened:
+        return 1;
     }
+    throw ArgumentError.value(state);
   }
 
   @override
   Widget build(BuildContext context) {
     Widget result = Opacity(
-      opacity: opacity(),
+      opacity: opacity,
       child: ConstrainedBox(
         constraints: BoxConstraints.loose(Size(
           width,
