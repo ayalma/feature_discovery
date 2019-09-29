@@ -180,6 +180,12 @@ DescribedFeatureOverlay(
 
 ## Notes
 
-In `DescribedFeatureOverlay`, `tapTarget`, `title`, and `description` can take any widget, but it is recommended to use an `Icon` for the tap target and simple `Text` widgets for the title and description. The package takes care of styling these widgets and having these as `Widget`s allows you to pass `Key`s, `Semantics`, etc. 
+In `DescribedFeatureOverlay`, `tapTarget`, `title`, and `description` can take any widget, but it is recommended to use an `Icon` for the tap target and simple `Text` widgets for the title and description. The package takes care of styling these widgets and having these as `Widget`s allows you to pass `Key`s, `Semantics`, etc.
+
+### Contributing
+
+If you want to start contributing to this package, it is recommended to refer to the [contributing guide](https://github.com/ayalma/feature_discovery/blob/master/CONTRIBUTING.md).
+
+### Gratitude 
 
 Thanks to [mattcarroll](https://medium.com/@mattcarroll) for their [Flutter challenge about Feature Discovery on Fluttery](https://youtu.be/Xm0ELlBtNWM).

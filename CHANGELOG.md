@@ -13,6 +13,7 @@
 * Added GIF demo of the package to the `README.md` file of the package and the example.
 * Updated example.
 * Added `OverflowMode` to `README.md`.
+* Added `CONTRIBUTING.md` and mentioned it in `README.md`.
 
 ## 0.5.0
 
