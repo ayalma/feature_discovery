@@ -141,16 +141,19 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   double _transitionProgress;
 
   AnimationController _openController;
+
+  /// The usual order is open, complete, then dismiss across the project,
+  /// but pulse does not exist for the other occurrences.
+  AnimationController _pulseController;
   AnimationController _completeController;
   AnimationController _dismissController;
-  AnimationController _pulseController;
 
-  Stream<String> _startStream;
-  Stream<String> _dismissStream;
+  Stream<String> _openStream;
   Stream<String> _completeStream;
-  StreamSubscription<String> _startStreamSubscription;
-  StreamSubscription<String> _dismissStreamSubscription;
+  Stream<String> _dismissStream;
+  StreamSubscription<String> _openStreamSubscription;
   StreamSubscription<String> _completeStreamSubscription;
+  StreamSubscription<String> _dismissStreamSubscription;
 
   /// The local reference to the [Bloc] is needed because it is used in [dispose].
   Bloc bloc;
@@ -184,14 +187,16 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _screenSize = MediaQuery.of(context).size;
 
     bloc = Bloc.of(context);
-    final Stream<String> newDismissStream = bloc.outDismiss;
-    final Stream<String> newCompleteStream = bloc.outComplete;
-    final Stream<String> newStartStream = bloc.outStart;
 
-    if (_dismissStream != newDismissStream) _setDismissStream(newDismissStream);
+    final Stream<String> newOpenStream = bloc.outOpen;
+    if (_openStream != newOpenStream) _setOpenStream(newOpenStream);
+
+    final Stream<String> newCompleteStream = bloc.outComplete;
     if (_completeStream != newCompleteStream)
       _setCompleteStream(newCompleteStream);
-    if (_startStream != newStartStream) _setStartStream(newStartStream);
+
+    final Stream<String> newDismissStream = bloc.outDismiss;
+    if (_dismissStream != newDismissStream) _setDismissStream(newDismissStream);
 
     // If this widget was not in the tree when the feature discovery was started,
     // we need to open it immediately because the streams will not receive
@@ -230,10 +235,10 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     super.dispose();
   }
 
-  void _setStartStream(Stream<void> newStream) {
-    _startStreamSubscription?.cancel();
-    _startStream = newStream;
-    _startStreamSubscription = _startStream.listen((String featureId) async {
+  void _setOpenStream(Stream<void> newStream) {
+    _openStreamSubscription?.cancel();
+    _openStream = newStream;
+    _openStreamSubscription = _openStream.listen((String featureId) async {
       assert(featureId != null);
 
       if (featureId == widget.featureId && _state == FeatureOverlayState.closed)
@@ -302,15 +307,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       final bool shouldOpen = await widget.onOpen();
       assert(shouldOpen != null,
           "You must return true or false at the end of the [onOpen] function");
-      if (shouldOpen)
-        _show();
-      else
+      if (!shouldOpen) {
         FeatureDiscovery.completeCurrentStep(context);
-    } else
-      _show();
-  }
+        return;
+      }
+    }
 
-  void _show() async {
     // The activeStep might have changed by now because onOpen is asynchronous.
     // For example, the step might have been completed programmatically.
     if (FeatureDiscovery.activeFeatureId(context) != widget.featureId) return;
@@ -845,8 +847,8 @@ enum OverflowMode {
   wrapBackground,
 }
 
-// The Flutter SDK has a State class called OverlayState.
-// Thus, this cannot be called OverlayState.
+/// The Flutter SDK has a State class called OverlayState.
+/// Thus, this cannot be called OverlayState.
 enum FeatureOverlayState {
   closed,
   opening,

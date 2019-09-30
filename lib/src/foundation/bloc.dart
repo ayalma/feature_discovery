@@ -29,13 +29,18 @@ class Bloc {
   }
 
   // The different streams send the featureId that must display/complete.
+  // The three types of actions are open, complete, and dismiss and
+  // they are ordered like that, like everywhere else as well.
 
-  final StreamController<String> _dismissController =
-      StreamController.broadcast();
+  // Open
 
-  Stream<String> get outDismiss => _dismissController.stream;
+  final StreamController<String> _openController = StreamController.broadcast();
 
-  Sink<String> get _inDismiss => _dismissController.sink;
+  Stream<String> get outOpen => _openController.stream;
+
+  Sink<String> get _inOpen => _openController.sink;
+
+  // Complete
 
   final StreamController<String> _completeController =
       StreamController.broadcast();
@@ -44,12 +49,14 @@ class Bloc {
 
   Sink<String> get _inComplete => _completeController.sink;
 
-  final StreamController<String> _startController =
+  // Dismiss
+
+  final StreamController<String> _dismissController =
       StreamController.broadcast();
 
-  Stream<String> get outStart => _startController.stream;
+  Stream<String> get outDismiss => _dismissController.stream;
 
-  Sink<String> get _inStart => _startController.sink;
+  Sink<String> get _inDismiss => _dismissController.sink;
 
   /// The steps consist of the feature ids of the features to be discovered.
   Iterable<String> _steps;
@@ -84,13 +91,13 @@ class Bloc {
     // which is the only possible cause for activeOverlays == 0 in the setter,
     // then we can possibly show that other overlay again because it is not
     // a duplicate anymore.
-    if (activeOverlays == 0) _inStart.add(activeFeatureId);
+    if (activeOverlays == 0) _inOpen.add(activeFeatureId);
   }
 
   void dispose() {
     _dismissController.close();
     _completeController.close();
-    _startController.close();
+    _openController.close();
   }
 
   void discoverFeatures({Iterable<String> steps}) {
@@ -99,7 +106,7 @@ class Bloc {
     _activeStepIndex = 0;
     _activeOverlays = 0;
 
-    _inStart.add(activeFeatureId);
+    _inOpen.add(activeFeatureId);
   }
 
   void completeStep() {
@@ -110,7 +117,7 @@ class Bloc {
     _activeOverlays = 0;
 
     if (_activeStepIndex < _steps.length) {
-      _inStart.add(activeFeatureId);
+      _inOpen.add(activeFeatureId);
       return;
     }
 
