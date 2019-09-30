@@ -374,9 +374,6 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     // at least a bit better and will almost never happen anyway.
     final previousState = _state;
 
-    print(
-        '_DescribedFeatureOverlayState._dismiss $previousState $_transitionProgress');
-
     // setState will be called in the animation listener.
     _state = FeatureOverlayState.dismissing;
     await _dismissController.forward(

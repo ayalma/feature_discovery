@@ -41,7 +41,7 @@ if 'suggestions' in output:
             s['title'], str(s['score']), s['description'])
 
 # Adding health issues
-health_issues = []  # TODO
+health_issues = []  # TODO(axel-op)
 
 
 event = json.loads(os.environ['EVENT_PAYLOAD'])
