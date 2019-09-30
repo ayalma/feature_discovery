@@ -13,7 +13,7 @@ const String feature1 = 'feature1',
 void main() {
   // You can increase the timeDilation value if you want to see
   // the animations more slowly.
-  timeDilation = 1.0;
+  timeDilation = 10.0; // todo
 
   runApp(MyApp());
 }

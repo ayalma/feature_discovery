@@ -143,7 +143,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   AnimationController _openController;
 
   /// The usual order is open, complete, then dismiss across the project,
-  /// but pulse does not exist for the other occurrences.
+  /// but pulse does not exist for most other occurrences.
   AnimationController _pulseController;
   AnimationController _completeController;
   AnimationController _dismissController;
@@ -210,9 +210,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   @override
   void dispose() {
     _openController.dispose();
+    _pulseController.dispose();
     _completeController.dispose();
     _dismissController.dispose();
-    _pulseController.dispose();
 
     // If this widget is disposed while still showing an overlay,
     // it needs to remove itself from the active overlays.
@@ -253,7 +253,10 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         _completeStream.listen((String featureId) async {
       assert(featureId != null);
 
-      if (featureId == widget.featureId && _state == FeatureOverlayState.opened)
+      // The state check is required to ensure that duplicate overlays that
+      // were not chosen to be displayed (having allowShowingDuplicate set to false)
+      // not suddenly display a completion animation.
+      if (featureId == widget.featureId && _state != FeatureOverlayState.closed)
         await _complete();
     });
   }
@@ -265,7 +268,10 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         _dismissStream.listen((String featureId) async {
       assert(featureId != null);
 
-      if (featureId == widget.featureId && _state == FeatureOverlayState.opened)
+      // The state check is required to ensure that duplicate overlays that
+      // were not chosen to be displayed (having allowShowingDuplicate set to false)
+      // not suddenly display a dismissal animation.
+      if (featureId == widget.featureId && _state != FeatureOverlayState.closed)
         await _dismiss();
     });
   }
@@ -283,7 +289,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       ..addStatusListener(
         (AnimationStatus status) {
           if (status == AnimationStatus.completed)
-            _pulseController.forward(from: 0.0);
+            _pulseController.forward(from: 0);
         },
       );
 
@@ -319,13 +325,13 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
     // setState will be called in the animation listener.
     _state = FeatureOverlayState.opening;
-    await _openController.forward(from: 0.0);
+    await _openController.forward(from: 0);
     // This will be called after the animation is done because the TickerFuture
     // from forward is completed when the animation is complete.
     setState(() => _state = FeatureOverlayState.opened);
 
     if (widget.enablePulsingAnimation == true)
-      _pulseController.forward(from: 0.0);
+      _pulseController.forward(from: 0);
   }
 
   Future<void> _complete() async {
@@ -337,7 +343,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
     // setState will be called in the animation listener.
     _state = FeatureOverlayState.completing;
-    await _completeController.forward(from: 0.0);
+    await _completeController.forward(from: 0);
     // This will be called after the animation is done because the TickerFuture
     // from forward is completed when the animation is complete.
     _close();
@@ -355,9 +361,28 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _openController.stop();
     _pulseController.stop();
 
+    // The point of this is to work with the transition progress
+    // from the opening animation if the opening animation was still
+    // playing when dismiss was called.
+    // Otherwise, the overlay would jump from opening to opened and
+    // run the dismissal animation from there.
+    //
+    // We do not do this in _complete because the completion animation
+    // does not animate backwards, i.e. the circle just grows when completing.
+    // On the flip side, the dismiss animation can be seen as a reversed open animation.
+    // This is not perfect because e.g. the curves are different, but it looks
+    // at least a bit better and will almost never happen anyway.
+    final previousState = _state;
+
+    print(
+        '_DescribedFeatureOverlayState._dismiss $previousState $_transitionProgress');
+
     // setState will be called in the animation listener.
     _state = FeatureOverlayState.dismissing;
-    await _dismissController.forward(from: 0.0);
+    await _dismissController.forward(
+        from: previousState == FeatureOverlayState.opening
+            ? 1 - _transitionProgress
+            : 0);
     // This will be called after the animation is done because the TickerFuture
     // from forward is completed when the animation is complete.
     _close();
