@@ -55,7 +55,7 @@ class Bloc {
 
   /// [DescribedFeatureOverlay]s use either `activeOverlays++` to add themselves
   /// to the active overlays or `activeOverlays--` to remove themselves.
-  set activeOverlays(activeOverlays) {
+  set activeOverlays(int activeOverlays) {
     // Callers (DescribedFeatureOverlay's) can only either add or remove
     // themselves, i.e. the difference will always be 1.
     assert((_activeOverlays - activeOverlays).abs() == 1);

@@ -126,11 +126,11 @@ class OverflowingDescriptionFeature extends StatelessWidget {
                   alignment: Alignment.topCenter,
                   child: DescribedFeatureOverlay(
                     featureId: featureId,
-                    tapTarget: Icon(Icons.arrow_drop_down_circle),
+                    tapTarget: const Icon(Icons.arrow_drop_down_circle),
                     description: Container(
                       width: double.infinity,
                       height: 9e3,
-                      color: Color(0xff000000),
+                      color: const Color(0xff000000),
                     ),
                     contentLocation: ContentLocation.below,
                     enablePulsingAnimation: false,
@@ -142,7 +142,7 @@ class OverflowingDescriptionFeature extends StatelessWidget {
                     child: Container(
                       width: 1e2,
                       height: 1e2,
-                      color: Color(0xfffffff),
+                      color: const Color(0xfffffff),
                     ),
                   ),
                 ),

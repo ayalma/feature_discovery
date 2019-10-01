@@ -265,12 +265,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
   void _initAnimationControllers() {
     _openController = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 250))
+        vsync: this, duration: const Duration(milliseconds: 250))
       ..addListener(
           () => setState(() => _transitionProgress = _openController.value));
 
     _pulseController = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 1000))
+        vsync: this, duration: const Duration(milliseconds: 1000))
       ..addListener(
           () => setState(() => _transitionProgress = _pulseController.value))
       ..addStatusListener(
@@ -280,13 +280,13 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         },
       );
 
-    _completeController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
-          ..addListener(() =>
-              setState(() => _transitionProgress = _completeController.value));
+    _completeController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 250))
+      ..addListener(() =>
+          setState(() => _transitionProgress = _completeController.value));
 
     _dismissController = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 250))
+        vsync: this, duration: const Duration(milliseconds: 250))
       ..addListener(
           () => setState(() => _transitionProgress = _dismissController.value));
   }
