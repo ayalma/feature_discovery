@@ -149,19 +149,23 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   AnimationController _completeController;
   AnimationController _dismissController;
 
-  Stream<String> _openStream;
-  Stream<String> _completeStream;
-  Stream<String> _dismissStream;
-  StreamSubscription<String> _openStreamSubscription;
-  StreamSubscription<String> _completeStreamSubscription;
-  StreamSubscription<String> _dismissStreamSubscription;
-
   /// The local reference to the [Bloc] is needed because it is used in [dispose].
   Bloc bloc;
+
+  Stream<EventType> _eventsStream;
+  StreamSubscription<EventType> _eventsSubscription;
+
+  /// If either [_complete] or [_dismiss] were called previously,
+  /// the overlay is awaiting the closure of itself. This is necessary
+  /// because [DescribedFeatureOverlay.onComplete] and [DescribedFeatureOverlay.onDismiss]
+  /// are `async` and while those are evaluated, the methods should not execute again.
+  bool _awaitingClosure;
 
   @override
   void initState() {
     _state = FeatureOverlayState.closed;
+
+    _awaitingClosure = false;
 
     _transitionProgress = 1;
 
@@ -189,15 +193,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
     bloc = Bloc.of(context);
 
-    final Stream<String> newOpenStream = bloc.outOpen;
-    if (_openStream != newOpenStream) _setOpenStream(newOpenStream);
-
-    final Stream<String> newCompleteStream = bloc.outComplete;
-    if (_completeStream != newCompleteStream)
-      _setCompleteStream(newCompleteStream);
-
-    final Stream<String> newDismissStream = bloc.outDismiss;
-    if (_dismissStream != newDismissStream) _setDismissStream(newDismissStream);
+    final Stream<EventType> newEventsStream = bloc.eventsOut;
+    if (_eventsStream != newEventsStream) _setStream(newEventsStream);
 
     // If this widget was not in the tree when the feature discovery was started,
     // we need to open it immediately because the streams will not receive
@@ -236,44 +233,31 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     super.dispose();
   }
 
-  void _setOpenStream(Stream<void> newStream) {
-    _openStreamSubscription?.cancel();
-    _openStream = newStream;
-    _openStreamSubscription = _openStream.listen((String featureId) async {
-      assert(featureId != null);
+  void _setStream(Stream<EventType> newStream) {
+    _eventsSubscription?.cancel();
+    _eventsStream = newStream;
+    _eventsSubscription = _eventsStream.listen((EventType event) async {
+      assert(event != null);
 
-      if (featureId == widget.featureId && _state == FeatureOverlayState.closed)
-        await _open();
-    });
-  }
+      switch (event) {
+        case EventType.open:
+          // Only try opening when the active feature id matches the id of this widget.
+          if (bloc.activeFeatureId != widget.featureId) return;
+          _open();
+          return;
+        case EventType.complete:
+        case EventType.dismiss:
+          // This overlay was the active feature before this event if it is either opening or already opened.
+          if (_state != FeatureOverlayState.opened &&
+              _state != FeatureOverlayState.opening) return;
 
-  void _setCompleteStream(Stream<void> newStream) {
-    _completeStreamSubscription?.cancel();
-    _completeStream = newStream;
-    _completeStreamSubscription =
-        _completeStream.listen((String featureId) async {
-      assert(featureId != null);
-
-      // The state check is required to ensure that duplicate overlays that
-      // were not chosen to be displayed (having allowShowingDuplicate set to false)
-      // not suddenly display a completion animation.
-      if (featureId == widget.featureId && _state != FeatureOverlayState.closed)
-        await _complete();
-    });
-  }
-
-  void _setDismissStream(Stream<void> newStream) {
-    _dismissStreamSubscription?.cancel();
-    _dismissStream = newStream;
-    _dismissStreamSubscription =
-        _dismissStream.listen((String featureId) async {
-      assert(featureId != null);
-
-      // The state check is required to ensure that duplicate overlays that
-      // were not chosen to be displayed (having allowShowingDuplicate set to false)
-      // not suddenly display a dismissal animation.
-      if (featureId == widget.featureId && _state != FeatureOverlayState.closed)
-        await _dismiss();
+          if (event == EventType.complete)
+            _complete();
+          else
+            _dismiss();
+          return;
+      }
+      throw ArgumentError.value(event);
     });
   }
 
@@ -336,10 +320,19 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   }
 
   Future<void> _complete() async {
-    if (_completeController.isAnimating) return;
+    // The method might be triggered multiple times.
+    if (_awaitingClosure) return;
+
+    _awaitingClosure = true;
 
     if (widget.onComplete != null) {
-      final bool shouldComplete = await widget.onComplete();
+      bool shouldComplete;
+      try {
+        shouldComplete = await widget.onComplete();
+      } finally {
+        _awaitingClosure = false;
+      }
+
       assert(shouldComplete != null,
           'You need to return a [Future] that completes with true or false in [onComplete].');
       if (!shouldComplete) return;
@@ -357,10 +350,18 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
   Future<void> _dismiss() async {
     // The method might be triggered multiple times, especially when swiping.
-    if (_dismissController.isAnimating) return;
+    if (_awaitingClosure) return;
+
+    _awaitingClosure = true;
 
     if (widget.onDismiss != null) {
-      final bool shouldDismiss = await widget.onDismiss();
+      bool shouldDismiss;
+      try {
+        shouldDismiss = await widget.onDismiss();
+      } finally {
+        _awaitingClosure = false;
+      }
+
       assert(shouldDismiss != null,
           'You need to return a [Future] that completes with true or false in [onDismiss].');
       if (!shouldDismiss) return;
@@ -397,6 +398,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   void _close() {
     assert(_state == FeatureOverlayState.completing ||
         _state == FeatureOverlayState.dismissing);
+
+    _awaitingClosure = false;
     setState(() {
       _state = FeatureOverlayState.closed;
     });

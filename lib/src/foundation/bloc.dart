@@ -28,35 +28,15 @@ class Bloc {
     return bloc;
   }
 
-  // The different streams send the featureId that must display/complete.
-  // The three types of actions are open, complete, and dismiss and
-  // they are ordered like that, like everywhere else as well.
-
-  // Open
-
-  final StreamController<String> _openController = StreamController.broadcast();
-
-  Stream<String> get outOpen => _openController.stream;
-
-  Sink<String> get _inOpen => _openController.sink;
-
-  // Complete
-
-  final StreamController<String> _completeController =
+  /// This [StreamController] allows to send events of type [EventType].
+  /// The [DescribedFeatureOverlay]s will be able to handle these events by checking the
+  /// [activeFeatureId] against its own feature id or by considering its current [FeatureOverlayState].
+  final StreamController<EventType> _eventsController =
       StreamController.broadcast();
 
-  Stream<String> get outComplete => _completeController.stream;
+  Stream<EventType> get eventsOut => _eventsController.stream;
 
-  Sink<String> get _inComplete => _completeController.sink;
-
-  // Dismiss
-
-  final StreamController<String> _dismissController =
-      StreamController.broadcast();
-
-  Stream<String> get outDismiss => _dismissController.stream;
-
-  Sink<String> get _inDismiss => _dismissController.sink;
+  Sink<EventType> get _eventsIn => _eventsController.sink;
 
   /// The steps consist of the feature ids of the features to be discovered.
   Iterable<String> _steps;
@@ -91,13 +71,11 @@ class Bloc {
     // which is the only possible cause for activeOverlays == 0 in the setter,
     // then we can possibly show that other overlay again because it is not
     // a duplicate anymore.
-    if (activeOverlays == 0) _inOpen.add(activeFeatureId);
+    if (activeOverlays == 0) _eventsIn.add(EventType.open);
   }
 
   void dispose() {
-    _dismissController.close();
-    _completeController.close();
-    _openController.close();
+    _eventsController.close();
   }
 
   void discoverFeatures({Iterable<String> steps}) {
@@ -106,18 +84,18 @@ class Bloc {
     _activeStepIndex = 0;
     _activeOverlays = 0;
 
-    _inOpen.add(activeFeatureId);
+    _eventsIn.add(EventType.open);
   }
 
   void completeStep() {
     if (_steps == null) return;
-    _inComplete.add(activeFeatureId);
+    _eventsIn.add(EventType.complete);
 
     _activeStepIndex++;
     _activeOverlays = 0;
 
     if (_activeStepIndex < _steps.length) {
-      _inOpen.add(activeFeatureId);
+      _eventsIn.add(EventType.open);
       return;
     }
 
@@ -127,10 +105,27 @@ class Bloc {
   }
 
   void dismiss() {
-    _inDismiss.add(activeFeatureId);
+    _eventsIn.add(EventType.dismiss);
 
     _steps = null;
     _activeStepIndex = null;
     _activeOverlays = 0;
   }
+}
+
+/// These are the different types of the event that [Bloc]
+/// can send to [DescribedFeatureOverlay]:
+///
+///  * [open] signals that the overlay should attempt to open itself.
+///    This happens when calling [FeatureDiscovery.discoverFeatures]
+///    or after a previous step is completed (see below).
+///  * [complete] signals that the overlay should attempt to complete itself, which happens
+///    when the end user taps the tap target or [FeatureDiscovery.completeCurrentStep] is called.
+///  * [dismiss] signals that the overlay should attempt to dismiss itself, which happens
+///    when the end user taps or swipes outside of the overlay or
+///    [FeatureDiscovery.dismiss] is called manually.
+enum EventType {
+  open,
+  complete,
+  dismiss,
 }

@@ -45,8 +45,10 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    final Future<void> Function() action =
-        () async => print('IconButton of $feature7 tapped.');
+    final Future<bool> Function() action = () async {
+      print('IconButton of $feature7 tapped.');
+      return true;
+    };
     const Icon icon1 = Icon(Icons.drive_eta);
     const Icon icon2 = Icon(Icons.menu);
     const Icon icon3 = Icon(Icons.search);
