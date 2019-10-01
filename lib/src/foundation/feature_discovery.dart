@@ -23,7 +23,7 @@ class FeatureDiscovery extends StatelessWidget {
       Bloc.of(context).discoverFeatures(steps: steps.toList());
 
   /// This will schedule completion of the current discovery step and continue
-  /// onto the step after the activation animation of the current overlay if successful.
+  /// onto the step after the completion animation of the current overlay if successful.
   ///
   /// The [stepId] ensures that you are marking the correct feature for completion.
   /// If the provided [stepId] does not match the feature that is currently shown, i.e.
@@ -36,6 +36,16 @@ class FeatureDiscovery extends StatelessWidget {
   /// If you want to complete the step and continue the feature discovery,
   /// call [completeCurrentStep] instead.
   static void dismiss(BuildContext context) => Bloc.of(context).dismiss();
+
+  /// This return the feature id of the current feature discovery step, i.e.
+  /// of the [DescribedFeatureOverlay] that is currently supposed to be shown, or `null`.
+  ///
+  /// Note that this will also return the feature id of the current step of the steps
+  /// you passed to [discoverFeature] even when there is no [DescribedFeatureOverlay]
+  /// in the tree to display the overlay.
+  /// This means that you cannot use this to check if a feature overlay is being displayed.
+  static String activeFeatureId(BuildContext context) =>
+      Bloc.of(context).activeFeatureId;
 
   /// Deprecated methods, kept for retrocompatibility.
   @Deprecated('Use [dismiss] instead')

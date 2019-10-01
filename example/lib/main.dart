@@ -45,8 +45,10 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    final Future<void> Function() action =
-        () async => print('IconButton of $feature7 tapped.');
+    final Future<bool> Function() action = () async {
+      print('IconButton of $feature7 tapped.');
+      return true;
+    };
     const Icon icon1 = Icon(Icons.drive_eta);
     const Icon icon2 = Icon(Icons.menu);
     const Icon icon3 = Icon(Icons.search);
@@ -298,8 +300,10 @@ class _ContentState extends State<Content> {
                   featureId: feature5,
                   tapTarget: const Icon(Icons.drive_eta),
                   backgroundColor: Colors.green,
-                  onComplete: () async =>
-                      print('Tapped tap target of $feature5.'),
+                  onComplete: () async {
+                    print('Tapped tap target of $feature5.');
+                    return true;
+                  },
                   onOpen: () async {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       ensureKey.currentState.ensureVisible();
@@ -340,8 +344,10 @@ class _ContentState extends State<Content> {
                   featureId: feature6,
                   tapTarget: const Icon(Icons.drive_eta),
                   backgroundColor: Colors.green,
-                  onComplete: () async =>
-                      print('Tapped tap target of $feature6.'),
+                  onComplete: () async {
+                    print('Tapped tap target of $feature6.');
+                    return true;
+                  },
                   onOpen: () async {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       ensureKey2.currentState.ensureVisible();

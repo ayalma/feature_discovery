@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/animation.dart';
 import 'package:meta/meta.dart';
 
 import 'package:feature_discovery/src/widgets.dart';
@@ -23,9 +24,20 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
   final double contentOffsetMultiplier;
 
   final Offset backgroundCenter;
+
+  /// This radius does not reflect the rendered value.
+  /// Instead, it is a default value that is used for [OverflowMode.ignore],
+  /// [OverflowMode.clipContent], and considered for [OverflowMode.extendBackground].
+  ///
+  /// [OverflowMode.wrapBackground] completely ignores this value.
+  ///
+  /// Furthermore, the value is further adjusted based on [transitionProgress] and [state].
   final double backgroundRadius;
 
   final Offset anchor;
+
+  final FeatureOverlayState state;
+  final double transitionProgress;
 
   BackgroundContentLayoutDelegate({
     @required this.overflowMode,
@@ -34,10 +46,13 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
     @required this.backgroundRadius,
     @required this.anchor,
     @required this.contentOffsetMultiplier,
+    @required this.state,
+    @required this.transitionProgress,
   })  : assert(overflowMode != null),
         assert(contentPosition != null),
         assert(backgroundCenter != null),
         assert(backgroundRadius != null),
+        assert(state != null),
         assert(anchor != null);
 
   @override
@@ -58,20 +73,27 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
           contentOffsetMultiplier.clamp(-1, 0) * contentSize.height,
     );
 
-    // 75 is the radius of the pulse when fully expanded.
-    // Calculating the distance here is easy because the pulse is a circle.
-    final distanceToOuterPulse = anchorPoint.distanceTo(backgroundPoint) + 75;
+    double matchedRadius;
 
-    // Calculate distance to the furthest point of the content.
-    final Rect contentArea = Rect.fromLTWH(
-        contentPoint.x, contentPoint.y, contentSize.width, contentSize.height);
-    // This is equal to finding the max out of the distances to the corners of the Rect.
-    // It is just the more Math-esque approach.
-    // See the commented out code below for an intuitive approach.
-    final double contentDx = max((contentArea.left - backgroundPoint.x).abs(),
-            (contentArea.right - backgroundPoint.x)),
-        contentDy = max((contentArea.top - backgroundPoint.y).abs(),
-            (contentArea.bottom - backgroundPoint.y).abs());
+    // The background radius is not affected when the overflow mode is ignore or clipContent.
+    if (overflowMode == OverflowMode.ignore ||
+        overflowMode == OverflowMode.clipContent)
+      matchedRadius = backgroundRadius;
+    else {
+      // 75 is the radius of the pulse when fully expanded.
+      // Calculating the distance here is easy because the pulse is a circle.
+      final distanceToOuterPulse = anchorPoint.distanceTo(backgroundPoint) + 75;
+
+      // Calculate distance to the furthest point of the content.
+      final Rect contentArea = Rect.fromLTWH(contentPoint.x, contentPoint.y,
+          contentSize.width, contentSize.height);
+      // This is equal to finding the max out of the distances to the corners of the Rect.
+      // It is just the more Math-esque approach.
+      // See the commented out code below for an intuitive approach.
+      final double contentDx = max((contentArea.left - backgroundPoint.x).abs(),
+              (contentArea.right - backgroundPoint.x)),
+          contentDy = max((contentArea.top - backgroundPoint.y).abs(),
+              (contentArea.bottom - backgroundPoint.y).abs());
 //    // We take the corners of the content because these are the furthest away in every scenario.
 //    final List<Point> contentAreaCorners = <Offset>[
 //      contentArea.topRight,
@@ -83,19 +105,44 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
 //    final double distanceToOuterContent = contentAreaCorners
 //        .map<double>((point) => point.distanceTo(backgroundPoint))
 //        .reduce(max);
-    final distanceToOuterContent =
-        sqrt(contentDx * contentDx + contentDy * contentDy);
+      final distanceToOuterContent =
+          sqrt(contentDx * contentDx + contentDy * contentDy);
 
-    final calculatedRadius =
-        max(distanceToOuterContent, distanceToOuterPulse) + outerContentPadding;
+      final calculatedRadius =
+          max(distanceToOuterContent, distanceToOuterPulse) +
+              outerContentPadding;
 
-    final double matchedRadius = (calculatedRadius > backgroundRadius &&
-                (overflowMode == OverflowMode.extendBackground ||
-                    overflowMode == OverflowMode.wrapBackground)) ||
-            (calculatedRadius < backgroundRadius &&
-                overflowMode == OverflowMode.wrapBackground)
-        ? calculatedRadius
-        : backgroundRadius;
+      matchedRadius = (calculatedRadius > backgroundRadius &&
+                  (overflowMode == OverflowMode.extendBackground ||
+                      overflowMode == OverflowMode.wrapBackground)) ||
+              (calculatedRadius < backgroundRadius &&
+                  overflowMode == OverflowMode.wrapBackground)
+          ? calculatedRadius
+          : backgroundRadius;
+    }
+
+    // This transforms the matched radius based on the current overlay
+    // state and transition progress.
+    switch (state) {
+      case FeatureOverlayState.opening:
+        matchedRadius *= const Interval(0, 0.8, curve: Curves.easeOut)
+            .transform(transitionProgress);
+        break;
+      case FeatureOverlayState.completing:
+        matchedRadius += transitionProgress * 40;
+        break;
+      case FeatureOverlayState.dismissing:
+        matchedRadius *= 1 - transitionProgress;
+        break;
+      case FeatureOverlayState.opened:
+        break;
+      case FeatureOverlayState.closed:
+        matchedRadius = 0;
+        break;
+      default:
+        // The switch statement should be exhaustive.
+        throw ArgumentError.value(state);
+    }
 
     layoutChild(
         BackgroundContentLayout.background,

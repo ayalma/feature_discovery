@@ -28,49 +28,104 @@ class Bloc {
     return bloc;
   }
 
+  /// This [StreamController] allows to send events of type [EventType].
+  /// The [DescribedFeatureOverlay]s will be able to handle these events by checking the
+  /// [activeFeatureId] against its own feature id or by considering its current [FeatureOverlayState].
+  final StreamController<EventType> _eventsController =
+      StreamController.broadcast();
+
+  Stream<EventType> get eventsOut => _eventsController.stream;
+
+  Sink<EventType> get _eventsIn => _eventsController.sink;
+
+  /// The steps consist of the feature ids of the features to be discovered.
   Iterable<String> _steps;
+
   int _activeStepIndex;
 
-  // The different streams send the featureId that must display/complete.
+  String get activeFeatureId =>
+      _activeStepIndex == null ? null : _steps?.elementAt(_activeStepIndex);
 
-  final StreamController<String> _dismissController =
-      StreamController.broadcast();
-  Stream<String> get outDismiss => _dismissController.stream;
-  Sink<String> get _inDismiss => _dismissController.sink;
+  /// This is used to determine if the active feature is already shown by
+  /// another [DescribedFeatureOverlay] as [DescribedFeatureOverlay.allowShowingDuplicate]
+  /// requires this.
+  int _activeOverlays;
 
-  final StreamController<String> _completeController =
-      StreamController.broadcast();
-  Stream<String> get outComplete => _completeController.stream;
-  Sink<String> get _inComplete => _completeController.sink;
+  int get activeOverlays => _activeOverlays;
 
-  final StreamController<String> _startController =
-      StreamController.broadcast();
-  Stream<String> get outStart => _startController.stream;
-  Sink<String> get _inStart => _startController.sink;
+  /// [DescribedFeatureOverlay]s use either `activeOverlays++` to add themselves
+  /// to the active overlays or `activeOverlays--` to remove themselves.
+  set activeOverlays(int activeOverlays) {
+    // Callers (DescribedFeatureOverlay's) can only either add or remove
+    // themselves, i.e. the difference will always be 1.
+    assert((_activeOverlays - activeOverlays).abs() == 1);
 
-  String get activeStepId => _steps?.elementAt(_activeStepIndex);
+    _activeOverlays = activeOverlays;
+
+    // There is the possibility that two DescribedFeatureOverlays with the same
+    // feature id were active when the feature id was added to _inStart initially.
+    // However, any of them could have had allowShowingDuplicate set to false,
+    // in which case that overlay would not have been opened.
+    //
+    // If the overlay that was showing the active step was disposed now,
+    // which is the only possible cause for activeOverlays == 0 in the setter,
+    // then we can possibly show that other overlay again because it is not
+    // a duplicate anymore.
+    if (activeOverlays == 0) _eventsIn.add(EventType.open);
+  }
 
   void dispose() {
-    _dismissController.close();
-    _completeController.close();
-    _startController.close();
+    _eventsController.close();
   }
 
   void discoverFeatures({Iterable<String> steps}) {
     assert(steps != null);
     _steps = steps;
     _activeStepIndex = 0;
-    _inStart.add(activeStepId);
+    _activeOverlays = 0;
+
+    _eventsIn.add(EventType.open);
   }
 
   void completeStep() {
     if (_steps == null) return;
-    _inComplete.add(activeStepId);
+    _eventsIn.add(EventType.complete);
+
     _activeStepIndex++;
-    if (_activeStepIndex < _steps.length) _inStart.add(activeStepId);
+    _activeOverlays = 0;
+
+    if (_activeStepIndex < _steps.length) {
+      _eventsIn.add(EventType.open);
+      return;
+    }
+
+    // The last step has been completed, so we need to clear the steps.
+    _steps = null;
+    _activeStepIndex = null;
   }
 
   void dismiss() {
-    _inDismiss.add(activeStepId);
+    _eventsIn.add(EventType.dismiss);
+
+    _steps = null;
+    _activeStepIndex = null;
+    _activeOverlays = 0;
   }
+}
+
+/// These are the different types of the event that [Bloc]
+/// can send to [DescribedFeatureOverlay]:
+///
+///  * [open] signals that the overlay should attempt to open itself.
+///    This happens when calling [FeatureDiscovery.discoverFeatures]
+///    or after a previous step is completed (see below).
+///  * [complete] signals that the overlay should attempt to complete itself, which happens
+///    when the end user taps the tap target or [FeatureDiscovery.completeCurrentStep] is called.
+///  * [dismiss] signals that the overlay should attempt to dismiss itself, which happens
+///    when the end user taps or swipes outside of the overlay or
+///    [FeatureDiscovery.dismiss] is called manually.
+enum EventType {
+  open,
+  complete,
+  dismiss,
 }
