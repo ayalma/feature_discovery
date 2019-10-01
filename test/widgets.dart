@@ -211,9 +211,7 @@ class WidgetWithDisposableFeatureState
                 title: Text(widget.disposableFeatureTitle),
                 tapTarget: Icon(widget.featureIcon),
                 child: Container(),
-              )
-            else
-              Container(),
+              ),
             DescribedFeatureOverlay(
               featureId: widget.featureId,
               allowShowingDuplicate: false,
