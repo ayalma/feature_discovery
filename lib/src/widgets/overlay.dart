@@ -81,9 +81,10 @@ class DescribedFeatureOverlay extends StatefulWidget {
   final Future<bool> Function() onDismiss;
 
   /// Called when the tap target is tapped.
-  /// Whenever the [Future] this function returns is finished, the feature discovery
+  /// Whenever the [Future] this function returns finishes with `true`, the feature discovery
   /// will continue and the next step will try to open after a closing animation.
-  final Future<void> Function() onComplete;
+  /// If it completes with `false`, nothing happens.
+  final Future<bool> Function() onComplete;
 
   /// Controls what happens with content that overflows the background's area.
   ///
@@ -312,7 +313,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     if (widget.onOpen != null) {
       final bool shouldOpen = await widget.onOpen();
       assert(shouldOpen != null,
-          "You must return true or false at the end of the [onOpen] function");
+          'You need to return a [Future] that completes with true or false in [onOpen].');
       if (!shouldOpen) {
         FeatureDiscovery.completeCurrentStep(context);
         return;
@@ -337,7 +338,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   Future<void> _complete() async {
     if (_completeController.isAnimating) return;
 
-    if (widget.onComplete != null) await widget.onComplete();
+    if (widget.onComplete != null) {
+      final bool shouldComplete = await widget.onComplete();
+      assert(shouldComplete != null,
+          'You need to return a [Future] that completes with true or false in [onComplete].');
+      if (!shouldComplete) return;
+    }
     _openController.stop();
     _pulseController.stop();
 
@@ -355,7 +361,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
     if (widget.onDismiss != null) {
       final bool shouldDismiss = await widget.onDismiss();
-      assert(shouldDismiss != null);
+      assert(shouldDismiss != null,
+          'You need to return a [Future] that completes with true or false in [onDismiss].');
       if (!shouldDismiss) return;
     }
     _openController.stop();

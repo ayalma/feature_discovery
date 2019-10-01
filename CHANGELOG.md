@@ -1,6 +1,8 @@
 ## 0.6.0
 
 * **Breaking change**: Renamed `ContentOrientation` to `ContentLocation`.
+* **Breaking change**: Made `onComplete` of type `Future<bool> Function()` to match `onOpen`
+  and `onDismiss`.
 * Methods `completeStep` and `markStepComplete` have been deprecated
   and `completeCurrentStep` should now be used.
 * Method `clear` is deprecated and `dismiss` should now be used.

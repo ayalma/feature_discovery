@@ -298,8 +298,10 @@ class _ContentState extends State<Content> {
                   featureId: feature5,
                   tapTarget: const Icon(Icons.drive_eta),
                   backgroundColor: Colors.green,
-                  onComplete: () async =>
-                      print('Tapped tap target of $feature5.'),
+                  onComplete: () async {
+                    print('Tapped tap target of $feature5.');
+                    return true;
+                  },
                   onOpen: () async {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       ensureKey.currentState.ensureVisible();
@@ -340,8 +342,10 @@ class _ContentState extends State<Content> {
                   featureId: feature6,
                   tapTarget: const Icon(Icons.drive_eta),
                   backgroundColor: Colors.green,
-                  onComplete: () async =>
-                      print('Tapped tap target of $feature6.'),
+                  onComplete: () async {
+                    print('Tapped tap target of $feature6.');
+                    return true;
+                  },
                   onOpen: () async {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       ensureKey2.currentState.ensureVisible();

@@ -67,7 +67,9 @@ This is `ContentLocation.trivial` by default, however, the package cannot always
    onComplete: () async {
     // Executed when the tap target is tapped. The overlay will not close before
     // this function returns and after that, the next step will be opened.
-    print('Target tapped.'); 
+    print('Target tapped.');
+    // You can prevent completion by returning false.
+    return true;
   },
 ```
 
@@ -76,8 +78,8 @@ This is `ContentLocation.trivial` by default, however, the package cannot always
 ```dart
   onDismiss: () async {
     // Called when the user taps outside of the overlay, trying to dismiss it.
-    // You can prevent dismissal by returning `false`.
     print('Overlay dismissed.');
+    // You can prevent dismissal by returning false.
     return true;
   },
 ```
@@ -87,9 +89,9 @@ This is `ContentLocation.trivial` by default, however, the package cannot always
 ```dart
   onOpen: () async {
     // This callback is called before the overlay is displayed.
-    // If you return false, it will not be opened and the next step
+    print('The overlay is about to be displayed.');
+    // If you return false, the overlay will not be opened and the next step
     // will be attempted to open.
-    print('The overlay is about to be displayed');
     return true;
   },
 ```
