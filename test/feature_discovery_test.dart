@@ -209,7 +209,7 @@ void main() {
         // if OverflowMode.clipContent is not enabled.
         await (TestWidgetsFlutterBinding.ensureInitialized()
                 as TestWidgetsFlutterBinding)
-            .setSurfaceSize(Size(3e2, 4e3));
+            .setSurfaceSize(const Size(3e2, 4e3));
 
         await tester.pumpWidget(
           OverflowingDescriptionFeature(
