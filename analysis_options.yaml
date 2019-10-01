@@ -5,7 +5,6 @@ linter:
 
     - prefer_const_declarations
     - prefer_const_constructors
-    - prefer_const_constructors_in_immutables
 
     - cancel_subscriptions
     - close_sinks
