@@ -41,18 +41,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Install Flutter
-        uses: subosito/flutter-action@v1
-      - name: Install pana
-        run: flutter pub global activate pana
-      - name: Install Python
-        uses: actions/setup-python@v1
+      - uses: axel-op/dart_package_analyzer@v1
         with:
-          python-version: ^3.7.4
-      - name: Install PyGithub package
-        run: pip install PyGithub
-      - name: Run pana, process the output, and post comment
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EVENT_PAYLOAD: ${{ toJson(github.event) }}
-        run: python ./.github/workflows/pana_scores.py $(pwd)
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          eventPayload: ${{ toJson(github.event) }}
+          commitSha: ${{ github.sha }}
+          maxScoreToComment: 99.99
