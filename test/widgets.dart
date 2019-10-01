@@ -203,16 +203,17 @@ class WidgetWithDisposableFeatureState
   Widget build(_) => TestWrapper(
         child: Column(
           children: <Widget>[
-            _showDisposableFeature
-                ? DescribedFeatureOverlay(
-                    featureId: widget.featureId,
-                    allowShowingDuplicate: false,
-                    enablePulsingAnimation: false,
-                    title: Text(widget.disposableFeatureTitle),
-                    tapTarget: Icon(widget.featureIcon),
-                    child: Container(),
-                  )
-                : Container(),
+            if (_showDisposableFeature)
+              DescribedFeatureOverlay(
+                featureId: widget.featureId,
+                allowShowingDuplicate: false,
+                enablePulsingAnimation: false,
+                title: Text(widget.disposableFeatureTitle),
+                tapTarget: Icon(widget.featureIcon),
+                child: Container(),
+              )
+            else
+              Container(),
             DescribedFeatureOverlay(
               featureId: widget.featureId,
               allowShowingDuplicate: false,

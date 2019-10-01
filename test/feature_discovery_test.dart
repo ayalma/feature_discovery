@@ -162,8 +162,11 @@ void main() {
 
       // Only one of the overlays should be displayed as allowShowingDuplicate is false.
       expect(find.byIcon(featureIcon), findsOneWidget);
-      // That overlay should be the disposable one because that should be notified first.
+      // That overlay should be the disposable one because that one receives the Bloc event first.
       // The reason that should happen is because the disposable widget is first in the Column children list.
+      //
+      // "Disposable widget" here is referring to the widget that is shown based on the _showDisposableFeature
+      // flag in WidgetWithDisposableFeatureState and has the disposableFeatureTitle.
       expect(find.text(disposableFeatureTitle), findsOneWidget);
       expect(find.text(staticFeatureTitle), findsNothing);
 
