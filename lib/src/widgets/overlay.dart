@@ -212,6 +212,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _completeController.dispose();
     _dismissController.dispose();
 
+    _eventsSubscription.cancel();
+
     // If this widget is disposed while still showing an overlay,
     // it needs to remove itself from the active overlays.
     //
@@ -306,7 +308,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
     // The activeStep might have changed by now because onOpen is asynchronous.
     // For example, the step might have been completed programmatically.
-    if (FeatureDiscovery.activeFeatureId(context) != widget.featureId) return;
+    if (bloc.activeFeatureId != widget.featureId) return;
 
     // setState will be called in the animation listener.
     _state = FeatureOverlayState.opening;
