@@ -196,7 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       feature3ItemCount++;
                     })),
             for (int n = feature3ItemCount; n > 0; n--)
-              Text('Testing OverflowMode.extendBackground'),
+              const Text('Testing OverflowMode.extendBackground'),
           ]),
           child: FloatingActionButton(
             onPressed: () {},
@@ -264,14 +264,14 @@ class _ContentState extends State<Content> {
               ),
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 color: Colors.blue,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: const Text(
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 8.0),
+                      child: Text(
                         'DISH REPUBLIC',
                         style: TextStyle(
                           color: Colors.white,
@@ -368,7 +368,7 @@ class _ContentState extends State<Content> {
                               feature6ItemCount++;
                             })),
                     for (int n = feature6ItemCount; n > 0; n--)
-                      Text('Testing OverflowMode.wrapBackground'),
+                      const Text('Testing OverflowMode.wrapBackground'),
                   ]),
                   overflowMode: OverflowMode.wrapBackground,
                   child: EnsureVisible(

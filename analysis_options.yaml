@@ -2,6 +2,16 @@ linter:
   rules:
     - unnecessary_const
     - unnecessary_new
+
+    - prefer_const_declarations
     - prefer_const_constructors
     - prefer_const_constructors_in_immutables
-    - prefer_const_declarations
+
+    - cancel_subscriptions
+    - close_sinks
+
+    - directives_ordering
+
+    - prefer_final_in_for_each
+
+    - provide_deprecation_message
