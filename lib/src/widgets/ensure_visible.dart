@@ -30,7 +30,7 @@ class EnsureVisible extends StatefulWidget {
 
   static void ensureVisible(BuildContext context) {
     EnsureVisibleState state =
-        context.ancestorStateOfType(TypeMatcher<EnsureVisibleState>())
+        context.ancestorStateOfType(const TypeMatcher<EnsureVisibleState>())
             as EnsureVisibleState;
 
     state.ensureVisible();

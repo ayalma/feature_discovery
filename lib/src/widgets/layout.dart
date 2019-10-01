@@ -11,7 +11,7 @@ class CenterAbout extends StatelessWidget {
     return Positioned(
       top: position.dy,
       left: position.dx,
-      child: new FractionalTranslation(
+      child: FractionalTranslation(
         translation: const Offset(-0.5, -0.5),
         child: child,
       ),

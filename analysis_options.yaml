@@ -1,0 +1,7 @@
+linter:
+  rules:
+    - unnecessary_const
+    - unnecessary_new
+    - prefer_const_constructors
+    - prefer_const_constructors_in_immutables
+    - prefer_const_declarations

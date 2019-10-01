@@ -245,7 +245,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         case EventType.open:
           // Only try opening when the active feature id matches the id of this widget.
           if (bloc.activeFeatureId != widget.featureId) return;
-          _open();
+          await _open();
           return;
         case EventType.complete:
         case EventType.dismiss:
@@ -254,9 +254,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
               _state != FeatureOverlayState.opening) return;
 
           if (event == EventType.complete)
-            _complete();
+            await _complete();
           else
-            _dismiss();
+            await _dismiss();
           return;
       }
       throw ArgumentError.value(event);
