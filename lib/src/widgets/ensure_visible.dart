@@ -23,8 +23,10 @@ class EnsureVisible extends StatefulWidget {
     Key key,
     @required this.child,
     @Deprecated('Use the curve parameter in EnsureVisibleState.ensureVisible.')
+        // ignore: deprecated_member_use_from_same_package
         this.curve,
     @Deprecated('Use the duration parameter in EnsureVisibleState.ensureVisible.')
+        // ignore: deprecated_member_use_from_same_package
         this.duration,
   })  : assert(child != null),
         super(key: key);
@@ -99,7 +101,9 @@ class EnsureVisibleState extends State<EnsureVisible> {
     return await position.ensureVisible(
       renderObject,
       alignment: alignment,
+      // ignore: deprecated_member_use_from_same_package
       duration: widget.duration ?? duration,
+      // ignore: deprecated_member_use_from_same_package
       curve: widget.curve ?? curve,
     );
   }
