@@ -308,7 +308,10 @@ class _ContentState extends State<Content> {
                   },
                   onOpen: () async {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      ensureKey.currentState.ensureVisible();
+                      ensureKey.currentState.ensureVisible(
+                        preciseAlignment: 0.5,
+                        duration: const Duration(milliseconds: 400),
+                      );
                     });
                     return true;
                   },
@@ -354,7 +357,8 @@ class _ContentState extends State<Content> {
                   },
                   onOpen: () async {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      ensureKey2.currentState.ensureVisible();
+                      ensureKey2.currentState.ensureVisible(
+                          duration: const Duration(milliseconds: 600));
                     });
                     return true;
                   },
@@ -377,7 +381,6 @@ class _ContentState extends State<Content> {
                   overflowMode: OverflowMode.wrapBackground,
                   child: EnsureVisible(
                     key: ensureKey2,
-                    duration: const Duration(milliseconds: 600),
                     child: const Text(
                       'Custom text',
                     ),
