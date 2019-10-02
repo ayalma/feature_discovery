@@ -34,4 +34,3 @@ linter:
     # to avoid that problem, curly braces have to be added in very few scenarios and
     # in all the other cases this lint is unhelpful.
     curly_braces_in_flow_control_structures: false
-    
