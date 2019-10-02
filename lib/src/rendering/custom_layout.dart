@@ -77,9 +77,9 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
 
     // The background radius is not affected when the overflow mode is ignore or clipContent.
     if (overflowMode == OverflowMode.ignore ||
-        overflowMode == OverflowMode.clipContent)
+        overflowMode == OverflowMode.clipContent) {
       matchedRadius = backgroundRadius;
-    else {
+    } else {
       // 75 is the radius of the pulse when fully expanded.
       // Calculating the distance here is easy because the pulse is a circle.
       final distanceToOuterPulse = anchorPoint.distanceTo(backgroundPoint) + 75;

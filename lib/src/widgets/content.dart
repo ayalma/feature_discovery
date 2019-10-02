@@ -100,12 +100,13 @@ class Content extends StatelessWidget {
       ),
     );
 
-    if (overflowMode == OverflowMode.clipContent)
+    if (overflowMode == OverflowMode.clipContent) {
       result = _ClipContent(
         backgroundCenter: backgroundCenter,
         backgroundRadius: backgroundRadius,
         child: result,
       );
+    }
 
     return result;
   }
