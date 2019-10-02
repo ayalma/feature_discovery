@@ -39,20 +39,18 @@ class TestWidget extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return TestWrapper(
-      child: Center(
-        child: Column(
-          children: featureIds
-              .map((featureId) => TestIcon(
-                    featureId: featureId,
-                    allowShowingDuplicate: allowShowingDuplicate,
-                  ))
-              .toList(),
+  Widget build(BuildContext context) => TestWrapper(
+        child: Center(
+          child: Column(
+            children: featureIds
+                .map((String featureId) => TestIcon(
+                      featureId: featureId,
+                      allowShowingDuplicate: allowShowingDuplicate,
+                    ))
+                .toList(),
+          ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 @visibleForTesting
@@ -117,7 +115,7 @@ class OverflowingDescriptionFeature extends StatelessWidget {
   @override
   Widget build(_) => TestWrapper(
         child: Builder(
-          builder: (context) {
+          builder: (BuildContext context) {
             onContext(context);
 
             return Stack(

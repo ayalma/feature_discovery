@@ -13,5 +13,17 @@ linter:
     - directives_ordering
 
     - prefer_final_in_for_each
+    - prefer_final_fields
+    - prefer_final_locals
 
     - provide_deprecation_message
+
+    - prefer_constructors_over_static_methods
+
+    - prefer_expression_function_bodies
+
+    - prefer_typing_uninitialized_variables
+    - always_declare_return_types
+    - always_specify_types
+
+    - annotate_overrides

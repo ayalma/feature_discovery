@@ -9,13 +9,11 @@ class BlocProvider extends StatelessWidget {
   const BlocProvider({Key key, this.child}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Provider<Bloc>(
-      child: child,
-      builder: (context) => Bloc(),
-      dispose: (context, bloc) => bloc.dispose(),
-    );
-  }
+  Widget build(BuildContext context) => Provider<Bloc>(
+        child: child,
+        builder: (BuildContext context) => Bloc(),
+        dispose: (BuildContext context, Bloc bloc) => bloc.dispose(),
+      );
 }
 
 class Bloc {
@@ -32,7 +30,7 @@ class Bloc {
   /// The [DescribedFeatureOverlay]s will be able to handle these events by checking the
   /// [activeFeatureId] against its own feature id or by considering its current [FeatureOverlayState].
   final StreamController<EventType> _eventsController =
-      StreamController.broadcast();
+      StreamController<EventType>.broadcast();
 
   Stream<EventType> get eventsOut => _eventsController.stream;
 

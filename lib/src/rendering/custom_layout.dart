@@ -60,13 +60,14 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
     assert(hasChild(BackgroundContentLayout.background));
     assert(hasChild(BackgroundContentLayout.content));
 
-    final contentSize =
+    final Size contentSize =
         layoutChild(BackgroundContentLayout.content, const BoxConstraints());
 
     // Do calculations regarding the sizing of the background.
-    final backgroundPoint = Point(backgroundCenter.dx, backgroundCenter.dy),
-        anchorPoint = Point(anchor.dx, anchor.dy),
-        contentPoint = Point(
+    final Point<double> backgroundPoint =
+            Point<double>(backgroundCenter.dx, backgroundCenter.dy),
+        anchorPoint = Point<double>(anchor.dx, anchor.dy),
+        contentPoint = Point<double>(
       contentPosition.dx,
       // If the content is rendered above the tap target, it needs to be shifted up.
       contentPosition.dy +
@@ -82,7 +83,8 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
     } else {
       // 75 is the radius of the pulse when fully expanded.
       // Calculating the distance here is easy because the pulse is a circle.
-      final distanceToOuterPulse = anchorPoint.distanceTo(backgroundPoint) + 75;
+      final double distanceToOuterPulse =
+          anchorPoint.distanceTo(backgroundPoint) + 75;
 
       // Calculate distance to the furthest point of the content.
       final Rect contentArea = Rect.fromLTWH(contentPoint.x, contentPoint.y,
@@ -105,10 +107,10 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
 //    final double distanceToOuterContent = contentAreaCorners
 //        .map<double>((point) => point.distanceTo(backgroundPoint))
 //        .reduce(max);
-      final distanceToOuterContent =
+      final double distanceToOuterContent =
           sqrt(contentDx * contentDx + contentDy * contentDy);
 
-      final calculatedRadius =
+      final double calculatedRadius =
           max(distanceToOuterContent, distanceToOuterPulse) +
               outerContentPadding;
 
@@ -169,10 +171,9 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
   }
 
   @override
-  bool shouldRelayout(BackgroundContentLayoutDelegate oldDelegate) {
-    return oldDelegate.overflowMode != overflowMode ||
-        oldDelegate.contentPosition != contentPosition ||
-        oldDelegate.backgroundCenter != backgroundCenter ||
-        oldDelegate.backgroundRadius != backgroundRadius;
-  }
+  bool shouldRelayout(BackgroundContentLayoutDelegate oldDelegate) =>
+      oldDelegate.overflowMode != overflowMode ||
+      oldDelegate.contentPosition != contentPosition ||
+      oldDelegate.backgroundCenter != backgroundCenter ||
+      oldDelegate.backgroundRadius != backgroundRadius;
 }

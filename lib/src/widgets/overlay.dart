@@ -385,7 +385,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     // On the flip side, the dismiss animation can be seen as a reversed open animation.
     // This is not perfect because e.g. the curves are different, but it looks
     // at least a bit better and will almost never happen anyway.
-    final previousState = _state;
+    final FeatureOverlayState previousState = _state;
 
     // setState will be called in the animation listener.
     _state = FeatureOverlayState.dismissing;
@@ -410,17 +410,14 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     });
   }
 
-  bool _isCloseToTopOrBottom(Offset position) {
-    return position.dy <= 88.0 || (_screenSize.height - position.dy) <= 88.0;
-  }
+  bool _isCloseToTopOrBottom(Offset position) =>
+      position.dy <= 88.0 || (_screenSize.height - position.dy) <= 88.0;
 
-  bool _isOnTopHalfOfScreen(Offset position) {
-    return position.dy < (_screenSize.height / 2.0);
-  }
+  bool _isOnTopHalfOfScreen(Offset position) =>
+      position.dy < (_screenSize.height / 2.0);
 
-  bool _isOnLeftHalfOfScreen(Offset position) {
-    return position.dx < (_screenSize.width / 2.0);
-  }
+  bool _isOnLeftHalfOfScreen(Offset position) =>
+      position.dx < (_screenSize.width / 2.0);
 
   /// The value returned from here will be adjusted in [BackgroundContentLayoutDelegate]
   /// in order to match the transition progress and overlay state.
@@ -438,7 +435,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     if (isBackgroundCentered) {
       return anchor;
     } else {
-      final startingBackgroundPosition = anchor;
+      final Offset startingBackgroundPosition = anchor;
 
       Offset endingBackgroundPosition;
       switch (contentLocation) {
@@ -631,15 +628,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return AnchoredOverlay(
-      showOverlay: _state != FeatureOverlayState.closed,
-      overlayBuilder: (BuildContext context, Offset anchor) {
-        return _buildOverlay(anchor);
-      },
-      child: widget.child,
-    );
-  }
+  Widget build(BuildContext context) => AnchoredOverlay(
+        showOverlay: _state != FeatureOverlayState.closed,
+        overlayBuilder: (BuildContext context, Offset anchor) =>
+            _buildOverlay(anchor),
+        child: widget.child,
+      );
 }
 
 class _Background extends StatelessWidget {
@@ -693,7 +687,7 @@ class _Background extends StatelessWidget {
     }
 
     return LayoutBuilder(
-        builder: (context, constraints) => Container(
+        builder: (BuildContext context, BoxConstraints constraints) => Container(
               // The size is controlled in BackgroundContentLayoutDelegate.
               width: constraints.biggest.width,
               height: constraints.biggest.height,
@@ -758,21 +752,19 @@ class _Pulse extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return state == FeatureOverlayState.closed
-        ? Container()
-        : CenterAbout(
-            position: anchor,
-            child: Container(
-              width: radius * 2,
-              height: radius * 2,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color.withOpacity(opacity),
-              ),
+  Widget build(BuildContext context) => state == FeatureOverlayState.closed
+      ? Container()
+      : CenterAbout(
+          position: anchor,
+          child: Container(
+            width: radius * 2,
+            height: radius * 2,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withOpacity(opacity),
             ),
-          );
-  }
+          ),
+        );
 }
 
 class _TapTarget extends StatelessWidget {
@@ -840,24 +832,22 @@ class _TapTarget extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return CenterAbout(
-      position: anchor,
-      child: Container(
-        height: 2 * radius,
-        width: 2 * radius,
-        child: Opacity(
-          opacity: opacity,
-          child: RawMaterialButton(
-            fillColor: color,
-            shape: const CircleBorder(),
-            child: child,
-            onPressed: onPressed,
+  Widget build(BuildContext context) => CenterAbout(
+        position: anchor,
+        child: Container(
+          height: 2 * radius,
+          width: 2 * radius,
+          child: Opacity(
+            opacity: opacity,
+            child: RawMaterialButton(
+              fillColor: color,
+              shape: const CircleBorder(),
+              child: child,
+              onPressed: onPressed,
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 /// Controls how content that overflows the background should be handled.

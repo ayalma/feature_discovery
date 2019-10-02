@@ -29,7 +29,7 @@ class EnsureVisible extends StatefulWidget {
   EnsureVisibleState createState() => EnsureVisibleState();
 
   static void ensureVisible(BuildContext context) {
-    EnsureVisibleState state =
+    final EnsureVisibleState state =
         context.ancestorStateOfType(const TypeMatcher<EnsureVisibleState>())
             as EnsureVisibleState;
 
@@ -38,15 +38,15 @@ class EnsureVisible extends StatefulWidget {
 }
 
 class EnsureVisibleState extends State<EnsureVisible> {
-  ensureVisible() {
+  void ensureVisible() {
     final RenderObject object = context.findRenderObject();
     final RenderAbstractViewport viewport = RenderAbstractViewport.of(object);
     assert(viewport != null);
 
-    ScrollableState scrollableState = Scrollable.of(context);
+    final ScrollableState scrollableState = Scrollable.of(context);
     assert(scrollableState != null);
 
-    ScrollPosition position = scrollableState.position;
+    final ScrollPosition position = scrollableState.position;
     double alignment;
     if (position.pixels > viewport.getOffsetToReveal(object, 0.0).offset) {
       // Move down to the top of the viewport

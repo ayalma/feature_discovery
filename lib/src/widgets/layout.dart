@@ -7,16 +7,14 @@ class CenterAbout extends StatelessWidget {
   const CenterAbout({Key key, this.position, this.child}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: position.dy,
-      left: position.dx,
-      child: FractionalTranslation(
-        translation: const Offset(-0.5, -0.5),
-        child: child,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Positioned(
+        top: position.dy,
+        left: position.dx,
+        child: FractionalTranslation(
+          translation: const Offset(-0.5, -0.5),
+          child: child,
+        ),
+      );
 }
 
 class AnchoredOverlay extends StatelessWidget {
@@ -29,24 +27,21 @@ class AnchoredOverlay extends StatelessWidget {
       : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return OverlayBuilder(
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) =>
+            OverlayBuilder(
           showOverlay: showOverlay,
           overlayBuilder: (BuildContext overlayContext) {
             /// calculate center and path to up
-            RenderBox box = context.findRenderObject() as RenderBox;
-            final center = box.size.center(box.localToGlobal(
+            final RenderBox box = context.findRenderObject() as RenderBox;
+            final Offset center = box.size.center(box.localToGlobal(
               const Offset(0.0, 0.0),
             ));
             return overlayBuilder(context, center);
           },
           child: child,
-        );
-      },
-    );
-  }
+        ),
+      );
 }
 
 class OverlayBuilder extends StatefulWidget {
