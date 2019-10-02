@@ -687,7 +687,8 @@ class _Background extends StatelessWidget {
     }
 
     return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) => Container(
+        builder: (BuildContext context, BoxConstraints constraints) =>
+            Container(
               // The size is controlled in BackgroundContentLayoutDelegate.
               width: constraints.biggest.width,
               height: constraints.biggest.height,
