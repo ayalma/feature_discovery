@@ -48,7 +48,8 @@ class EnsureVisibleState extends State<EnsureVisible> {
 
     final position = scrollableState.position;
     double alignment;
-    if (position.pixels > viewport.getOffsetToReveal(renderObject, 0.0).offset) {
+    if (position.pixels >
+        viewport.getOffsetToReveal(renderObject, 0.0).offset) {
       // Move down to the top of the viewport
       alignment = 0.0;
     } else if (position.pixels <
