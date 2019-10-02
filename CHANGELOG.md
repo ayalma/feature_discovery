@@ -10,6 +10,7 @@
   to control how the overlay should handle content that exceeds the background's boundaries.
 * Added `FeatureDiscovery.activeFeatureId`, which allows you to get the feature id of the
   current feature discovery step.
+* Added `duration`, `curve`, and `preciseAligment` parameters to `EnsureVisibleState.ensureVisible`.
 * Deprecated `EnsureVisible.duration` and `EnsureVisible.curve` as parameters because they should
   be passed when calling `EnsureVisibleState.ensureVisible`. This is not a breaking change.
 * Made the return type of `EnsureVisibleState.ensureVisible` be `Future<void>`. This is not
