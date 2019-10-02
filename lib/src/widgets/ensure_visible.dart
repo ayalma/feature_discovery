@@ -38,7 +38,7 @@ class EnsureVisible extends StatefulWidget {
 }
 
 class EnsureVisibleState extends State<EnsureVisible> {
-  void ensureVisible() {
+  Future<void> ensureVisible() async {
     final renderObject = context.findRenderObject();
     final viewport = RenderAbstractViewport.of(renderObject);
     assert(viewport != null);
@@ -60,7 +60,7 @@ class EnsureVisibleState extends State<EnsureVisible> {
       // No scrolling is necessary to reveal the child
       return;
     }
-    position.ensureVisible(
+    return await position.ensureVisible(
       renderObject,
       alignment: alignment,
       duration: widget.duration,
