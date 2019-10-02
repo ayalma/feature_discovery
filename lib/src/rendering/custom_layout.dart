@@ -60,14 +60,13 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
     assert(hasChild(BackgroundContentLayout.background));
     assert(hasChild(BackgroundContentLayout.content));
 
-    final Size contentSize =
+    final contentSize =
         layoutChild(BackgroundContentLayout.content, const BoxConstraints());
 
     // Do calculations regarding the sizing of the background.
-    final Point<double> backgroundPoint =
-            Point<double>(backgroundCenter.dx, backgroundCenter.dy),
-        anchorPoint = Point<double>(anchor.dx, anchor.dy),
-        contentPoint = Point<double>(
+    final backgroundPoint = Point(backgroundCenter.dx, backgroundCenter.dy),
+        anchorPoint = Point(anchor.dx, anchor.dy),
+        contentPoint = Point(
       contentPosition.dx,
       // If the content is rendered above the tap target, it needs to be shifted up.
       contentPosition.dy +
@@ -78,13 +77,12 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
 
     // The background radius is not affected when the overflow mode is ignore or clipContent.
     if (overflowMode == OverflowMode.ignore ||
-        overflowMode == OverflowMode.clipContent) {
+        overflowMode == OverflowMode.clipContent)
       matchedRadius = backgroundRadius;
-    } else {
+    else {
       // 75 is the radius of the pulse when fully expanded.
       // Calculating the distance here is easy because the pulse is a circle.
-      final double distanceToOuterPulse =
-          anchorPoint.distanceTo(backgroundPoint) + 75;
+      final distanceToOuterPulse = anchorPoint.distanceTo(backgroundPoint) + 75;
 
       // Calculate distance to the furthest point of the content.
       final Rect contentArea = Rect.fromLTWH(contentPoint.x, contentPoint.y,
@@ -107,10 +105,10 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
 //    final double distanceToOuterContent = contentAreaCorners
 //        .map<double>((point) => point.distanceTo(backgroundPoint))
 //        .reduce(max);
-      final double distanceToOuterContent =
+      final distanceToOuterContent =
           sqrt(contentDx * contentDx + contentDy * contentDy);
 
-      final double calculatedRadius =
+      final calculatedRadius =
           max(distanceToOuterContent, distanceToOuterPulse) +
               outerContentPadding;
 

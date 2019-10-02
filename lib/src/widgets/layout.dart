@@ -28,13 +28,12 @@ class AnchoredOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) =>
-            OverlayBuilder(
+        builder: (context, constraints) => OverlayBuilder(
           showOverlay: showOverlay,
           overlayBuilder: (BuildContext overlayContext) {
             /// calculate center and path to up
-            final RenderBox box = context.findRenderObject() as RenderBox;
-            final Offset center = box.size.center(box.localToGlobal(
+            final box = context.findRenderObject() as RenderBox;
+            final center = box.size.center(box.localToGlobal(
               const Offset(0.0, 0.0),
             ));
             return overlayBuilder(context, center);

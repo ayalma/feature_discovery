@@ -115,7 +115,7 @@ class OverflowingDescriptionFeature extends StatelessWidget {
   @override
   Widget build(_) => TestWrapper(
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (context) {
             onContext(context);
 
             return Stack(

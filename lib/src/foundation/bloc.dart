@@ -30,7 +30,7 @@ class Bloc {
   /// The [DescribedFeatureOverlay]s will be able to handle these events by checking the
   /// [activeFeatureId] against its own feature id or by considering its current [FeatureOverlayState].
   final StreamController<EventType> _eventsController =
-      StreamController<EventType>.broadcast();
+      StreamController.broadcast();
 
   Stream<EventType> get eventsOut => _eventsController.stream;
 

@@ -385,7 +385,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     // On the flip side, the dismiss animation can be seen as a reversed open animation.
     // This is not perfect because e.g. the curves are different, but it looks
     // at least a bit better and will almost never happen anyway.
-    final FeatureOverlayState previousState = _state;
+    final previousState = _state;
 
     // setState will be called in the animation listener.
     _state = FeatureOverlayState.dismissing;
@@ -435,7 +435,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     if (isBackgroundCentered) {
       return anchor;
     } else {
-      final Offset startingBackgroundPosition = anchor;
+      final startingBackgroundPosition = anchor;
 
       Offset endingBackgroundPosition;
       switch (contentLocation) {
@@ -687,8 +687,7 @@ class _Background extends StatelessWidget {
     }
 
     return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) =>
-            Container(
+        builder: (context, constraints) => Container(
               // The size is controlled in BackgroundContentLayoutDelegate.
               width: constraints.biggest.width,
               height: constraints.biggest.height,

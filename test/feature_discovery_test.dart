@@ -8,13 +8,13 @@ import 'widgets.dart';
 List<String> textsToMatch(List<String> featureIds) {
   assert(featureIds != null);
   return featureIds
-      .map((String featureId) => 'Test has passed for $featureId')
+      .map((featureId) => 'Test has passed for $featureId')
       .toList();
 }
 
 void main() {
   group('Basic behavior', () {
-    const List<String> steps = <String>[
+    const steps = <String>[
       'featureIdA',
       'featureIdB',
       'featureIdC',
@@ -28,7 +28,7 @@ void main() {
       expect(finder, findsNWidgets(steps.length));
       final BuildContext context = tester.firstState(finder).context;
       // Should be no overlays before calling discoverFeatures
-      texts.forEach((String t) => expect(find.text(t), findsNothing));
+      texts.forEach((t) => expect(find.text(t), findsNothing));
       FeatureDiscovery.discoverFeatures(context, steps);
       await tester.pumpAndSettle();
       // First overlay should appear
@@ -48,13 +48,13 @@ void main() {
       FeatureDiscovery.dismiss(context);
       await tester.pumpAndSettle();
       // No overlay should remain
-      texts.forEach((String t) => expect(find.text(t), findsNothing));
+      texts.forEach((t) => expect(find.text(t), findsNothing));
     });
   });
 
   group('Non-existent feature ids', () {
-    const List<String> featureIds = <String>['featA', 'featB', 'featC'];
-    final List<String> texts = textsToMatch(featureIds);
+    const featureIds = <String>['featA', 'featB', 'featC'];
+    final texts = textsToMatch(featureIds);
     testWidgets(
         "Calling [discoverFeatures] with two ids that aren't associated with an overlay",
         (WidgetTester tester) async {
@@ -75,13 +75,13 @@ void main() {
       FeatureDiscovery.completeCurrentStep(context);
       await tester.pumpAndSettle();
       // No overlay should remain on screen
-      texts.forEach((String t) => expect(find.text(t), findsNothing));
+      texts.forEach((t) => expect(find.text(t), findsNothing));
     });
   });
 
   group('Duplicate feature ids', () {
     for (final bool allowShowingDuplicate in <bool>[true, false]) {
-      const List<String> featureIds = <String>[
+      const featureIds = <String>[
         'featureIdA',
         'featureIdB',
         'featureIdB',
@@ -93,7 +93,7 @@ void main() {
         'featureIdC',
       ];
 
-      final List<String> texts = textsToMatch(steps);
+      final texts = textsToMatch(steps);
 
       testWidgets('allowShowingDuplicate == $allowShowingDuplicate',
           (WidgetTester tester) async {
@@ -105,7 +105,7 @@ void main() {
         final Finder finder = find.byType(TestIcon);
         expect(finder, findsNWidgets(featureIds.length));
         final BuildContext context = tester.firstState(finder).context;
-        texts.forEach((String t) => expect(find.text(t), findsNothing));
+        texts.forEach((t) => expect(find.text(t), findsNothing));
 
         FeatureDiscovery.discoverFeatures(context, steps);
         await tester.pumpAndSettle();
@@ -216,8 +216,7 @@ void main() {
             onDismiss: () {
               triggered = true;
             },
-            onContext: (BuildContext builderContext) =>
-                context = builderContext,
+            onContext: (builderContext) => context = builderContext,
             featureId: featureId,
             icon: icon,
             mode: modeEntry.key,
