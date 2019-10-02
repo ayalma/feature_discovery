@@ -14,7 +14,7 @@ List<String> textsToMatch(List<String> featureIds) {
 
 void main() {
   group('Basic behavior', () {
-    const List<String> steps = [
+    const steps = <String>[
       'featureIdA',
       'featureIdB',
       'featureIdC',
@@ -53,8 +53,8 @@ void main() {
   });
 
   group('Non-existent feature ids', () {
-    const List<String> featureIds = ['featA', 'featB', 'featC'];
-    final List<String> texts = textsToMatch(featureIds);
+    const featureIds = <String>['featA', 'featB', 'featC'];
+    final texts = textsToMatch(featureIds);
     testWidgets(
         "Calling [discoverFeatures] with two ids that aren't associated with an overlay",
         (WidgetTester tester) async {
@@ -81,19 +81,19 @@ void main() {
 
   group('Duplicate feature ids', () {
     for (final bool allowShowingDuplicate in <bool>[true, false]) {
-      const List<String> featureIds = [
+      const featureIds = <String>[
         'featureIdA',
         'featureIdB',
         'featureIdB',
         'featureIdC',
       ],
-          steps = [
+          steps = <String>[
         'featureIdA',
         'featureIdB',
         'featureIdC',
       ];
 
-      final List<String> texts = textsToMatch(steps);
+      final texts = textsToMatch(steps);
 
       testWidgets('allowShowingDuplicate == $allowShowingDuplicate',
           (WidgetTester tester) async {
@@ -133,11 +133,10 @@ void main() {
         (WidgetTester tester) async {
       const String featureId = 'feature';
       const IconData featureIcon = Icons.content_copy;
-
-      String staticFeatureTitle = 'Static',
+      const String staticFeatureTitle = 'Static',
           disposableFeatureTitle = 'Disposable';
 
-      await tester.pumpWidget(WidgetWithDisposableFeature(
+      await tester.pumpWidget(const WidgetWithDisposableFeature(
         featureId: featureId,
         featureIcon: featureIcon,
         staticFeatureTitle: staticFeatureTitle,

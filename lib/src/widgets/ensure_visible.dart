@@ -29,8 +29,8 @@ class EnsureVisible extends StatefulWidget {
   EnsureVisibleState createState() => EnsureVisibleState();
 
   static void ensureVisible(BuildContext context) {
-    EnsureVisibleState state =
-        context.ancestorStateOfType(TypeMatcher<EnsureVisibleState>())
+    final state =
+        context.ancestorStateOfType(const TypeMatcher<EnsureVisibleState>())
             as EnsureVisibleState;
 
     state.ensureVisible();
@@ -38,21 +38,22 @@ class EnsureVisible extends StatefulWidget {
 }
 
 class EnsureVisibleState extends State<EnsureVisible> {
-  ensureVisible() {
-    final RenderObject object = context.findRenderObject();
-    final RenderAbstractViewport viewport = RenderAbstractViewport.of(object);
+  void ensureVisible() {
+    final renderObject = context.findRenderObject();
+    final viewport = RenderAbstractViewport.of(renderObject);
     assert(viewport != null);
 
-    ScrollableState scrollableState = Scrollable.of(context);
+    final scrollableState = Scrollable.of(context);
     assert(scrollableState != null);
 
-    ScrollPosition position = scrollableState.position;
+    final position = scrollableState.position;
     double alignment;
-    if (position.pixels > viewport.getOffsetToReveal(object, 0.0).offset) {
+    if (position.pixels >
+        viewport.getOffsetToReveal(renderObject, 0.0).offset) {
       // Move down to the top of the viewport
       alignment = 0.0;
     } else if (position.pixels <
-        viewport.getOffsetToReveal(object, 1.0).offset) {
+        viewport.getOffsetToReveal(renderObject, 1.0).offset) {
       // Move up to the bottom of the viewport
       alignment = 1.0;
     } else {
@@ -60,7 +61,7 @@ class EnsureVisibleState extends State<EnsureVisible> {
       return;
     }
     position.ensureVisible(
-      object,
+      renderObject,
       alignment: alignment,
       duration: widget.duration,
       curve: widget.curve,

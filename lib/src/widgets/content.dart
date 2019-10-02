@@ -100,12 +100,13 @@ class Content extends StatelessWidget {
       ),
     );
 
-    if (overflowMode == OverflowMode.clipContent)
+    if (overflowMode == OverflowMode.clipContent) {
       result = _ClipContent(
         backgroundCenter: backgroundCenter,
         backgroundRadius: backgroundRadius,
         child: result,
       );
+    }
 
     return result;
   }
@@ -132,10 +133,8 @@ class _ClipContent extends SingleChildRenderObjectWidget {
   }) : super(key: key, child: child);
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
-    return RenderClipContent(
-        center: backgroundCenter, radius: backgroundRadius);
-  }
+  RenderObject createRenderObject(BuildContext context) =>
+      RenderClipContent(center: backgroundCenter, radius: backgroundRadius);
 
   @override
   void updateRenderObject(

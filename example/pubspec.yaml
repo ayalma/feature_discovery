@@ -26,6 +26,9 @@ dependencies:
   feature_discovery:
     path: ../
 
+dev_dependencies:
+  pedantic: any
+
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec
 

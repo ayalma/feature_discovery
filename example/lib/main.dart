@@ -20,17 +20,15 @@ void main() {
 
 class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Feature Discovery',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const FeatureDiscovery(
-        child: MyHomePage(title: 'Flutter Feature Discovery'),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => MaterialApp(
+        title: 'Feature Discovery',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const FeatureDiscovery(
+          child: MyHomePage(title: 'Flutter Feature Discovery'),
+        ),
+      );
 }
 
 class MyHomePage extends StatefulWidget {
@@ -88,7 +86,9 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         leading: StatefulBuilder(
-          builder: (context, setState) => DescribedFeatureOverlay(
+          builder:
+              (BuildContext context, void Function(void Function()) setState) =>
+                  DescribedFeatureOverlay(
             featureId: feature1,
             tapTarget: icon2,
             backgroundColor: Colors.teal,
@@ -177,7 +177,9 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: const Content(),
       floatingActionButton: StatefulBuilder(
-        builder: (context, setState) => DescribedFeatureOverlay(
+        builder:
+            (BuildContext context, void Function(void Function()) setState) =>
+                DescribedFeatureOverlay(
           featureId: feature3,
           tapTarget: icon4,
           backgroundColor: Colors.green,
@@ -196,7 +198,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       feature3ItemCount++;
                     })),
             for (int n = feature3ItemCount; n > 0; n--)
-              Text('Testing OverflowMode.extendBackground'),
+              const Text('Testing OverflowMode.extendBackground'),
           ]),
           child: FloatingActionButton(
             onPressed: () {},
@@ -228,7 +230,7 @@ class _ContentState extends State<Content> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FeatureDiscovery.discoverFeatures(
         context,
-        const {
+        const <String>{
           feature7,
           feature1,
           feature2,
@@ -252,7 +254,7 @@ class _ContentState extends State<Content> {
     int feature6ItemCount = 0;
 
     return Stack(
-      children: [
+      children: <Widget>[
         SingleChildScrollView(
           child: Column(
             children: <Widget>[
@@ -264,14 +266,14 @@ class _ContentState extends State<Content> {
               ),
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 color: Colors.blue,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: const Text(
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 8.0),
+                      child: Text(
                         'DISH REPUBLIC',
                         style: TextStyle(
                           color: Colors.white,
@@ -321,7 +323,7 @@ class _ContentState extends State<Content> {
                       onPressed: () {
                         FeatureDiscovery.discoverFeatures(
                           context,
-                          const {
+                          const <String>{
                             feature1,
                             feature2,
                             feature3,
@@ -340,7 +342,9 @@ class _ContentState extends State<Content> {
                 color: Colors.blueAccent,
               ),
               StatefulBuilder(
-                builder: (context, setState) => DescribedFeatureOverlay(
+                builder: (BuildContext context,
+                        void Function(void Function()) setState) =>
+                    DescribedFeatureOverlay(
                   featureId: feature6,
                   tapTarget: const Icon(Icons.drive_eta),
                   backgroundColor: Colors.green,
@@ -368,7 +372,7 @@ class _ContentState extends State<Content> {
                               feature6ItemCount++;
                             })),
                     for (int n = feature6ItemCount; n > 0; n--)
-                      Text('Testing OverflowMode.wrapBackground'),
+                      const Text('Testing OverflowMode.wrapBackground'),
                   ]),
                   overflowMode: OverflowMode.wrapBackground,
                   child: EnsureVisible(

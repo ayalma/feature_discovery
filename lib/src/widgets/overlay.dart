@@ -177,9 +177,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   @override
   void didUpdateWidget(DescribedFeatureOverlay oldWidget) {
     if (oldWidget.enablePulsingAnimation != widget.enablePulsingAnimation) {
-      if (widget.enablePulsingAnimation)
+      if (widget.enablePulsingAnimation) {
         _pulseController.forward(from: 0);
-      else {
+      } else {
         _pulseController.stop();
         setState(() => _transitionProgress = 0);
       }
@@ -245,7 +245,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         case EventType.open:
           // Only try opening when the active feature id matches the id of this widget.
           if (bloc.activeFeatureId != widget.featureId) return;
-          _open();
+          await _open();
           return;
         case EventType.complete:
         case EventType.dismiss:
@@ -253,10 +253,11 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           if (_state != FeatureOverlayState.opened &&
               _state != FeatureOverlayState.opening) return;
 
-          if (event == EventType.complete)
-            _complete();
-          else
-            _dismiss();
+          if (event == EventType.complete) {
+            await _complete();
+          } else {
+            await _dismiss();
+          }
           return;
       }
       throw ArgumentError.value(event);
@@ -275,8 +276,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           () => setState(() => _transitionProgress = _pulseController.value))
       ..addStatusListener(
         (AnimationStatus status) {
-          if (status == AnimationStatus.completed)
+          if (status == AnimationStatus.completed) {
             _pulseController.forward(from: 0);
+          }
         },
       );
 
@@ -317,8 +319,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     // from forward is completed when the animation is complete.
     setState(() => _state = FeatureOverlayState.opened);
 
-    if (widget.enablePulsingAnimation == true)
+    if (widget.enablePulsingAnimation == true) {
       _pulseController.forward(from: 0);
+    }
   }
 
   Future<void> _complete() async {
@@ -407,17 +410,14 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     });
   }
 
-  bool _isCloseToTopOrBottom(Offset position) {
-    return position.dy <= 88.0 || (_screenSize.height - position.dy) <= 88.0;
-  }
+  bool _isCloseToTopOrBottom(Offset position) =>
+      position.dy <= 88.0 || (_screenSize.height - position.dy) <= 88.0;
 
-  bool _isOnTopHalfOfScreen(Offset position) {
-    return position.dy < (_screenSize.height / 2.0);
-  }
+  bool _isOnTopHalfOfScreen(Offset position) =>
+      position.dy < (_screenSize.height / 2.0);
 
-  bool _isOnLeftHalfOfScreen(Offset position) {
-    return position.dx < (_screenSize.width / 2.0);
-  }
+  bool _isOnLeftHalfOfScreen(Offset position) =>
+      position.dx < (_screenSize.width / 2.0);
 
   /// The value returned from here will be adjusted in [BackgroundContentLayoutDelegate]
   /// in order to match the transition progress and overlay state.
@@ -475,27 +475,29 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   }
 
   ContentLocation _nonTrivialContentOrientation(Offset anchor) {
-    if (widget.contentLocation != ContentLocation.trivial)
+    if (widget.contentLocation != ContentLocation.trivial) {
       return widget.contentLocation;
+    }
 
     // Calculates appropriate content location for ContentLocation.trivial.
-    if (_isCloseToTopOrBottom(anchor))
+    if (_isCloseToTopOrBottom(anchor)) {
       return _isOnTopHalfOfScreen(anchor)
           ? ContentLocation.below
           : ContentLocation.above;
-    else
+    } else {
       return _isOnTopHalfOfScreen(anchor)
           ? ContentLocation.above
           : ContentLocation.below;
+    }
   }
 
   Offset _contentCenterPosition(Offset anchor) {
     final double width = min(_screenSize.width, _screenSize.height);
     final bool isBackgroundCentered = _isCloseToTopOrBottom(anchor);
 
-    if (isBackgroundCentered)
+    if (isBackgroundCentered) {
       return anchor;
-    else {
+    } else {
       final Offset startingBackgroundPosition = anchor;
       final Offset endingBackgroundPosition = Offset(
           width / 2.0 + (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
@@ -626,15 +628,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return AnchoredOverlay(
-      showOverlay: _state != FeatureOverlayState.closed,
-      overlayBuilder: (BuildContext context, Offset anchor) {
-        return _buildOverlay(anchor);
-      },
-      child: widget.child,
-    );
-  }
+  Widget build(BuildContext context) => AnchoredOverlay(
+        showOverlay: _state != FeatureOverlayState.closed,
+        overlayBuilder: (BuildContext context, Offset anchor) =>
+            _buildOverlay(anchor),
+        child: widget.child,
+      );
 }
 
 class _Background extends StatelessWidget {
@@ -753,21 +752,19 @@ class _Pulse extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return state == FeatureOverlayState.closed
-        ? Container()
-        : CenterAbout(
-            position: anchor,
-            child: Container(
-              width: radius * 2,
-              height: radius * 2,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color.withOpacity(opacity),
-              ),
+  Widget build(BuildContext context) => state == FeatureOverlayState.closed
+      ? Container()
+      : CenterAbout(
+          position: anchor,
+          child: Container(
+            width: radius * 2,
+            height: radius * 2,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withOpacity(opacity),
             ),
-          );
-  }
+          ),
+        );
 }
 
 class _TapTarget extends StatelessWidget {
@@ -819,12 +816,13 @@ class _TapTarget extends StatelessWidget {
         return 20 + 24 * transitionProgress;
       case FeatureOverlayState.opened:
         double expandedPercent;
-        if (transitionProgress < 0.3)
+        if (transitionProgress < 0.3) {
           expandedPercent = transitionProgress / 0.3;
-        else if (transitionProgress < 0.6)
+        } else if (transitionProgress < 0.6) {
           expandedPercent = 1 - ((transitionProgress - 0.3) / 0.3);
-        else
+        } else {
           expandedPercent = 0;
+        }
         return 44 + (20 * expandedPercent);
       case FeatureOverlayState.completing:
       case FeatureOverlayState.dismissing:
@@ -834,24 +832,22 @@ class _TapTarget extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return CenterAbout(
-      position: anchor,
-      child: Container(
-        height: 2 * radius,
-        width: 2 * radius,
-        child: Opacity(
-          opacity: opacity,
-          child: RawMaterialButton(
-            fillColor: color,
-            shape: const CircleBorder(),
-            child: child,
-            onPressed: onPressed,
+  Widget build(BuildContext context) => CenterAbout(
+        position: anchor,
+        child: Container(
+          height: 2 * radius,
+          width: 2 * radius,
+          child: Opacity(
+            opacity: opacity,
+            child: RawMaterialButton(
+              fillColor: color,
+              shape: const CircleBorder(),
+              child: child,
+              onPressed: onPressed,
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 /// Controls how content that overflows the background should be handled.
