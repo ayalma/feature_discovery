@@ -17,10 +17,13 @@ class EnsureVisible extends StatefulWidget {
 
   const EnsureVisible({
     Key key,
-    @required this.child,
+    @required
+        this.child,
     @Deprecated('If you use this, the curve parameter in EnsureVisibleState.ensureVisible will be ignored. You should use that parameter instead.')
+        // ignore: deprecated_member_use_from_same_package
         this.curve,
     @Deprecated('If you use this, the duration parameter in EnsureVisibleState.ensureVisible will be ignored. You should use that parameter instead.')
+        // ignore: deprecated_member_use_from_same_package
         this.duration,
   })  : assert(child != null),
         super(key: key);
