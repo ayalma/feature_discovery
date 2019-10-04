@@ -10,6 +10,11 @@
   to control how the overlay should handle content that exceeds the background's boundaries.
 * Added `FeatureDiscovery.activeFeatureId`, which allows you to get the feature id of the
   current feature discovery step.
+* Added `duration`, `curve`, and `preciseAligment` parameters to `EnsureVisibleState.ensureVisible`.
+* Deprecated `EnsureVisible.duration` and `EnsureVisible.curve` as parameters because they should
+  be passed when calling `EnsureVisibleState.ensureVisible`. This is not a breaking change.
+* Made the return type of `EnsureVisibleState.ensureVisible` be `Future<void>`. This is not
+  a breaking change because the previous return type was `void`, which you cannot work with.
 * Made the `enablePulsingAnimation` respond to rebuilds, allowing to change it
   after the overlay has been shown.
 * Added GIF demo of the package to the `README.md` file of the package and the example.
