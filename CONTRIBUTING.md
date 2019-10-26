@@ -9,7 +9,7 @@ The following steps are based on [creativecreatorormaybenot/wakelock's contribut
  * `git clone git@github.com:<github_user_name>/feature_discovery.git`
  * `cd feature_discovery`
  * `git remote add upstream git@github.com:/ayalma/feature_discovery.git`  
-   This ensures that `git fetch` fetches from this remote repository instead of from your own fork to get the latest changes.
+   This ensures that `git fetch upstream` is possible to fetch from this remote repository instead of from your own fork to get the latest changes.
    
 ## Creating a patch
 
