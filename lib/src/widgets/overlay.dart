@@ -562,10 +562,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     return Stack(
       children: <Widget>[
         GestureDetector(
-          onTap: () => FeatureDiscovery.dismiss(context),
+          onTap: bloc.dismiss,
           // According to the spec, the user should be able to dismiss by swiping.
-          onPanUpdate: (DragUpdateDetails _) =>
-              FeatureDiscovery.dismiss(context),
+          onPanUpdate: (DragUpdateDetails _) => bloc.dismiss(),
           child: Container(
             width: double.infinity,
             height: double.infinity,
