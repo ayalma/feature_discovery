@@ -378,7 +378,7 @@ class _ContentState extends State<Content> {
                     for (int n = feature6ItemCount; n > 0; n--)
                       const Text('Testing OverflowMode.wrapBackground'),
                   ]),
-                  overflowMode: OverflowMode.wrapBackground,
+                  overflowMode: OverflowMode.clipContent,
                   child: EnsureVisible(
                     key: ensureKey2,
                     child: const Text(
