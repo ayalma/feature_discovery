@@ -1,5 +1,5 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:meta/meta.dart';
 
 /// We use [RenderProxyBox] because we only want to clip and keep
 /// the properties of the _Content children.

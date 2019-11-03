@@ -1,8 +1,9 @@
 import 'dart:math';
 import 'package:flutter/animation.dart';
-import 'package:meta/meta.dart';
+
 
 import 'package:feature_discovery/src/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 enum BackgroundContentLayout {
