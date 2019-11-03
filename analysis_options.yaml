@@ -1,0 +1,36 @@
+include: package:pedantic/analysis_options.yaml
+linter:
+  rules:
+    unnecessary_const: true
+    unnecessary_new: true
+
+    prefer_const_declarations: true
+    prefer_const_constructors: true
+
+    cancel_subscriptions: true
+    close_sinks: true
+
+    directives_ordering: true
+
+    prefer_final_in_for_each: true
+    prefer_final_fields: true
+    prefer_final_locals: true
+
+    provide_deprecation_message: true
+
+    prefer_constructors_over_static_methods: true
+
+    prefer_expression_function_bodies: true
+
+    prefer_typing_uninitialized_variables: true
+
+    always_declare_return_types: true
+
+    annotate_overrides: true
+
+    # Excluded rules
+
+    # This is intended to help prevent the dangling else problem, however,
+    # to avoid that problem, curly braces have to be added in very few scenarios and
+    # in all the other cases this lint is unhelpful.
+    curly_braces_in_flow_control_structures: false

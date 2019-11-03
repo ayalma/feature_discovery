@@ -1,0 +1,49 @@
+name: Flutter Unit Testing, Format & Analysis
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install Flutter
+        uses: subosito/flutter-action@v1
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Run tests
+        run: flutter test
+
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install Flutter
+        uses: subosito/flutter-action@v1
+      - run: flutter analyze
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install Flutter
+        uses: subosito/flutter-action@v1
+      - name: Check Dart Formatting
+        run: flutter format --set-exit-if-changed -n .
+
+  package-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: axel-op/dart_package_analyzer@master
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          eventPayload: ${{ toJson(github.event) }}
+          commitSha: ${{ github.sha }}
+          maxScoreToComment: 99.99

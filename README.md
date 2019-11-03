@@ -2,7 +2,10 @@
 
 This Flutter package implements Feature Discovery following the [Material Design guidelines](https://material.io/archive/guidelines/growth-communications/feature-discovery.html).  
 
-With Feature Discovery, you can add context to any UI element, i.e. any `Widget` in your Flutter app. 
+With Feature Discovery, you can add context to any UI element, i.e. any `Widget` in your Flutter app.  
+Here is a small demo of the [`example` app](https://pub.dev/packages/feature_discovery#-example-tab-):
+
+[![](https://media.giphy.com/media/TJlOkURETOPiucHNRC/giphy.gif)](https://media.giphy.com/media/TJlOkURETOPiucHNRC/giphy.gif)
 
 ## Installing
 
@@ -15,7 +18,7 @@ To use this package, follow the [installing guide](https://pub.dev/packages/feat
 To be able to work with any of the global functions provided by the `feature_discovery` package, you will have to wrap your widget tree in a `FeatureDiscovery` widget.    
 There are many places where you can add `FeatureDiscovery` in your build tree, but the easiest to assure that it sits on top is to wrap your `MaterialApp` with it:
 ```dart
-FeatureDiscovery(
+const FeatureDiscovery(
   child: MaterialApp(
    ...
   )
@@ -52,11 +55,11 @@ DescribedFeatureOverlay(
 
 #### `contentLocation`
 
-This is `ContentOrientation.trivial` by default, however, the package cannot always determine the correct placement for the overlay. In those cases, you can provide either of these two:
+This is `ContentLocation.trivial` by default, however, the package cannot always determine the correct placement for the overlay. In those cases, you can provide either of these two:
 
- * `ContentOrientation.below`: Text is displayed below the target.
+ * `ContentLocation.below`: Text is displayed below the target.
   
- * `ContentOrientation.above`: Text is displayed above the target.
+ * `ContentLocation.above`: Text is displayed above the target.
 
 #### `onComplete`
 
@@ -64,7 +67,9 @@ This is `ContentOrientation.trivial` by default, however, the package cannot alw
    onComplete: () async {
     // Executed when the tap target is tapped. The overlay will not close before
     // this function returns and after that, the next step will be opened.
-    print('Target tapped.'); 
+    print('Target tapped.');
+    // You can prevent completion by returning false.
+    return true;
   },
 ```
 
@@ -73,8 +78,8 @@ This is `ContentOrientation.trivial` by default, however, the package cannot alw
 ```dart
   onDismiss: () async {
     // Called when the user taps outside of the overlay, trying to dismiss it.
-    // You can prevent dismissal by returning `false`.
     print('Overlay dismissed.');
+    // You can prevent dismissal by returning false.
     return true;
   },
 ```
@@ -84,9 +89,9 @@ This is `ContentOrientation.trivial` by default, however, the package cannot alw
 ```dart
   onOpen: () async {
     // This callback is called before the overlay is displayed.
-    // If you return false, it will not be opened and the next step
+    print('The overlay is about to be displayed.');
+    // If you return false, the overlay will not be opened and the next step
     // will be attempted to open.
-    print('The overlay is about to be displayed');
     return true;
   },
 ```
@@ -98,6 +103,17 @@ This is set to `true` by default, but you can disable the pulsing animation abou
 #### `allowShowingDuplicate`
 
 If multiple `DescribedFeatureOverlay`s have the same `featureId`, they will interfere with each other during discovery and if you want to display multiple overlays at the same time, you will have to set `allowShowingDuplicate` to `true` for all of them.
+
+#### `overflowMode`
+
+This is `OverflowMode.ignore` by default, which will simply render the content you pass to `title` and `description`, even if it overflows the background area, i.e. the circle of the overlay. Alternatively, you can specify any of the following if you desire different behavior:
+
+ * `OverflowMode.clipContent` will clip any content that is outside of the inner area (the background's circle).
+ 
+ * `OverflowMode.extendBackground` will expand the background circle if necessary.
+ 
+ * `OverflowMode.wrapBackground` will expand the background circle if necessary, but also shrink it if the content is smaller than the default background size. 
+
 </details>
 
 ### `FeatureDiscovery.discoverFeatures`
@@ -166,6 +182,12 @@ DescribedFeatureOverlay(
 
 ## Notes
 
-In `DescribedFeatureOverlay`, `tapTarget`, `title`, and `description` can take any widget, but it is recommended to use an `Icon` for the tap target and simple `Text` widgets for the title and description. The package takes care of styling these widgets and having these as `Widget`s allows you to pass `Key`s, `Semantics`, etc. 
+In `DescribedFeatureOverlay`, `tapTarget`, `title`, and `description` can take any widget, but it is recommended to use an `Icon` for the tap target and simple `Text` widgets for the title and description. The package takes care of styling these widgets and having these as `Widget`s allows you to pass `Key`s, `Semantics`, etc.
+
+### Contributing
+
+If you want to start contributing to this package, it is recommended to refer to the [contributing guide](https://github.com/ayalma/feature_discovery/blob/master/CONTRIBUTING.md).
+
+### Gratitude 
 
 Thanks to [mattcarroll](https://medium.com/@mattcarroll) for their [Flutter challenge about Feature Discovery on Fluttery](https://youtu.be/Xm0ELlBtNWM).

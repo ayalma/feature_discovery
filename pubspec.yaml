@@ -1,12 +1,24 @@
 name: feature_discovery
-description: A Flutter package that implements Material Design feature discovery to show a description of UI elements to the user.
-version: 0.5.0
-author: ayalma <alimohammadi7117@gmail.com>
+description: >-
+  A Flutter package that implements Material Design Feature discovery
+  to show a description of specific features to new users.
+  See https://tinyurl.com/FeatureDiscovery
+version: 0.6.0
+authors: 
+  - ayalma <alimohammadi7117@gmail.com>
+  - creativecreatorormaybenot <19204050+creativecreatorormaybenot@users.noreply.github.com>
+  - axel-op <49279289+axel-op@users.noreply.github.com>
 homepage: https://github.com/ayalma/feature_discovery
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: '>=2.2.2 <3.0.0' # This should never be higher than the Flutter stable constraints.
 
 dependencies:
   flutter:
+    sdk: flutter
+  provider: ^3.1.0
+
+dev_dependencies:
+  pedantic: any
+  flutter_test:
     sdk: flutter

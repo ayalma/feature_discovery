@@ -1,3 +1,27 @@
+## 0.6.0
+
+* **Breaking change**: Renamed `ContentOrientation` to `ContentLocation`.
+* **Breaking change**: Made `onComplete` of type `Future<bool> Function()` to match `onOpen`
+  and `onDismiss`.
+* Methods `completeStep` and `markStepComplete` have been deprecated
+  and `completeCurrentStep` should now be used.
+* Method `clear` is deprecated and `dismiss` should now be used.
+* Added an `OverflowMode` enum and the `overflowMode` parameter to `DescribedFeatureOverlay`
+  to control how the overlay should handle content that exceeds the background's boundaries.
+* Added `FeatureDiscovery.activeFeatureId`, which allows you to get the feature id of the
+  current feature discovery step.
+* Added `duration`, `curve`, and `preciseAligment` parameters to `EnsureVisibleState.ensureVisible`.
+* Deprecated `EnsureVisible.duration` and `EnsureVisible.curve` as parameters because they should
+  be passed when calling `EnsureVisibleState.ensureVisible`. This is not a breaking change.
+* Made the return type of `EnsureVisibleState.ensureVisible` be `Future<void>`. This is not
+  a breaking change because the previous return type was `void`, which you cannot work with.
+* Made the `enablePulsingAnimation` respond to rebuilds, allowing to change it
+  after the overlay has been shown.
+* Added GIF demo of the package to the `README.md` file of the package and the example.
+* Updated example.
+* Added `OverflowMode` to `README.md`.
+* Added `CONTRIBUTING.md` and mentioned it in `README.md`.
+
 ## 0.5.0
 
 * **Breaking change**: Instead of the `icon` parameter, you now need to use the `tapTarget`
@@ -7,7 +31,7 @@
 * **Breaking change**: `title` and `description` parameters now take a `Widget`.
 * **Breaking change**: Callbacks are now `onOpen`, `onDismiss`, and `onComplete`.
   `onOpen` and `onDismiss` need to return `Future<bool>` when specified to decide
-  if the step should be open or dimissed respectively.
+  if the step should be open or dismissed respectively.
 * Fixed `DescribedFeatureOverlay`'s constantly rebuilding even if they were never displayed.
 * Fixed `DescribedFeatureOverlay`'s rebuilding after dismissing them.
 * **Warning**: `Theme.of(context)` is now used to determine text styles
