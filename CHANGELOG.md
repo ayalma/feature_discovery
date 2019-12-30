@@ -1,3 +1,7 @@
+## 0.6.1
+
+* Update version constraint to `^4.0.1` for `provider` dependency.
+
 ## 0.6.0
 
 * **Breaking change**: Renamed `ContentOrientation` to `ContentLocation`.
