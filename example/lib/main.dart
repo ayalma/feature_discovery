@@ -43,19 +43,19 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    final Future<bool> Function() action = () async {
+    final action = () async {
       print('IconButton of $feature7 tapped.');
       return true;
     };
-    const Icon icon1 = Icon(Icons.drive_eta);
-    const Icon icon2 = Icon(Icons.menu);
-    const Icon icon3 = Icon(Icons.search);
-    const Icon icon4 = Icon(Icons.add);
+    const icon1 = Icon(Icons.drive_eta);
+    const icon2 = Icon(Icons.menu);
+    const icon3 = Icon(Icons.search);
+    const icon4 = Icon(Icons.add);
 
-    OverflowMode feature1OverflowMode = OverflowMode.clipContent;
-    bool feature1EnablePulsingAnimation = false;
+    var feature1OverflowMode = OverflowMode.clipContent;
+    var feature1EnablePulsingAnimation = false;
 
-    int feature3ItemCount = 15;
+    var feature3ItemCount = 15;
 
     return Scaffold(
       appBar: AppBar(
@@ -251,7 +251,7 @@ class _ContentState extends State<Content> {
 
   @override
   Widget build(BuildContext context) {
-    int feature6ItemCount = 0;
+    var feature6ItemCount = 0;
 
     return Stack(
       children: <Widget>[
