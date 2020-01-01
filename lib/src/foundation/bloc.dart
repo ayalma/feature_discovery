@@ -11,8 +11,8 @@ class BlocProvider extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Provider<Bloc>(
         child: child,
-        builder: (BuildContext context) => Bloc(),
-        dispose: (BuildContext context, Bloc bloc) => bloc.dispose(),
+        create: (BuildContext context) => Bloc._(),
+        dispose: (BuildContext context, Bloc bloc) => bloc._dispose(),
       );
 }
 
@@ -25,6 +25,8 @@ class Bloc {
         "Don't forget to wrap your widget tree in a [FeatureDiscovery] widget.");
     return bloc;
   }
+
+  Bloc._();
 
   /// This [StreamController] allows to send events of type [EventType].
   /// The [DescribedFeatureOverlay]s will be able to handle these events by checking the
@@ -72,7 +74,7 @@ class Bloc {
     if (activeOverlays == 0) _eventsIn.add(EventType.open);
   }
 
-  void dispose() {
+  void _dispose() {
     _eventsController.close();
   }
 

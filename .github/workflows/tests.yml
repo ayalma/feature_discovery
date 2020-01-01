@@ -12,7 +12,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Install Flutter
         uses: subosito/flutter-action@v1
       - name: Install dependencies
@@ -23,7 +23,7 @@ jobs:
   analyze:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Install Flutter
         uses: subosito/flutter-action@v1
       - run: flutter analyze
@@ -31,7 +31,7 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Install Flutter
         uses: subosito/flutter-action@v1
       - name: Check Dart Formatting
@@ -40,10 +40,7 @@ jobs:
   package-analysis:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: axel-op/dart_package_analyzer@master
+      - uses: actions/checkout@v2
+      - uses: axel-op/dart_package_analyzer@stable
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          eventPayload: ${{ toJson(github.event) }}
-          commitSha: ${{ github.sha }}
-          maxScoreToComment: 99.99
