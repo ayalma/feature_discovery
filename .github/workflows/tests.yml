@@ -1,12 +1,6 @@
 name: Flutter Unit Testing, Format & Analysis
 
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - '*'
+on: [push, pull_request]
 
 jobs:
   test:
@@ -41,6 +35,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: axel-op/dart_package_analyzer@stable
+      - uses: axel-op/dart-package-analyzer@stable
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
