@@ -8,6 +8,9 @@
 * **Deprecations:**
   * `activeFeatureId` has been deprecated and replaced by `currentFeatureIdOf`, to emphasize that this is a getter.
   * `dismiss` has been deprecated and replaced by `dismissAll` to be clear on the fact that no next step will be shown.
+* Non breaking:
+  * Incorrect documentation of some static methods in `FeatureDiscovery` has been edited.
+  * Error messages have been improved : the error thrown when the widget tree isn't wrapped in a `FeatureDiscovery` widget is clearer.
 
 ## 0.6.1
 

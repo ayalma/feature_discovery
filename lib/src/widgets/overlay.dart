@@ -191,16 +191,21 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   void didChangeDependencies() {
     _screenSize = MediaQuery.of(context).size;
 
-    bloc = Bloc.of(context);
+    try {
+      bloc = Bloc.of(context);
 
-    final Stream<EventType> newEventsStream = bloc.eventsOut;
-    if (_eventsStream != newEventsStream) _setStream(newEventsStream);
+      final Stream<EventType> newEventsStream = bloc.eventsOut;
+      if (_eventsStream != newEventsStream) _setStream(newEventsStream);
 
-    // If this widget was not in the tree when the feature discovery was started,
-    // we need to open it immediately because the streams will not receive
-    // any further events that could open the overlay.
-    if (bloc.activeFeatureId == widget.featureId &&
-        _state == FeatureOverlayState.closed) _open();
+      // If this widget was not in the tree when the feature discovery was started,
+      // we need to open it immediately because the streams will not receive
+      // any further events that could open the overlay.
+      if (bloc.activeFeatureId == widget.featureId &&
+          _state == FeatureOverlayState.closed) _open();
+    } on BlocNotFoundError catch (e) {
+      throw FlutterError(e.message +
+          '\nEnsure that all the DescribedFeatureOverlay widgets are below it.');
+    }
 
     super.didChangeDependencies();
   }

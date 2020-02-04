@@ -20,10 +20,13 @@ class Bloc {
   /// This is used to retrieve the [Bloc] in [FeatureDiscovery] and [DescribedOverlayState].
   /// It can be public here because [Bloc] is not exposed when importing `feature_discovery`.
   static Bloc of(BuildContext context) {
-    final Bloc bloc = Provider.of<Bloc>(context, listen: false);
-    assert(bloc != null,
-        "Don't forget to wrap your widget tree in a [FeatureDiscovery] widget.");
-    return bloc;
+    try {
+      return Provider.of<Bloc>(context, listen: false);
+    } on ProviderNotFoundException {
+      throw BlocNotFoundError(
+          'Could not find a FeatureDiscovery widget above this context.'
+          '\nFeatureDiscovery works like an inherited widget. You must wrap your widget tree in it.');
+    }
   }
 
   Bloc._();
@@ -128,4 +131,9 @@ enum EventType {
   open,
   complete,
   dismiss,
+}
+
+class BlocNotFoundError extends Error {
+  final String message;
+  BlocNotFoundError(this.message) : super();
 }
