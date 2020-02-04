@@ -5,6 +5,9 @@
 * **Breaking changes:**
   * Deprecated static methods of `FeatureDiscovery` class have been removed.
   * Deprecated paramaters in the constructor of `EnsureVisible` have been removed.
+* **Deprecations:**
+  * `activeFeatureId` has been deprecated and replaced by `currentFeatureIdOf`, to emphasize that this is a getter.
+  * `dismiss` has been deprecated and replaced by `dismissAll` to be clear on the fact that no next step will be shown.
 
 ## 0.6.1
 

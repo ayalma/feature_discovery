@@ -45,7 +45,7 @@ void main() {
       expect(find.text(texts[1]), findsNothing);
       expect(find.text(texts[2]), findsOneWidget);
       // Dismiss all
-      FeatureDiscovery.dismiss(context);
+      FeatureDiscovery.dismissAll(context);
       await tester.pumpAndSettle();
       // No overlay should remain
       texts.forEach((t) => expect(find.text(t), findsNothing));

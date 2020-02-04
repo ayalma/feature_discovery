@@ -35,17 +35,24 @@ class FeatureDiscovery extends StatelessWidget {
   /// of the current feature discovery. The dismissal animation will play if successful.
   /// If you want to complete the step and continue the feature discovery,
   /// call [completeCurrentStep] instead.
-  static void dismiss(BuildContext context) => Bloc.of(context).dismiss();
+  static void dismissAll(BuildContext context) => Bloc.of(context).dismiss();
 
-  /// This return the feature id of the current feature discovery step, i.e.
+  @Deprecated("Use [dismissAll] instead.")
+  static void dismiss(BuildContext context) => dismissAll(context);
+
+  /// This returns the feature id of the current feature discovery step, i.e.
   /// of the [DescribedFeatureOverlay] that is currently supposed to be shown, or `null`.
   ///
   /// Note that this will also return the feature id of the current step of the steps
   /// you passed to [discoverFeature] even when there is no [DescribedFeatureOverlay]
   /// in the tree to display the overlay.
   /// This means that you cannot use this to check if a feature overlay is being displayed.
-  static String activeFeatureId(BuildContext context) =>
+  static String currentFeatureIdOf(BuildContext context) =>
       Bloc.of(context).activeFeatureId;
+
+  @Deprecated("Use [currentFeatureIdOf] instead.")
+  static String activeFeatureId(BuildContext context) =>
+      currentFeatureIdOf(context);
 
   final Widget child;
 
