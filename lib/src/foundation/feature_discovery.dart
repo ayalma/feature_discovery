@@ -47,19 +47,6 @@ class FeatureDiscovery extends StatelessWidget {
   static String activeFeatureId(BuildContext context) =>
       Bloc.of(context).activeFeatureId;
 
-  /// Deprecated methods, kept for retrocompatibility.
-  @Deprecated('Use [dismiss] instead')
-  static void clear(BuildContext context) => dismiss(context);
-
-  @Deprecated('Use [completeCurrentStep] instead')
-  static void completeStep(BuildContext context) =>
-      completeCurrentStep(context);
-
-  @Deprecated(
-      'Use [completeCurrentStep] instead ; [stepId] argument will not be used')
-  static void markStepComplete(BuildContext context, String stepId) =>
-      completeCurrentStep(context);
-
   final Widget child;
 
   const FeatureDiscovery({Key key, this.child}) : super(key: key);

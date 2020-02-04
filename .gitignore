@@ -39,6 +39,7 @@ pubspec.lock
 **/android/**/GeneratedPluginRegistrant.java
 **/example/android/app/.*
 example/android/.project
+example/android/.settings
 
 # iOS/XCode related
 **/ios/**/*.mode1v3

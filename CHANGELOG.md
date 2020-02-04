@@ -1,3 +1,11 @@
+# Changelog
+
+## 0.7.0
+
+* **Breaking changes:**
+  * Deprecated static methods of `FeatureDiscovery` class have been removed.
+  * Deprecated paramaters in the constructor of `EnsureVisible` have been removed.
+
 ## 0.6.1
 
 * Update version constraint to `^4.0.1` for `provider` dependency.
