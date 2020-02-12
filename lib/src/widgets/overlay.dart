@@ -150,7 +150,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   AnimationController _dismissController;
 
   /// The local reference to the [Bloc] is needed because it is used in [dispose].
-  Bloc bloc;
+  Bloc _bloc;
 
   Stream<EventType> _eventsStream;
   StreamSubscription<EventType> _eventsSubscription;
@@ -192,15 +192,15 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _screenSize = MediaQuery.of(context).size;
 
     try {
-      bloc = Bloc.of(context);
+      _bloc = Bloc.of(context);
 
-      final Stream<EventType> newEventsStream = bloc.eventsOut;
+      final Stream<EventType> newEventsStream = _bloc.eventsOut;
       if (_eventsStream != newEventsStream) _setStream(newEventsStream);
 
       // If this widget was not in the tree when the feature discovery was started,
       // we need to open it immediately because the streams will not receive
       // any further events that could open the overlay.
-      if (bloc.activeFeatureId == widget.featureId &&
+      if (_bloc.activeFeatureId == widget.featureId &&
           _state == FeatureOverlayState.closed) _open();
     } on BlocNotFoundError catch (e) {
       throw FlutterError(e.message +
@@ -233,9 +233,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         _state != FeatureOverlayState.completing) {
       // If the _state is anything else, this overlay has to be showing,
       // otherwise something is wrong.
-      assert(bloc.activeFeatureId == widget.featureId);
+      assert(_bloc.activeFeatureId == widget.featureId);
 
-      bloc.activeOverlays--;
+      _bloc.activeOverlays--;
     }
     super.dispose();
   }
@@ -249,7 +249,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       switch (event) {
         case EventType.open:
           // Only try opening when the active feature id matches the id of this widget.
-          if (bloc.activeFeatureId != widget.featureId) return;
+          if (_bloc.activeFeatureId != widget.featureId) return;
           await _open();
           return;
         case EventType.complete:
@@ -299,9 +299,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   }
 
   Future<void> _open() async {
-    if (!widget.allowShowingDuplicate && bloc.activeOverlays > 0) return;
+    if (!widget.allowShowingDuplicate && _bloc.activeOverlays > 0) return;
 
-    bloc.activeOverlays++;
+    _bloc.activeOverlays++;
 
     if (widget.onOpen != null) {
       final bool shouldOpen = await widget.onOpen();
@@ -315,7 +315,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
     // The activeStep might have changed by now because onOpen is asynchronous.
     // For example, the step might have been completed programmatically.
-    if (bloc.activeFeatureId != widget.featureId) return;
+    if (_bloc.activeFeatureId != widget.featureId) return;
 
     // setState will be called in the animation listener.
     _state = FeatureOverlayState.opening;
@@ -567,9 +567,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     return Stack(
       children: <Widget>[
         GestureDetector(
-          onTap: bloc.dismiss,
+          onTap: _bloc.dismiss,
           // According to the spec, the user should be able to dismiss by swiping.
-          onPanUpdate: (DragUpdateDetails _) => bloc.dismiss(),
+          onPanUpdate: (DragUpdateDetails _) => _bloc.dismiss(),
           child: Container(
             width: double.infinity,
             height: double.infinity,
