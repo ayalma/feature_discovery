@@ -20,13 +20,13 @@ void main() {
       'featureIdC',
       'featureIdD',
     ];
-    final List<String> texts = textsToMatch(steps);
+    final texts = textsToMatch(steps);
     testWidgets('Displaying two steps and dismissing before the third',
         (WidgetTester tester) async {
       await tester.pumpWidget(const TestWidget(featureIds: steps));
-      final Finder finder = find.byType(TestIcon);
+      final finder = find.byType(TestIcon);
       expect(finder, findsNWidgets(steps.length));
-      final BuildContext context = tester.firstState(finder).context;
+      final context = tester.firstState(finder).context;
       // Should be no overlays before calling discoverFeatures
       texts.forEach((t) => expect(find.text(t), findsNothing));
       FeatureDiscovery.discoverFeatures(context, steps);
@@ -61,9 +61,9 @@ void main() {
       await tester.pumpWidget(TestWidget(
           // Only one overlay will be placed in the tree
           featureIds: featureIds.sublist(1, 2)));
-      final Finder finder = find.byType(TestIcon);
+      final finder = find.byType(TestIcon);
       expect(finder, findsOneWidget);
-      final BuildContext context = tester.firstState(finder).context;
+      final context = tester.firstState(finder).context;
       FeatureDiscovery.discoverFeatures(context, featureIds);
       await tester.pumpAndSettle();
       // First overlay should NOT appear
@@ -80,7 +80,7 @@ void main() {
   });
 
   group('Duplicate feature ids', () {
-    for (final bool allowShowingDuplicate in <bool>[true, false]) {
+    for (final allowShowingDuplicate in <bool>[true, false]) {
       const featureIds = <String>[
         'featureIdA',
         'featureIdB',
@@ -102,9 +102,9 @@ void main() {
           allowShowingDuplicate: allowShowingDuplicate,
         ));
 
-        final Finder finder = find.byType(TestIcon);
+        final finder = find.byType(TestIcon);
         expect(finder, findsNWidgets(featureIds.length));
-        final BuildContext context = tester.firstState(finder).context;
+        final context = tester.firstState(finder).context;
         texts.forEach((t) => expect(find.text(t), findsNothing));
 
         FeatureDiscovery.discoverFeatures(context, steps);
@@ -131,9 +131,9 @@ void main() {
 
     testWidgets('Show other overlay after duplicate has been removed',
         (WidgetTester tester) async {
-      const String featureId = 'feature';
-      const IconData featureIcon = Icons.content_copy;
-      const String staticFeatureTitle = 'Static',
+      const featureId = 'feature';
+      const featureIcon = Icons.content_copy;
+      const staticFeatureTitle = 'Static',
           disposableFeatureTitle = 'Disposable';
 
       await tester.pumpWidget(const WidgetWithDisposableFeature(
@@ -143,14 +143,14 @@ void main() {
         disposableFeatureTitle: disposableFeatureTitle,
       ));
 
-      final Finder stateFinder = find.byType(WidgetWithDisposableFeature);
+      final stateFinder = find.byType(WidgetWithDisposableFeature);
       expect(stateFinder, findsOneWidget);
-      final WidgetWithDisposableFeatureState state =
-          tester.firstState(stateFinder);
+      final state =
+          tester.firstState(stateFinder) as WidgetWithDisposableFeatureState;
 
       // Need some widget to return a context that has the Bloc widget as an ancestor.
-      final Finder overlayFinder = find.byType(DescribedFeatureOverlay);
-      final BuildContext context = tester.firstState(overlayFinder).context;
+      final overlayFinder = find.byType(DescribedFeatureOverlay);
+      final context = tester.firstState(overlayFinder).context;
 
       // Feature titles should only be visible once feature discovery has been started.
       expect(find.text(staticFeatureTitle), findsNothing);
@@ -179,22 +179,22 @@ void main() {
   });
 
   group('OverflowMode', () {
-    const IconData icon = Icons.error;
-    const String featureId = 'feature';
+    const icon = Icons.error;
+    const featureId = 'feature';
 
     // Declares what OverflowMode's should allow the button to be tapped.
-    const Map<OverflowMode, bool> modes = <OverflowMode, bool>{
+    const modes = <OverflowMode, bool>{
       OverflowMode.ignore: false,
       OverflowMode.extendBackground: false,
       OverflowMode.wrapBackground: false,
       OverflowMode.clipContent: true,
     };
 
-    for (final MapEntry<OverflowMode, bool> modeEntry in modes.entries) {
+    for (final modeEntry in modes.entries) {
       testWidgets(modeEntry.key.toString(), (WidgetTester tester) async {
         BuildContext context;
 
-        bool triggered = false;
+        var triggered = false;
 
         // The surface size is set to ensure that the minimum overlay background size
         // does not cover the button, but the content does.

@@ -43,15 +43,13 @@ class Content extends StatelessWidget {
       case FeatureOverlayState.closed:
         return 0;
       case FeatureOverlayState.opening:
-        final double adjustedPercent =
-            const Interval(0.6, 1, curve: Curves.easeOut)
-                .transform(transitionProgress);
+        final adjustedPercent = const Interval(0.6, 1, curve: Curves.easeOut)
+            .transform(transitionProgress);
         return adjustedPercent;
       case FeatureOverlayState.completing:
       case FeatureOverlayState.dismissing:
-        final double adjustedPercent =
-            const Interval(0, 0.4, curve: Curves.easeOut)
-                .transform(transitionProgress);
+        final adjustedPercent = const Interval(0, 0.4, curve: Curves.easeOut)
+            .transform(transitionProgress);
         return 1 - adjustedPercent;
       case FeatureOverlayState.opened:
         return 1;
@@ -79,7 +77,7 @@ class Content extends StatelessWidget {
                   DefaultTextStyle(
                     style: Theme.of(context)
                         .textTheme
-                        .title
+                        .title // TODO(creativecreatorormaybenot): Update to headline6 when Flutter stable deprecates title.
                         .copyWith(color: textColor),
                     child: title,
                   ),
@@ -89,7 +87,7 @@ class Content extends StatelessWidget {
                   DefaultTextStyle(
                     style: Theme.of(context)
                         .textTheme
-                        .body1
+                        .body1 // TODO(creativecreatorormaybenot): Update to bodyText2 when Flutter stable deprecates body1.
                         .copyWith(color: textColor.withOpacity(0.9)),
                     child: description,
                   )

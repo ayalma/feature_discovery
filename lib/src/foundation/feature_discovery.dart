@@ -29,20 +29,21 @@ class FeatureDiscovery extends StatelessWidget {
   /// Though they can be placed in any [Iterable], it is recommended to pass them as a [Set]
   /// because this ensures that every step is only shown once.
   static void discoverFeatures(BuildContext context, Iterable<String> steps) =>
-      _blocOf(context).discoverFeatures(steps: steps.toList());
+      _blocOf(context).discoverFeatures(steps.toList());
 
   /// This will schedule completion of the current discovery step and continue
   /// onto the step after the completion animation of the current overlay if successful.
   static void completeCurrentStep(BuildContext context) =>
       _blocOf(context).completeStep();
 
-  /// This will schedule dismissal of the current discovery step and with that
-  /// of the current feature discovery. The dismissal animation will play if successful.
-  /// If you want to complete the step and continue the feature discovery,
+  /// A method to dismiss all steps.
+  ///
+  /// The `onDimiss` parameter will be ignored for every active overlay.
+  /// If you want to complete the current step and continue the feature discovery,
   /// call [completeCurrentStep] instead.
   static void dismissAll(BuildContext context) => _blocOf(context).dismiss();
 
-  @Deprecated("Use [dismissAll] instead.")
+  @Deprecated('Use [dismissAll] instead.')
   static void dismiss(BuildContext context) => dismissAll(context);
 
   /// This returns the feature id of the current feature discovery step, i.e.
@@ -55,7 +56,7 @@ class FeatureDiscovery extends StatelessWidget {
   static String currentFeatureIdOf(BuildContext context) =>
       _blocOf(context).activeFeatureId;
 
-  @Deprecated("Use [currentFeatureIdOf] instead.")
+  @Deprecated('Use [currentFeatureIdOf] instead.')
   static String activeFeatureId(BuildContext context) =>
       currentFeatureIdOf(context);
 

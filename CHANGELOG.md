@@ -1,16 +1,16 @@
-# Changelog
-
 ## 0.7.0
 
-* **Breaking changes:**
-  * Deprecated static methods of `FeatureDiscovery` class have been removed.
-  * Deprecated paramaters in the constructor of `EnsureVisible` have been removed.
-* **Deprecations:**
-  * `activeFeatureId` has been deprecated and replaced by `currentFeatureIdOf`, to emphasize that this is a getter.
-  * `dismiss` has been deprecated and replaced by `dismissAll` to be clear on the fact that no next step will be shown.
-* Non breaking:
-  * Incorrect documentation of some static methods in `FeatureDiscovery` has been edited.
-  * Error messages have been improved : the error thrown when the widget tree isn't wrapped in a `FeatureDiscovery` widget is clearer.
+* **Breaking change:** removed deprecated static methods in `FeatureDiscovery`.
+* **Breaking change:** removed deprecated parameters in the `EnsureVisible` constructor.
+* **Breaking change:** overlays will always be dismissed when calling `FeatureDiscovery.dismissAll`.
+* *Deprecated* `activeFeatureId`; replaced by `currentFeatureIdOf` to emphasize that this is a getter.
+* *Deprecated* `FeatureDiscovery.dismiss`; replaced by `dismissAll` to indicate that no next step
+  will be shown.
+* Added `assert` to require at least one step to be passed to `FeatureDiscovery.discoverFeatures`.
+* Incorrect documentation of some static methods in `FeatureDiscovery` has been updated.
+* Error messages have been improved : the error thrown when the widget tree isn't wrapped in
+  a `FeatureDiscovery` widget is clearer.
+* Incorrect behavior when `onDismiss` returned `Future<false>` has been fixed.
 
 ## 0.6.1
 

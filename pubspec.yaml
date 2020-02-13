@@ -11,14 +11,22 @@ authors:
 homepage: https://github.com/ayalma/feature_discovery
 
 environment:
-  sdk: '>=2.2.2 <3.0.0' # This should never be higher than the Flutter stable constraints.
+  # This should match the Flutter stable SDK constraint.
+  # See https://github.com/flutter/flutter/blob/stable/packages/flutter/pubspec.yaml.
+  sdk: '>=2.2.2 <3.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  provider: ^4.0.2
+
+  provider: ^4.0.4
 
 dev_dependencies:
-  pedantic: any
   flutter_test:
     sdk: flutter
+
+  pedantic: 1.9.0
+
+dependency_overrides:
+  # TODO(creativecreatorormaybenot): Remove when Pedantic is updated in flutter_test.
+  pedantic: 1.9.0

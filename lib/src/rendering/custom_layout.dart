@@ -85,12 +85,12 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
       final distanceToOuterPulse = anchorPoint.distanceTo(backgroundPoint) + 75;
 
       // Calculate distance to the furthest point of the content.
-      final Rect contentArea = Rect.fromLTWH(contentPoint.x, contentPoint.y,
+      final contentArea = Rect.fromLTWH(contentPoint.x, contentPoint.y,
           contentSize.width, contentSize.height);
       // This is equal to finding the max out of the distances to the corners of the Rect.
       // It is just the more Math-esque approach.
       // See the commented out code below for an intuitive approach.
-      final double contentDx = max((contentArea.left - backgroundPoint.x).abs(),
+      final contentDx = max((contentArea.left - backgroundPoint.x).abs(),
               (contentArea.right - backgroundPoint.x)),
           contentDy = max((contentArea.top - backgroundPoint.y).abs(),
               (contentArea.bottom - backgroundPoint.y).abs());

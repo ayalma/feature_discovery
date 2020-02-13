@@ -81,8 +81,9 @@ class Bloc {
     _eventsController.close();
   }
 
-  void discoverFeatures({Iterable<String> steps}) {
-    assert(steps != null);
+  void discoverFeatures(Iterable<String> steps) {
+    assert(steps != null && steps.isNotEmpty,
+        'You need to pass at least one step to [FeatureDiscovery.discoverFeatures].');
     _steps = steps;
     _activeStepIndex = 0;
     _activeOverlays = 0;
