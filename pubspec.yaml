@@ -3,7 +3,7 @@ description: >-
   A Flutter package that implements Material Design Feature discovery
   to show a description of specific features to new users.
   See https://tinyurl.com/FeatureDiscovery
-version: 0.7.0
+version: 0.8.0
 authors:
   - ayalma <alimohammadi7117@gmail.com>
   - creativecreatorormaybenot <19204050+creativecreatorormaybenot@users.noreply.github.com>
@@ -20,6 +20,7 @@ dependencies:
     sdk: flutter
 
   provider: ^4.0.4
+  shared_preferences: ^0.5.6+1
 
 dev_dependencies:
   flutter_test:

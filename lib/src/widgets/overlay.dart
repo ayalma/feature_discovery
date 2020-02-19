@@ -311,7 +311,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       assert(shouldOpen != null,
           'You need to return a [Future] that completes with true or false in [onOpen].');
       if (!shouldOpen) {
-        FeatureDiscovery.completeCurrentStep(context);
+        await FeatureDiscovery.completeCurrentStep(context);
         return;
       }
     }

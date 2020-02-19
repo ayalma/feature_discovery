@@ -155,7 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           .textTheme
                           .button
                           .copyWith(color: Colors.white)),
-                  onPressed: () =>
+                  onPressed: () async =>
                       FeatureDiscovery.completeCurrentStep(context),
                 ),
                 FlatButton(
@@ -264,6 +264,20 @@ class _ContentState extends State<Content> {
                 width: double.infinity,
                 child: const Text(
                     'Imagine there would be a beautiful picture here.'),
+              ),
+              RaisedButton.icon(
+                onPressed: () {
+                  FeatureDiscovery.clearPreferences(context, const <String>{
+                    feature1,
+                    feature2,
+                    feature3,
+                    feature4,
+                    feature6,
+                    feature5
+                  });
+                },
+                icon: Icon(Icons.clear),
+                label: const Text('Reset Preferences'),
               ),
               Container(
                 width: double.infinity,

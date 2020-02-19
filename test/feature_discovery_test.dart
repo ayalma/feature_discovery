@@ -112,7 +112,7 @@ void main() {
         // First overlay should appear.
         expect(find.text(texts[0]), findsOneWidget);
 
-        FeatureDiscovery.completeCurrentStep(context);
+        await FeatureDiscovery.completeCurrentStep(context);
         await tester.pumpAndSettle();
         // First overlay should have disappeared, and either both
         // overlay 2 and 3 should be displayed or just one of them
@@ -121,7 +121,7 @@ void main() {
         expect(find.text(texts[1]),
             allowShowingDuplicate ? findsNWidgets(2) : findsOneWidget);
 
-        FeatureDiscovery.completeCurrentStep(context);
+        await FeatureDiscovery.completeCurrentStep(context);
         await tester.pumpAndSettle();
         // Overlays 2 and 3 should have disappeared, and the last overlay should appear.
         expect(find.text(texts[1]), findsNothing);

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BlocProvider extends StatelessWidget {
   final Widget child;
@@ -81,25 +82,41 @@ class Bloc {
     _eventsController.close();
   }
 
-  void discoverFeatures(Iterable<String> steps) {
+  void discoverFeatures(Iterable<String> steps) async {
     assert(steps != null && steps.isNotEmpty,
         'You need to pass at least one step to [FeatureDiscovery.discoverFeatures].');
+    final isAllStepCompleted = await _isAllStepCompleted(steps);
+    if (isAllStepCompleted) return;
+
     _steps = steps;
     _activeStepIndex = 0;
     _activeOverlays = 0;
 
-    _eventsIn.add(EventType.open);
+    if (await _isCurrentStepCompleted()) {
+      await _nextStep();
+    } else {
+      _eventsIn.add(EventType.open);
+    }
   }
 
-  void completeStep() {
+  Future<void> completeStep() async {
     if (_steps == null) return;
     _eventsIn.add(EventType.complete);
 
+    await _setCurrentStepComplete();
+    await _nextStep();
+  }
+
+  Future<void> _nextStep() async {
     _activeStepIndex++;
     _activeOverlays = 0;
 
     if (_activeStepIndex < _steps.length) {
-      _eventsIn.add(EventType.open);
+      if (await _isCurrentStepCompleted()) {
+        await _nextStep();
+      } else {
+        _eventsIn.add(EventType.open);
+      }
       return;
     }
 
@@ -114,6 +131,32 @@ class Bloc {
     _steps = null;
     _activeStepIndex = null;
     _activeOverlays = 0;
+  }
+
+  Future<void> _setCurrentStepComplete() async =>
+      await (await SharedPreferences.getInstance())
+          .setBool(activeFeatureId, true);
+
+  Future<bool> _isCurrentStepCompleted() async =>
+      await (await SharedPreferences.getInstance()).getBool(activeFeatureId) ??
+      false;
+
+  Future<bool> _isAllStepCompleted(Iterable<String> steps) async {
+    final pref = await SharedPreferences.getInstance();
+    var isCompleted = true;
+    steps.forEach((step) {
+      final isShowed = (pref.getBool(step) ?? false);
+      isCompleted = isCompleted && isShowed;
+    });
+    return isCompleted;
+  }
+
+  Future<void> clearPreferences(Iterable<String> steps) async {
+    final pref = await SharedPreferences.getInstance();
+
+    steps.forEach((step) {
+      pref.setBool(step, null);
+    });
   }
 }
 
@@ -136,5 +179,6 @@ enum EventType {
 
 class BlocNotFoundError extends Error {
   final String message;
+
   BlocNotFoundError(this.message) : super();
 }

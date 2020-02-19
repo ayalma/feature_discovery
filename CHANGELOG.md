@@ -1,3 +1,6 @@
+## 0.8.0
+* Added preferences for each feature to show is understood by user or not
+* Library will not show understood feature
 ## 0.7.0
 
 * **Breaking change:** removed deprecated static methods in `FeatureDiscovery`.

@@ -33,8 +33,13 @@ class FeatureDiscovery extends StatelessWidget {
 
   /// This will schedule completion of the current discovery step and continue
   /// onto the step after the completion animation of the current overlay if successful.
-  static void completeCurrentStep(BuildContext context) =>
+  static Future<void> completeCurrentStep(BuildContext context) async =>
       _blocOf(context).completeStep();
+
+
+
+  static Future<void> clearPreferences(BuildContext context,Iterable<String> steps)  =>
+      _blocOf(context).clearPreferences(steps);
 
   /// A method to dismiss all steps.
   ///
