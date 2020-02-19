@@ -1,6 +1,9 @@
 ## 0.8.0
+* **Breaking change:**  `FeatureDiscovery.completeCurrentStep` is async know.
 * Added preferences for each feature to show is understood by user or not
 * Library will not show understood feature
+* Added method for reset all preferences of features `FeatureDiscovery.clearPreferences`
+
 ## 0.7.0
 
 * **Breaking change:** removed deprecated static methods in `FeatureDiscovery`.
