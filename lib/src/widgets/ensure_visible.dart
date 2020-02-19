@@ -5,27 +5,8 @@ class EnsureVisible extends StatefulWidget {
   /// The child widget that we are wrapping
   final Widget child;
 
-  /// The curve we will use to scroll ourselves into view.
-  ///
-  /// Defaults to Curves.ease.
-  final Curve curve;
-
-  /// The duration we will use to scroll ourselves into view.
-  ///
-  /// Defaults to 100 milliseconds.
-  final Duration duration;
-
-  const EnsureVisible({
-    Key key,
-    @required
-        this.child,
-    @Deprecated('If you use this, the curve parameter in EnsureVisibleState.ensureVisible will be ignored. You should use that parameter instead.')
-        // ignore: deprecated_member_use_from_same_package
-        this.curve,
-    @Deprecated('If you use this, the duration parameter in EnsureVisibleState.ensureVisible will be ignored. You should use that parameter instead.')
-        // ignore: deprecated_member_use_from_same_package
-        this.duration,
-  })  : assert(child != null),
+  const EnsureVisible({Key key, @required this.child})
+      : assert(child != null),
         super(key: key);
 
   @override
@@ -94,8 +75,8 @@ class EnsureVisibleState extends State<EnsureVisible> {
     return await position.ensureVisible(
       renderObject,
       alignment: alignment,
-      duration: widget.duration ?? duration,
-      curve: widget.curve ?? curve,
+      duration: duration,
+      curve: curve,
     );
   }
 

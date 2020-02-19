@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
+        // Required: this widget works like an inherited widget.
         home: const FeatureDiscovery(
           child: MyHomePage(title: 'Flutter Feature Discovery'),
         ),
@@ -164,7 +165,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           .textTheme
                           .button
                           .copyWith(color: Colors.white)),
-                  onPressed: () => FeatureDiscovery.dismiss(context),
+                  onPressed: () => FeatureDiscovery.dismissAll(context),
                 ),
               ],
             ),

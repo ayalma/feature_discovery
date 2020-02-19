@@ -40,6 +40,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// any [Widget].
   /// The overlay uses a [DefaultTextStyle] for the title, which is a combination
   /// of [TextTheme.title] from [Theme] and the [textColor].
+  // TODO(creativecreatorormaybenot): Update TextTheme.title link to headline6 when Flutter stable deprecates body1.
   final Widget title;
 
   /// This is the second content widget, i.e. it is displayed below [description].
@@ -48,6 +49,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// any [Widget].
   /// The overlay uses a [DefaultTextStyle] for the description, which is a combination
   /// of [TextTheme.body1] from [Theme] and the [textColor].
+  // TODO(creativecreatorormaybenot): Update TextTheme.body1 link to bodyText2 when Flutter stable deprecates body1.
   final Widget description;
 
   /// This is usually an [Icon].
@@ -150,7 +152,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   AnimationController _dismissController;
 
   /// The local reference to the [Bloc] is needed because it is used in [dispose].
-  Bloc bloc;
+  Bloc _bloc;
 
   Stream<EventType> _eventsStream;
   StreamSubscription<EventType> _eventsSubscription;
@@ -191,16 +193,21 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   void didChangeDependencies() {
     _screenSize = MediaQuery.of(context).size;
 
-    bloc = Bloc.of(context);
+    try {
+      _bloc = Bloc.of(context);
 
-    final Stream<EventType> newEventsStream = bloc.eventsOut;
-    if (_eventsStream != newEventsStream) _setStream(newEventsStream);
+      final newEventsStream = _bloc.eventsOut;
+      if (_eventsStream != newEventsStream) _setStream(newEventsStream);
 
-    // If this widget was not in the tree when the feature discovery was started,
-    // we need to open it immediately because the streams will not receive
-    // any further events that could open the overlay.
-    if (bloc.activeFeatureId == widget.featureId &&
-        _state == FeatureOverlayState.closed) _open();
+      // If this widget was not in the tree when the feature discovery was started,
+      // we need to open it immediately because the streams will not receive
+      // any further events that could open the overlay.
+      if (_bloc.activeFeatureId == widget.featureId &&
+          _state == FeatureOverlayState.closed) _open();
+    } on BlocNotFoundError catch (e) {
+      throw FlutterError(e.message +
+          '\nEnsure that all the DescribedFeatureOverlay widgets are below it.');
+    }
 
     super.didChangeDependencies();
   }
@@ -228,9 +235,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         _state != FeatureOverlayState.completing) {
       // If the _state is anything else, this overlay has to be showing,
       // otherwise something is wrong.
-      assert(bloc.activeFeatureId == widget.featureId);
+      assert(_bloc.activeFeatureId == widget.featureId);
 
-      bloc.activeOverlays--;
+      _bloc.activeOverlays--;
     }
     super.dispose();
   }
@@ -244,9 +251,9 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       switch (event) {
         case EventType.open:
           // Only try opening when the active feature id matches the id of this widget.
-          if (bloc.activeFeatureId != widget.featureId) return;
+          if (_bloc.activeFeatureId != widget.featureId) return;
           await _open();
-          return;
+          break;
         case EventType.complete:
         case EventType.dismiss:
           // This overlay was the active feature before this event if it is either opening or already opened.
@@ -256,11 +263,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           if (event == EventType.complete) {
             await _complete();
           } else {
-            await _dismiss();
+            await _dismiss(force: true);
           }
-          return;
+          break;
+        default:
+          throw ArgumentError.value(event);
       }
-      throw ArgumentError.value(event);
     });
   }
 
@@ -294,12 +302,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   }
 
   Future<void> _open() async {
-    if (!widget.allowShowingDuplicate && bloc.activeOverlays > 0) return;
+    if (!widget.allowShowingDuplicate && _bloc.activeOverlays > 0) return;
 
-    bloc.activeOverlays++;
+    _bloc.activeOverlays++;
 
     if (widget.onOpen != null) {
-      final bool shouldOpen = await widget.onOpen();
+      final shouldOpen = await widget.onOpen();
       assert(shouldOpen != null,
           'You need to return a [Future] that completes with true or false in [onOpen].');
       if (!shouldOpen) {
@@ -310,7 +318,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
     // The activeStep might have changed by now because onOpen is asynchronous.
     // For example, the step might have been completed programmatically.
-    if (bloc.activeFeatureId != widget.featureId) return;
+    if (_bloc.activeFeatureId != widget.featureId) return;
 
     // setState will be called in the animation listener.
     _state = FeatureOverlayState.opening;
@@ -353,13 +361,13 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     _close();
   }
 
-  Future<void> _dismiss() async {
+  Future<void> _dismiss({bool force = false}) async {
     // The method might be triggered multiple times, especially when swiping.
     if (_awaitingClosure) return;
 
     _awaitingClosure = true;
 
-    if (widget.onDismiss != null) {
+    if (!force && widget.onDismiss != null) {
       bool shouldDismiss;
       try {
         shouldDismiss = await widget.onDismiss();
@@ -422,15 +430,15 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   /// The value returned from here will be adjusted in [BackgroundContentLayoutDelegate]
   /// in order to match the transition progress and overlay state.
   double _backgroundRadius(Offset anchor) {
-    final bool isBackgroundCentered = _isCloseToTopOrBottom(anchor);
-    final double backgroundRadius = min(_screenSize.width, _screenSize.height) *
+    final isBackgroundCentered = _isCloseToTopOrBottom(anchor);
+    final backgroundRadius = min(_screenSize.width, _screenSize.height) *
         (isBackgroundCentered ? 1.0 : 0.7);
     return backgroundRadius;
   }
 
   Offset _backgroundPosition(Offset anchor, ContentLocation contentLocation) {
-    final double width = min(_screenSize.width, _screenSize.height);
-    final bool isBackgroundCentered = _isCloseToTopOrBottom(anchor);
+    final width = min(_screenSize.width, _screenSize.height);
+    final isBackgroundCentered = _isCloseToTopOrBottom(anchor);
 
     if (isBackgroundCentered) {
       return anchor;
@@ -455,7 +463,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
       switch (_state) {
         case FeatureOverlayState.opening:
-          final double adjustedPercent =
+          final adjustedPercent =
               const Interval(0.0, 0.8, curve: Curves.easeOut)
                   .transform(_transitionProgress);
           return Offset.lerp(startingBackgroundPosition,
@@ -492,14 +500,14 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   }
 
   Offset _contentCenterPosition(Offset anchor) {
-    final double width = min(_screenSize.width, _screenSize.height);
-    final bool isBackgroundCentered = _isCloseToTopOrBottom(anchor);
+    final width = min(_screenSize.width, _screenSize.height);
+    final isBackgroundCentered = _isCloseToTopOrBottom(anchor);
 
     if (isBackgroundCentered) {
       return anchor;
     } else {
-      final Offset startingBackgroundPosition = anchor;
-      final Offset endingBackgroundPosition = Offset(
+      final startingBackgroundPosition = anchor;
+      final endingBackgroundPosition = Offset(
           width / 2.0 + (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
           anchor.dy +
               (_isOnTopHalfOfScreen(anchor)
@@ -508,7 +516,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
       switch (_state) {
         case FeatureOverlayState.opening:
-          final double adjustedPercent =
+          final adjustedPercent =
               const Interval(0.0, 0.8, curve: Curves.easeOut)
                   .transform(_transitionProgress);
           return Offset.lerp(startingBackgroundPosition,
@@ -538,33 +546,40 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   Widget _buildOverlay(Offset anchor) {
     // This will be assigned either above or below, i.e. trivial from
     // widget.contentLocation will be converted to above or below.
-    final ContentLocation contentLocation =
-        _nonTrivialContentOrientation(anchor);
+    final contentLocation = _nonTrivialContentOrientation(anchor);
     assert(contentLocation != ContentLocation.trivial);
 
-    final Offset backgroundCenter =
-        _backgroundPosition(anchor, contentLocation);
-    final double backgroundRadius = _backgroundRadius(anchor);
+    final backgroundCenter = _backgroundPosition(anchor, contentLocation);
+    final backgroundRadius = _backgroundRadius(anchor);
 
-    final double contentOffsetMultiplier =
-        _contentOffsetMultiplier(contentLocation);
-    final Offset contentCenterPosition = _contentCenterPosition(anchor);
+    final contentOffsetMultiplier = _contentOffsetMultiplier(contentLocation);
+    final contentCenterPosition = _contentCenterPosition(anchor);
 
-    final double contentWidth = min(_screenSize.width, _screenSize.height);
+    final contentWidth = min(_screenSize.width, _screenSize.height);
 
-    final double dx = contentCenterPosition.dx - contentWidth;
-    final Offset contentPosition = Offset(
+    final dx = contentCenterPosition.dx - contentWidth;
+    final contentPosition = Offset(
       (dx.isNegative) ? 0.0 : dx,
       anchor.dy +
           contentOffsetMultiplier * (44 + 20), // 44 is the tap target's radius.
     );
 
+    // Will try to dismiss this overlay,
+    // then will call the bloc's dismiss function
+    // only if this overlay has been successfully dismissed.
+    void tryDismissThisThenAll() async {
+      await _dismiss();
+      if (_state == FeatureOverlayState.closed) {
+        _bloc.dismiss();
+      }
+    }
+
     return Stack(
       children: <Widget>[
         GestureDetector(
-          onTap: bloc.dismiss,
+          onTap: tryDismissThisThenAll,
           // According to the spec, the user should be able to dismiss by swiping.
-          onPanUpdate: (DragUpdateDetails _) => bloc.dismiss(),
+          onPanUpdate: (DragUpdateDetails _) => tryDismissThisThenAll(),
           child: Container(
             width: double.infinity,
             height: double.infinity,
@@ -655,21 +670,18 @@ class _Background extends StatelessWidget {
   double get opacity {
     switch (state) {
       case FeatureOverlayState.opening:
-        final double adjustedPercent =
-            const Interval(0.0, 0.3, curve: Curves.easeOut)
-                .transform(transitionProgress);
+        final adjustedPercent = const Interval(0.0, 0.3, curve: Curves.easeOut)
+            .transform(transitionProgress);
         return 0.96 * adjustedPercent;
 
       case FeatureOverlayState.completing:
-        final double adjustedPercent =
-            const Interval(0.1, 0.6, curve: Curves.easeOut)
-                .transform(transitionProgress);
+        final adjustedPercent = const Interval(0.1, 0.6, curve: Curves.easeOut)
+            .transform(transitionProgress);
 
         return 0.96 * (1 - adjustedPercent);
       case FeatureOverlayState.dismissing:
-        final double adjustedPercent =
-            const Interval(0.2, 1.0, curve: Curves.easeOut)
-                .transform(transitionProgress);
+        final adjustedPercent = const Interval(0.2, 1.0, curve: Curves.easeOut)
+            .transform(transitionProgress);
         return 0.96 * (1 - adjustedPercent);
       case FeatureOverlayState.opened:
         return 0.96;
@@ -737,7 +749,7 @@ class _Pulse extends StatelessWidget {
   double get opacity {
     switch (state) {
       case FeatureOverlayState.opened:
-        final double percentOpaque =
+        final percentOpaque =
             1 - ((transitionProgress.clamp(0.3, 0.8) - 0.3) / 0.5);
         return (percentOpaque * 0.75).clamp(0, 1);
       case FeatureOverlayState.completing:

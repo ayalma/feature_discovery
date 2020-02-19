@@ -72,7 +72,7 @@ class TestIcon extends StatefulWidget {
 class TestIconState extends State<TestIcon> {
   @override
   Widget build(BuildContext context) {
-    const Icon icon = Icon(Icons.more_horiz);
+    const icon = Icon(Icons.more_horiz);
     return DescribedFeatureOverlay(
       featureId: widget.featureId,
       // It is mandatory to disable the pulsing animation
