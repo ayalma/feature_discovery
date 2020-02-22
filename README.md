@@ -32,7 +32,9 @@ This widget takes all the parameters for the overlay that will be displayed duri
 
 #### Feature ids
 
-Every feature you describe should have a unique identifier, which is a `String` passed to the `featureId` parameter. You will also need to provide these ids when starting the discovery.  
+Every feature you describe should have a unique identifier, which is a `String` passed to the `featureId` parameter. You will also need to provide these ids when starting the discovery.
+And library will use this ids to save flag internally to indicate which feature is showed to user and completed by user.
+And if this feature is completed by user library will not show it again.
 
 ```dart
 DescribedFeatureOverlay(
@@ -146,6 +148,12 @@ void initState() {
   });
   super.initState();
 }
+```
+### `FeatureDiscovery.clearPreferences`
+
+If you want to clear feature discovery flag use this command like that
+```
+FeatureDiscovery.clearPreferences(context, <String>{ 'add_item_feature_id', });
 ```
 
 #### Other methods
