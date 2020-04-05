@@ -103,6 +103,11 @@ class DescribedFeatureOverlay extends StatefulWidget {
   ///  * [OverflowMode], which has explanations for the different modes.
   final OverflowMode overflowMode;
 
+  /// Controls whether the overlay should dismiss on touching outside or not.
+  ///
+  /// The default value for [dismissOnTouchOutside] is `true`.
+  final bool dismissOnTouchOutside;
+
   const DescribedFeatureOverlay({
     Key key,
     @required this.featureId,
@@ -120,6 +125,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.enablePulsingAnimation = true,
     this.allowShowingDuplicate = false,
     this.overflowMode = OverflowMode.ignore,
+    this.dismissOnTouchOutside = true,
   })  : assert(featureId != null),
         assert(tapTarget != null),
         assert(child != null),
@@ -128,6 +134,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
         assert(targetColor != null),
         assert(textColor != null),
         assert(overflowMode != null),
+        assert(dismissOnTouchOutside != null),
         super(key: key);
 
   @override
@@ -574,18 +581,24 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       }
     }
 
+    Widget background = Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.transparent,
+    );
+
+    if (widget.dismissOnTouchOutside) {
+      background = GestureDetector(
+        onTap: tryDismissThisThenAll,
+        // According to the spec, the user should be able to dismiss by swiping.
+        onPanUpdate: (DragUpdateDetails _) => tryDismissThisThenAll(),
+        child: background,
+      );
+    }
+
     return Stack(
       children: <Widget>[
-        GestureDetector(
-          onTap: tryDismissThisThenAll,
-          // According to the spec, the user should be able to dismiss by swiping.
-          onPanUpdate: (DragUpdateDetails _) => tryDismissThisThenAll(),
-          child: Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: Colors.transparent,
-          ),
-        ),
+        background,
         CustomMultiChildLayout(
           delegate: BackgroundContentLayoutDelegate(
             overflowMode: widget.overflowMode,
