@@ -103,10 +103,10 @@ class DescribedFeatureOverlay extends StatefulWidget {
   ///  * [OverflowMode], which has explanations for the different modes.
   final OverflowMode overflowMode;
 
-  /// Controls whether the overlay should dismiss on touching outside or not.
+  /// Controls whether the overlay should be dismissed on touching outside or not.
   ///
-  /// The default value for [dismissOnTouchOutside] is `true`.
-  final bool dismissOnTouchOutside;
+  /// The default value for [barrierDismissible] is `true`.
+  final bool barrierDismissible;
 
   const DescribedFeatureOverlay({
     Key key,
@@ -125,7 +125,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.enablePulsingAnimation = true,
     this.allowShowingDuplicate = false,
     this.overflowMode = OverflowMode.ignore,
-    this.dismissOnTouchOutside = true,
+    this.barrierDismissible = true,
   })  : assert(featureId != null),
         assert(tapTarget != null),
         assert(child != null),
@@ -134,7 +134,12 @@ class DescribedFeatureOverlay extends StatefulWidget {
         assert(targetColor != null),
         assert(textColor != null),
         assert(overflowMode != null),
-        assert(dismissOnTouchOutside != null),
+        assert(barrierDismissible != null),
+        assert(
+          barrierDismissible == true || onDismiss == null,
+          'Cannot provide both a barrierDismissible and onDismiss function\n'
+          'The onDismiss function will never get executed when barrierDismissible is set to false.',
+        ),
         super(key: key);
 
   @override
@@ -587,7 +592,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       color: Colors.transparent,
     );
 
-    if (widget.dismissOnTouchOutside) {
+    if (widget.barrierDismissible) {
       background = GestureDetector(
         onTap: tryDismissThisThenAll,
         // According to the spec, the user should be able to dismiss by swiping.
