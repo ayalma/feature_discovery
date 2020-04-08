@@ -106,6 +106,10 @@ This is set to `true` by default, but you can disable the pulsing animation abou
 
 If multiple `DescribedFeatureOverlay`s have the same `featureId`, they will interfere with each other during discovery and if you want to display multiple overlays at the same time, you will have to set `allowShowingDuplicate` to `true` for all of them.
 
+### `barrierDismissible`
+
+This is set to `true` by default, but you can disable "dissmiss overlay on touch outside" by setting this to `false`.
+
 #### `overflowMode`
 
 This is `OverflowMode.ignore` by default, which will simply render the content you pass to `title` and `description`, even if it overflows the background area, i.e. the circle of the overlay. Alternatively, you can specify any of the following if you desire different behavior:
