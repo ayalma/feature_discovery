@@ -103,6 +103,14 @@ class DescribedFeatureOverlay extends StatefulWidget {
   ///  * [OverflowMode], which has explanations for the different modes.
   final OverflowMode overflowMode;
 
+  final Duration openDuration;
+
+  final Duration pulseDuration;
+
+  final Duration completeDuration;
+
+  final Duration dismissDuration;
+
   const DescribedFeatureOverlay({
     Key key,
     @required this.featureId,
@@ -120,6 +128,10 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.enablePulsingAnimation = true,
     this.allowShowingDuplicate = false,
     this.overflowMode = OverflowMode.ignore,
+    this.openDuration = const Duration(milliseconds: 250),
+    this.pulseDuration = const Duration(milliseconds: 1000),
+    this.completeDuration = const Duration(milliseconds: 250),
+    this.dismissDuration = const Duration(milliseconds: 250),
   })  : assert(featureId != null),
         assert(tapTarget != null),
         assert(child != null),
@@ -273,15 +285,11 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   }
 
   void _initAnimationControllers() {
-    _openController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 250))
-      ..addListener(
-          () => setState(() => _transitionProgress = _openController.value));
+    _openController = AnimationController(vsync: this, duration: widget.openDuration)
+      ..addListener(() => setState(() => _transitionProgress = _openController.value));
 
-    _pulseController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1000))
-      ..addListener(
-          () => setState(() => _transitionProgress = _pulseController.value))
+    _pulseController = AnimationController(vsync: this, duration: widget.pulseDuration)
+      ..addListener(() => setState(() => _transitionProgress = _pulseController.value))
       ..addStatusListener(
         (AnimationStatus status) {
           if (status == AnimationStatus.completed) {
