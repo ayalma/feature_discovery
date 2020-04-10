@@ -103,12 +103,16 @@ class DescribedFeatureOverlay extends StatefulWidget {
   ///  * [OverflowMode], which has explanations for the different modes.
   final OverflowMode overflowMode;
 
+  /// Duration for overlay open animation.
   final Duration openDuration;
 
+  /// Duration for target pulse animation.
   final Duration pulseDuration;
 
+  /// Duration for overlay complete animation.
   final Duration completeDuration;
 
+  /// Duration for overlay dismiss animation.
   final Duration dismissDuration;
 
   const DescribedFeatureOverlay({
