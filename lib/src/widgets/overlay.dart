@@ -144,6 +144,10 @@ class DescribedFeatureOverlay extends StatefulWidget {
         assert(targetColor != null),
         assert(textColor != null),
         assert(overflowMode != null),
+        assert(openDuration != null),
+        assert(pulseDuration != null),
+        assert(completeDuration != null),
+        assert(dismissDuration != null),
         super(key: key);
 
   @override
@@ -303,12 +307,12 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       );
 
     _completeController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 250))
+        vsync: this, duration: widget.completeDuration)
       ..addListener(() =>
           setState(() => _transitionProgress = _completeController.value));
 
     _dismissController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 250))
+        vsync: this, duration: widget.dismissDuration)
       ..addListener(
           () => setState(() => _transitionProgress = _dismissController.value));
   }
