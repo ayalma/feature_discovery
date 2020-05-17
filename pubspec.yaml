@@ -4,10 +4,6 @@ description: >-
   to show a description of specific features to new users.
   See https://tinyurl.com/FeatureDiscovery
 version: 0.9.0
-authors:
-  - ayalma <alimohammadi7117@gmail.com>
-  - creativecreatorormaybenot <19204050+creativecreatorormaybenot@users.noreply.github.com>
-  - axel-op <49279289+axel-op@users.noreply.github.com>
 homepage: https://github.com/ayalma/feature_discovery
 
 environment:
