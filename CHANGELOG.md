@@ -1,3 +1,7 @@
+## 0.9.0
+* Added `barrierDismissible` flag which decides whether the overlay should dismiss
+  on touching outside or not.
+
 ## 0.8.0
 * **Breaking change:**  `FeatureDiscovery.completeCurrentStep` is async know.
 * Added preferences for each feature to show is understood by user or not

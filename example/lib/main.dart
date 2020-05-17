@@ -363,6 +363,7 @@ class _ContentState extends State<Content> {
                 builder: (BuildContext context,
                         void Function(void Function()) setState) =>
                     DescribedFeatureOverlay(
+                  barrierDismissible: false,
                   featureId: feature6,
                   tapTarget: const Icon(Icons.drive_eta),
                   backgroundColor: Colors.green,
