@@ -37,6 +37,9 @@ class FeatureDiscovery extends StatelessWidget {
       _blocOf(context).completeStep();
 
 
+  /// This will return the status of provided featureId 
+  static Future<bool> isDisplayed(BuildContext context,String featureId)  =>
+      _blocOf(context).isDisplayed(featureId);
 
   static Future<void> clearPreferences(BuildContext context,Iterable<String> steps)  =>
       _blocOf(context).clearPreferences(steps);

@@ -151,6 +151,12 @@ class Bloc {
     return isCompleted;
   }
 
+  Future<bool> isDisplayed(String featureId) async {
+    final pref = await SharedPreferences.getInstance();
+    final result =  pref.getBool(featureId);
+    return (result != null)?result:false;
+  }
+
   Future<void> clearPreferences(Iterable<String> steps) async {
     final pref = await SharedPreferences.getInstance();
 
