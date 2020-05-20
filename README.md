@@ -3,7 +3,7 @@
 This Flutter package implements Feature Discovery following the [Material Design guidelines](https://material.io/archive/guidelines/growth-communications/feature-discovery.html).  
 
 With Feature Discovery, you can add context to any UI element, i.e. any `Widget` in your Flutter app.  
-Here is a small demo of the [`example` app](https://pub.dev/packages/feature_discovery#-example-tab-):
+Here is a small demo of the [ `example` app](https://pub.dev/packages/feature_discovery#-example-tab-):
 
 [![](https://media.giphy.com/media/TJlOkURETOPiucHNRC/giphy.gif)](https://media.giphy.com/media/TJlOkURETOPiucHNRC/giphy.gif)
 
@@ -13,11 +13,12 @@ To use this package, follow the [installing guide](https://pub.dev/packages/feat
 
 ## Usage
 
-### `FeatureDiscovery`
+### `FeatureDiscovery` 
 
 To be able to work with any of the global functions provided by the `feature_discovery` package, you will have to wrap your widget tree in a `FeatureDiscovery` widget.    
 There are many places where you can add `FeatureDiscovery` in your build tree, but the easiest to assure that it sits on top is to wrap your `MaterialApp` with it:
-```dart
+
+``` dart
 const FeatureDiscovery(
   child: MaterialApp(
    ...
@@ -25,10 +26,10 @@ const FeatureDiscovery(
 )
 ```
 
-### `DescribedFeatureOverlay`
+### `DescribedFeatureOverlay` 
 
-For every UI element (`Widget`) that you want to describe using Feature Discovery, you will need to add a `DescribedFeatureOverlay`.  
-This widget takes all the parameters for the overlay that will be displayed during Feature Discovery and takes the `Widget` you want to display the overlay about as its `child`.
+For every UI element ( `Widget` ) that you want to describe using Feature Discovery, you will need to add a `DescribedFeatureOverlay` .  
+This widget takes all the parameters for the overlay that will be displayed during Feature Discovery and takes the `Widget` you want to display the overlay about as its `child` .
 
 #### Feature ids
 
@@ -36,7 +37,7 @@ Every feature you describe should have a unique identifier, which is a `String` 
 And library will use this ids to save flag internally to indicate which feature is showed to user and completed by user.
 And if this feature is completed by user library will not show it again.
 
-```dart
+``` dart
 DescribedFeatureOverlay(
   featureId: 'add_item_feature_id', // Unique id that identifies this overlay.
   tapTarget: const Icon(Icons.add), // The widget that will be displayed as the tap target.
@@ -55,17 +56,17 @@ DescribedFeatureOverlay(
 <details>
 <summary>Additional parameters</summary>
 
-#### `contentLocation`
+#### `contentLocation` 
 
 This is `ContentLocation.trivial` by default, however, the package cannot always determine the correct placement for the overlay. In those cases, you can provide either of these two:
 
- * `ContentLocation.below`: Text is displayed below the target.
+ * `ContentLocation.below` : Text is displayed below the target.
   
- * `ContentLocation.above`: Text is displayed above the target.
+ * `ContentLocation.above` : Text is displayed above the target.
 
-#### `onComplete`
+#### `onComplete` 
 
-```dart
+``` dart
    onComplete: () async {
     // Executed when the tap target is tapped. The overlay will not close before
     // this function returns and after that, the next step will be opened.
@@ -75,9 +76,9 @@ This is `ContentLocation.trivial` by default, however, the package cannot always
   },
 ```
 
-#### `onDismiss`
+#### `onDismiss` 
 
-```dart
+``` dart
   onDismiss: () async {
     // Called when the user taps outside of the overlay, trying to dismiss it.
     print('Overlay dismissed.');
@@ -86,9 +87,9 @@ This is `ContentLocation.trivial` by default, however, the package cannot always
   },
 ```
 
-#### `onOpen`
+#### `onOpen` 
 
-```dart
+``` dart
   onOpen: () async {
     // This callback is called before the overlay is displayed.
     print('The overlay is about to be displayed.');
@@ -98,21 +99,21 @@ This is `ContentLocation.trivial` by default, however, the package cannot always
   },
 ```
 
-#### `enablePulsingAnimation`
+#### `enablePulsingAnimation` 
 
-This is set to `true` by default, but you can disable the pulsing animation about the tap target by setting this to `false`.
+This is set to `true` by default, but you can disable the pulsing animation about the tap target by setting this to `false` .
 
-#### `allowShowingDuplicate`
+#### `allowShowingDuplicate` 
 
-If multiple `DescribedFeatureOverlay`s have the same `featureId`, they will interfere with each other during discovery and if you want to display multiple overlays at the same time, you will have to set `allowShowingDuplicate` to `true` for all of them.
+If multiple `DescribedFeatureOverlay` s have the same `featureId` , they will interfere with each other during discovery and if you want to display multiple overlays at the same time, you will have to set `allowShowingDuplicate` to `true` for all of them.
 
-### `barrierDismissible`
+### `barrierDismissible` 
 
-This is set to `true` by default, but you can disable "dissmiss overlay on touch outside" by setting this to `false`.
+This is set to `true` by default, but you can disable "dissmiss overlay on touch outside" by setting this to `false` .
 
-#### `overflowMode`
+#### `overflowMode` 
 
-This is `OverflowMode.ignore` by default, which will simply render the content you pass to `title` and `description`, even if it overflows the background area, i.e. the circle of the overlay. Alternatively, you can specify any of the following if you desire different behavior:
+This is `OverflowMode.ignore` by default, which will simply render the content you pass to `title` and `description` , even if it overflows the background area, i.e. the circle of the overlay. Alternatively, you can specify any of the following if you desire different behavior:
 
  * `OverflowMode.clipContent` will clip any content that is outside of the inner area (the background's circle).
  
@@ -122,12 +123,12 @@ This is `OverflowMode.ignore` by default, which will simply render the content y
 
 </details>
 
-### `FeatureDiscovery.discoverFeatures`
+### `FeatureDiscovery.discoverFeatures` 
 
 When you want to showcase your features, you can call `FeatureDiscovery.discoverFeatures` with the applicable feature ids. The features will be displayed as steps in order if the user does not dismiss them.  
 By tapping the tap target, the user will be sent on to the next step and by tapping outside of the overlay, the user will dismiss all queued steps.
 
-```dart
+``` dart
 FeatureDiscovery.discoverFeatures(
   context,
   const <String>{ // Feature ids for every feature that you want to showcase in order.
@@ -136,9 +137,9 @@ FeatureDiscovery.discoverFeatures(
 );
 ```
 
-If you want to display Feature Discovery for a page right after it has been opened, you can use [`SchedulerBinding.addPostFrameCallback`](https://api.flutter.dev/flutter/scheduler/SchedulerBinding/addPostFrameCallback.html) in the [`initState` method of your `StatefulWidget`](https://api.flutter.dev/flutter/widgets/State/initState.html):
+If you want to display Feature Discovery for a page right after it has been opened, you can use [ `SchedulerBinding.addPostFrameCallback` ](https://api.flutter.dev/flutter/scheduler/SchedulerBinding/addPostFrameCallback.html) in the [ `initState` method of your `StatefulWidget` ](https://api.flutter.dev/flutter/widgets/State/initState.html):
 
-```dart
+``` dart
 @override
 void initState() {
   // ...
@@ -153,23 +154,32 @@ void initState() {
   super.initState();
 }
 ```
-### `FeatureDiscovery.clearPreferences`
+
+### `FeatureDiscovery.clearPreferences` 
 
 If you want to clear feature discovery flag use this command like that
-```
+
+``` 
 FeatureDiscovery.clearPreferences(context, <String>{ 'add_item_feature_id', });
+```
+
+### `FeatureDiscovery.isDisplayed` 
+
+If you want to findout feature discovery is Displayed or not ? use this command like that
+
+``` 
+FeatureDiscovery.isDisplayed(context,'desired_feature_id');
 ```
 
 #### Other methods
 
-You can view the [API reference for `FeatureDiscovery`](https://pub.dev/documentation/feature_discovery/latest/feature_discovery/FeatureDiscovery-class.html#static-methods) to find other useful methods for controlling the Feature Discovery process programmatically.
+You can view the [API reference for `FeatureDiscovery` ](https://pub.dev/documentation/feature_discovery/latest/feature_discovery/FeatureDiscovery-class.html#static-methods) to find other useful methods for controlling the Feature Discovery process programmatically.
 
+### `EnsureVisible` 
 
-### `EnsureVisible`
+You can use the [ `EnsureVisible` widget](https://pub.dev/documentation/feature_discovery/latest/feature_discovery/EnsureVisible-class.html) to automatically scroll to widgets that are inside of scrollable viewports when they are described during Feature Discovery:
 
-You can use the [`EnsureVisible` widget](https://pub.dev/documentation/feature_discovery/latest/feature_discovery/EnsureVisible-class.html) to automatically scroll to widgets that are inside of scrollable viewports when they are described during Feature Discovery:
-
-```dart
+``` dart
 // You need to save an instance of a GlobalKey in order to call ensureVisible in onOpen.
 GlobalKey<EnsureVisibleState> ensureVisibleGlobalKey = GlobalKey<EnsureVisibleState>();
 
@@ -194,7 +204,7 @@ DescribedFeatureOverlay(
 
 ## Notes
 
-In `DescribedFeatureOverlay`, `tapTarget`, `title`, and `description` can take any widget, but it is recommended to use an `Icon` for the tap target and simple `Text` widgets for the title and description. The package takes care of styling these widgets and having these as `Widget`s allows you to pass `Key`s, `Semantics`, etc.
+In `DescribedFeatureOverlay` , `tapTarget` , `title` , and `description` can take any widget, but it is recommended to use an `Icon` for the tap target and simple `Text` widgets for the title and description. The package takes care of styling these widgets and having these as `Widget` s allows you to pass `Key` s, `Semantics` , etc.
 
 ### Contributing
 
