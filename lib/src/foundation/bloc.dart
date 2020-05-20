@@ -153,8 +153,8 @@ class Bloc {
 
   Future<bool> isDisplayed(String featureId) async {
     final pref = await SharedPreferences.getInstance();
-    final result =  pref.getBool(featureId);
-    return (result != null)?result:false;
+    final result = pref.getBool(featureId);
+    return (result != null) ? result : false;
   }
 
   Future<void> clearPreferences(Iterable<String> steps) async {
