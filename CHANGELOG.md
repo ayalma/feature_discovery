@@ -1,3 +1,15 @@
+## 0.10.0 
+* Added `FeatureDiscovery.isDisplayed` method to check status of feature
+* Added Feature/animation durations customization 
+* Added `openDuration` flag that controls open animation duration.
+* Added `pulseDuration` flag that controls tap target pulse animation duration.
+* Added `completeDuration` flag that controls complete animation duration.
+* Added `dismissDuration` flag that controls dismiss animation duration.
+
+## 0.9.0
+* Added `barrierDismissible` flag which decides whether the overlay should dismiss
+  on touching outside or not.
+
 ## 0.8.0
 * **Breaking change:**  `FeatureDiscovery.completeCurrentStep` is async know.
 * Added preferences for each feature to show is understood by user or not
