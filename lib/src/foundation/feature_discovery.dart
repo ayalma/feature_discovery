@@ -51,9 +51,6 @@ class FeatureDiscovery extends StatelessWidget {
   /// call [completeCurrentStep] instead.
   static void dismissAll(BuildContext context) => _blocOf(context).dismiss();
 
-  @Deprecated('Use [dismissAll] instead.')
-  static void dismiss(BuildContext context) => dismissAll(context);
-
   /// This returns the feature id of the current feature discovery step, i.e.
   /// of the [DescribedFeatureOverlay] that is currently supposed to be shown, or `null`.
   ///
@@ -63,10 +60,6 @@ class FeatureDiscovery extends StatelessWidget {
   /// This means that you cannot use this to check if a feature overlay is being displayed.
   static String currentFeatureIdOf(BuildContext context) =>
       _blocOf(context).activeFeatureId;
-
-  @Deprecated('Use [currentFeatureIdOf] instead.')
-  static String activeFeatureId(BuildContext context) =>
-      currentFeatureIdOf(context);
 
   final Widget child;
 
