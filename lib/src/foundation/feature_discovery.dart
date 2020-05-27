@@ -36,9 +36,14 @@ class FeatureDiscovery extends StatelessWidget {
   static Future<void> completeCurrentStep(BuildContext context) async =>
       _blocOf(context).completeStep();
 
-  /// This will return the status of provided featureId
-  static Future<bool> isDisplayed(BuildContext context, String featureId) =>
-      _blocOf(context).isDisplayed(featureId);
+  /// This will return true iff
+  /// this [featureId] has been recorded as completed
+  /// in the Shared Preferences.
+  static Future<bool> hasPreviouslyCompleted(
+    BuildContext context,
+    String featureId,
+  ) =>
+      _blocOf(context).hasPreviouslyCompleted(featureId);
 
   static Future<void> clearPreferences(
           BuildContext context, Iterable<String> steps) =>
@@ -63,8 +68,31 @@ class FeatureDiscovery extends StatelessWidget {
 
   final Widget child;
 
-  const FeatureDiscovery({Key key, this.child}) : super(key: key);
+  /// If true, the completion of the steps will be recorded in the Shared Preferences.
+  ///
+  /// The key for each step will be
+  /// ```
+  /// '${sharedPreferencesPrefix}${featureId}'
+  /// ```
+  final bool recordStepsInSharedPreferences;
+
+  /// The prefix to put before the feature ids
+  /// to form the keys for the Shared Preferences.
+  ///
+  /// Will only be used if [recordStepsInSharedPreferences] is true.
+  final String sharedPreferencesPrefix;
+
+  const FeatureDiscovery({
+    Key key,
+    @required this.child,
+    this.recordStepsInSharedPreferences = true,
+    this.sharedPreferencesPrefix = '',
+  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => BlocProvider(child: child);
+  Widget build(BuildContext context) => BlocProvider(
+        child: child,
+        recordInSharedPrefs: recordStepsInSharedPreferences,
+        sharedPrefsPrefix: sharedPreferencesPrefix,
+      );
 }

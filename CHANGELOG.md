@@ -2,7 +2,10 @@
 
 ## 0.11.0
 
-* Remove deprecated methods in `FeatureDiscovery`.
+* **Breaking change:** `isDisplayed` is replaced by `hasPreviouslyCompleted`.
+* Deprecated methods in `FeatureDiscovery` have been removed.
+* New parameter `recordStepsInSharedPreferences` in `FeatureDiscovery` to prevent step completions to be recorded in Shared Preferences.
+* New parameter `sharedPreferencesPrefix` in `FeatureDiscovery`.
 
 ## 0.10.0
 
