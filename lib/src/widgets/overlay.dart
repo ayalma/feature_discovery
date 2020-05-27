@@ -172,6 +172,8 @@ class DescribedFeatureOverlay extends StatefulWidget {
 }
 
 class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with TickerProviderStateMixin {
+  static const double kDefaultBackroungOpacity = 0.96;
+
   Size _screenSize;
 
   FeatureOverlayState _state;
@@ -599,7 +601,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay> with 
               child: _Background(
                 transitionProgress: _transitionProgress,
                 color: widget.backgroundColor ?? Theme.of(context).primaryColor,
-                defaultOpacity: widget.backgroundOpacity ?? 0.96,
+                defaultOpacity: widget.backgroundOpacity ?? kDefaultBackroungOpacity,
                 state: _state,
                 overflowMode: widget.overflowMode,
               ),
