@@ -61,6 +61,9 @@ class Bloc {
   /// The steps consist of the feature ids of the features to be discovered.
   Iterable<String> _steps;
 
+  /// Steps that have been previously completed.
+  Set<String> _stepsToIgnore;
+
   int _activeStepIndex;
 
   String get activeFeatureId =>
@@ -103,21 +106,17 @@ class Bloc {
         'You need to pass at least one step to [FeatureDiscovery.discoverFeatures].');
 
     _steps = steps;
-    _activeStepIndex = 0;
-    _activeOverlays = 0;
+    _stepsToIgnore = await _alreayCompletedSteps;
+    _activeStepIndex = -1;
 
-    if (recordInSharedPrefs && await hasPreviouslyCompleted(activeFeatureId)) {
-      await _nextStep();
-    } else {
-      _eventsIn.add(EventType.open);
-    }
+    await _nextStep();
   }
 
   Future<void> completeStep() async {
     if (_steps == null) return;
     _eventsIn.add(EventType.complete);
 
-    await saveCompletionOf(activeFeatureId);
+    unawaited(_saveCompletionOf(activeFeatureId));
     await _nextStep();
   }
 
@@ -126,8 +125,7 @@ class Bloc {
     _activeOverlays = 0;
 
     if (_activeStepIndex < _steps.length) {
-      if (recordInSharedPrefs &&
-          await hasPreviouslyCompleted(activeFeatureId)) {
+      if (_stepsToIgnore.contains(activeFeatureId)) {
         await _nextStep();
       } else {
         _eventsIn.add(EventType.open);
@@ -149,10 +147,19 @@ class Bloc {
   }
 
   /// Will mark [featureId] as completed in the Shared Preferences.
-  Future<void> saveCompletionOf(String featureId) async {
+  Future<void> _saveCompletionOf(String featureId) async {
     if (!recordInSharedPrefs) return;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('$sharedPrefsPrefix$featureId', true);
+    _stepsToIgnore?.add(featureId);
+  }
+
+  Future<Set<String>> get _alreayCompletedSteps async {
+    if (!recordInSharedPrefs) return {};
+    final prefs = await SharedPreferences.getInstance();
+    return _steps
+        .where((s) => prefs.getBool('$sharedPrefsPrefix$s') == true)
+        .toSet();
   }
 
   /// Returns true iff this step has been previously
@@ -160,14 +167,16 @@ class Bloc {
   /// with [saveCompletionOf].
   Future<bool> hasPreviouslyCompleted(String featureId) async {
     if (!recordInSharedPrefs) return false;
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('$sharedPrefsPrefix$featureId') ?? false;
+    _stepsToIgnore ??= await _alreayCompletedSteps;
+    return _stepsToIgnore.contains(featureId);
   }
 
   Future<void> clearPreferences(Iterable<String> steps) async {
     final prefs = await SharedPreferences.getInstance();
     await Future.wait(
-      steps.map((featureId) => prefs.remove('$sharedPrefsPrefix$featureId')),
+      steps.map<Future>(
+        (featureId) => prefs.remove('$sharedPrefsPrefix$featureId'),
+      ),
     );
   }
 }
@@ -193,4 +202,8 @@ class BlocNotFoundError extends Error {
   final String message;
 
   BlocNotFoundError(this.message) : super();
+}
+
+void unawaited(Future future) async {
+  await future;
 }
