@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
         ),
         // Required: this widget works like an inherited widget.
         home: const FeatureDiscovery(
+          recordStepsInSharedPreferences: false,
           child: MyHomePage(title: 'Flutter Feature Discovery'),
         ),
       );

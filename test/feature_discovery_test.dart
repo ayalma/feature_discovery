@@ -40,7 +40,7 @@ void main() {
       expect(find.text(texts[0]), findsNothing);
       expect(find.text(texts[1]), findsOneWidget);
       // Test with [completeCurrentStep]
-      FeatureDiscovery.completeCurrentStep(context);
+      await FeatureDiscovery.completeCurrentStep(context);
       await tester.pumpAndSettle();
       expect(find.text(texts[1]), findsNothing);
       expect(find.text(texts[2]), findsOneWidget);
@@ -68,11 +68,11 @@ void main() {
       await tester.pumpAndSettle();
       // First overlay should NOT appear
       expect(find.text(texts[0]), findsNothing);
-      FeatureDiscovery.completeCurrentStep(context);
+      await FeatureDiscovery.completeCurrentStep(context);
       await tester.pumpAndSettle();
       // Second overlay should appear
       expect(find.text(texts[1]), findsOneWidget);
-      FeatureDiscovery.completeCurrentStep(context);
+      await FeatureDiscovery.completeCurrentStep(context);
       await tester.pumpAndSettle();
       // No overlay should remain on screen
       texts.forEach((t) => expect(find.text(t), findsNothing));

@@ -15,6 +15,7 @@ class TestWrapper extends StatelessWidget {
 
   @override
   Widget build(_) => FeatureDiscovery(
+        recordStepsInSharedPreferences: false,
         child: MaterialApp(
           title: 'FeatureDiscovery Test',
           home: Scaffold(
