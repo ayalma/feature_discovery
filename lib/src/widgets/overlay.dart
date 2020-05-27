@@ -114,7 +114,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
 
   /// Duration for overlay dismiss animation.
   final Duration dismissDuration;
-  
+
   /// Controls whether the overlay should be dismissed on touching outside or not.
   ///
   /// The default value for [barrierDismissible] is `true`.
@@ -305,11 +305,15 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
   }
 
   void _initAnimationControllers() {
-    _openController = AnimationController(vsync: this, duration: widget.openDuration)
-      ..addListener(() => setState(() => _transitionProgress = _openController.value));
+    _openController = AnimationController(
+        vsync: this, duration: widget.openDuration)
+      ..addListener(
+          () => setState(() => _transitionProgress = _openController.value));
 
-    _pulseController = AnimationController(vsync: this, duration: widget.pulseDuration)
-      ..addListener(() => setState(() => _transitionProgress = _pulseController.value))
+    _pulseController = AnimationController(
+        vsync: this, duration: widget.pulseDuration)
+      ..addListener(
+          () => setState(() => _transitionProgress = _pulseController.value))
       ..addStatusListener(
         (AnimationStatus status) {
           if (status == AnimationStatus.completed) {
@@ -318,10 +322,10 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
         },
       );
 
-    _completeController = AnimationController(
-        vsync: this, duration: widget.completeDuration)
-      ..addListener(() =>
-          setState(() => _transitionProgress = _completeController.value));
+    _completeController =
+        AnimationController(vsync: this, duration: widget.completeDuration)
+          ..addListener(() =>
+              setState(() => _transitionProgress = _completeController.value));
 
     _dismissController = AnimationController(
         vsync: this, duration: widget.dismissDuration)
