@@ -7,6 +7,8 @@ import 'package:feature_discovery/src/widgets.dart';
 import 'package:flutter/material.dart';
 
 class DescribedFeatureOverlay extends StatefulWidget {
+  static const double kDefaultBackgroundOpacity = 0.96;
+
   /// This id should be unique among all the [DescribedFeatureOverlay] widgets.
   /// Otherwise, multiple overlays would show at once, which is currently
   /// only possible if [allowShowingDuplicate] is set to `true`.
@@ -141,7 +143,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.enablePulsingAnimation = true,
     this.allowShowingDuplicate = false,
     this.overflowMode = OverflowMode.ignore,
-    this.backgroundOpacity,
+    this.backgroundOpacity = kDefaultBackgroundOpacity,
     this.openDuration = const Duration(milliseconds: 250),
     this.pulseDuration = const Duration(milliseconds: 1000),
     this.completeDuration = const Duration(milliseconds: 250),
@@ -174,8 +176,6 @@ class DescribedFeatureOverlay extends StatefulWidget {
 
 class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     with TickerProviderStateMixin {
-  static const double kDefaultBackroungOpacity = 0.96;
-
   Size _screenSize;
 
   FeatureOverlayState _state;
@@ -648,8 +648,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
               child: _Background(
                 transitionProgress: _transitionProgress,
                 color: widget.backgroundColor ?? Theme.of(context).primaryColor,
-                defaultOpacity:
-                    widget.backgroundOpacity ?? kDefaultBackroungOpacity,
+                defaultOpacity: widget.backgroundOpacity,
                 state: _state,
                 overflowMode: widget.overflowMode,
               ),
