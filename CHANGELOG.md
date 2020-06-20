@@ -1,3 +1,7 @@
+## 0.11.0 
+* Added `FeatureDiscovery.backgroundOpacity` in order to customize overlay background opacity when it is displayed.
+  `backgroundOpacity` is optional. If ignored, the default value is 0.96.
+
 ## 0.10.0 
 * Added `FeatureDiscovery.isDisplayed` method to check status of feature
 * Added Feature/animation durations customization 
