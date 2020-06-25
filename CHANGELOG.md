@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.11.0
+## 0.12.0
 
 * **Breaking change:** `isDisplayed` is replaced by `hasPreviouslyCompleted`.
 * **Fix:** the `onComplete` returned value will no longer be ignored, and the next overlay won't show if this function returns `false`.
@@ -9,10 +9,15 @@
 * New parameter `recordStepsInSharedPreferences` in `FeatureDiscovery` to prevent step completions to be recorded in Shared Preferences.
 * New parameter `sharedPreferencesPrefix` in `FeatureDiscovery`.
 
+## 0.11.0
+
+* Added `FeatureDiscovery.backgroundOpacity` in order to customize overlay background opacity when it is displayed.
+  `backgroundOpacity` is optional. If ignored, the default value is 0.96.
+
 ## 0.10.0
 
-* Added `FeatureDiscovery.isDisplayed` method to check status of feature.
-* Added Feature/animation durations customization.
+* Added `FeatureDiscovery.isDisplayed` method to check status of feature
+* Added Feature/animation durations customization
 * Added `openDuration` flag that controls open animation duration.
 * Added `pulseDuration` flag that controls tap target pulse animation duration.
 * Added `completeDuration` flag that controls complete animation duration.

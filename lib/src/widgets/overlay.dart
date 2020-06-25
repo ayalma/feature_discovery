@@ -7,6 +7,8 @@ import 'package:feature_discovery/src/widgets.dart';
 import 'package:flutter/material.dart';
 
 class DescribedFeatureOverlay extends StatefulWidget {
+  static const double kDefaultBackgroundOpacity = 0.96;
+
   /// This id should be unique among all the [DescribedFeatureOverlay] widgets.
   /// Otherwise, multiple overlays would show at once, which is currently
   /// only possible if [allowShowingDuplicate] is set to `true`.
@@ -27,6 +29,10 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// The color of the large circle, where the text sits on.
   /// If null, defaults to [ThemeData.primaryColor].
   final Color backgroundColor;
+
+  /// The opacity of the large circle, where the text sits on.
+  /// If null, defaults to 0.96.
+  final double backgroundOpacity;
 
   /// Color of the target, that is the small circle behind the tap target.
   final Color targetColor;
@@ -135,6 +141,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.enablePulsingAnimation = true,
     this.allowShowingDuplicate = false,
     this.overflowMode = OverflowMode.ignore,
+    this.backgroundOpacity = kDefaultBackgroundOpacity,
     this.openDuration = const Duration(milliseconds: 250),
     this.pulseDuration = const Duration(milliseconds: 1000),
     this.completeDuration = const Duration(milliseconds: 250),
@@ -630,6 +637,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
               child: _Background(
                 transitionProgress: _transitionProgress,
                 color: widget.backgroundColor ?? Theme.of(context).primaryColor,
+                defaultOpacity: widget.backgroundOpacity,
                 state: _state,
                 overflowMode: widget.overflowMode,
               ),
@@ -682,14 +690,16 @@ class _Background extends StatelessWidget {
   final double transitionProgress;
   final Color color;
   final OverflowMode overflowMode;
+  final double defaultOpacity;
 
-  const _Background({
-    Key key,
-    @required this.color,
-    @required this.state,
-    @required this.transitionProgress,
-    @required this.overflowMode,
-  })  : assert(color != null),
+  const _Background(
+      {Key key,
+      @required this.color,
+      @required this.state,
+      @required this.transitionProgress,
+      @required this.overflowMode,
+      @required this.defaultOpacity})
+      : assert(color != null),
         assert(state != null),
         assert(transitionProgress != null),
         super(key: key);
@@ -699,19 +709,19 @@ class _Background extends StatelessWidget {
       case FeatureOverlayState.opening:
         final adjustedPercent = const Interval(0.0, 0.3, curve: Curves.easeOut)
             .transform(transitionProgress);
-        return 0.96 * adjustedPercent;
+        return defaultOpacity * adjustedPercent;
 
       case FeatureOverlayState.completing:
         final adjustedPercent = const Interval(0.1, 0.6, curve: Curves.easeOut)
             .transform(transitionProgress);
 
-        return 0.96 * (1 - adjustedPercent);
+        return defaultOpacity * (1 - adjustedPercent);
       case FeatureOverlayState.dismissing:
         final adjustedPercent = const Interval(0.2, 1.0, curve: Curves.easeOut)
             .transform(transitionProgress);
-        return 0.96 * (1 - adjustedPercent);
+        return defaultOpacity * (1 - adjustedPercent);
       case FeatureOverlayState.opened:
-        return 0.96;
+        return defaultOpacity;
       case FeatureOverlayState.closed:
         return 0;
     }
