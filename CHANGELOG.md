@@ -3,6 +3,8 @@
 ## 0.11.0
 
 * **Breaking change:** `isDisplayed` is replaced by `hasPreviouslyCompleted`.
+* **Fix:** the `onComplete` returned value will no longer be ignored, and the next overlay won't show if this function returns `false`.
+* `FeatureDiscovery.completeCurrentStep` will force complete the current step and not execute the `onComplete` function.
 * Deprecated methods in `FeatureDiscovery` have been removed.
 * New parameter `recordStepsInSharedPreferences` in `FeatureDiscovery` to prevent step completions to be recorded in Shared Preferences.
 * New parameter `sharedPreferencesPrefix` in `FeatureDiscovery`.

@@ -266,20 +266,6 @@ class _ContentState extends State<Content> {
                 child: const Text(
                     'Imagine there would be a beautiful picture here.'),
               ),
-              RaisedButton.icon(
-                onPressed: () {
-                  FeatureDiscovery.clearPreferences(context, const <String>{
-                    feature1,
-                    feature2,
-                    feature3,
-                    feature4,
-                    feature6,
-                    feature5
-                  });
-                },
-                icon: Icon(Icons.clear),
-                label: const Text('Reset Preferences'),
-              ),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16.0),

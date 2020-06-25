@@ -31,8 +31,10 @@ class FeatureDiscovery extends StatelessWidget {
   static void discoverFeatures(BuildContext context, Iterable<String> steps) =>
       _blocOf(context).discoverFeatures(steps.toList());
 
-  /// This will schedule completion of the current discovery step and continue
-  /// onto the step after the completion animation of the current overlay if successful.
+  /// This will force the completion of the current step and continue
+  /// onto the next step after the completion animation of the current overlay.
+  ///
+  /// The `onComplete` parameter will be ignored for every active overlay.
   static Future<void> completeCurrentStep(BuildContext context) async =>
       _blocOf(context).completeStep();
 
