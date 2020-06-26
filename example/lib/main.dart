@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
         ),
         // Required: this widget works like an inherited widget.
         home: const FeatureDiscovery(
+          recordStepsInSharedPreferences: false,
           child: MyHomePage(title: 'Flutter Feature Discovery'),
         ),
       );
@@ -264,20 +265,6 @@ class _ContentState extends State<Content> {
                 width: double.infinity,
                 child: const Text(
                     'Imagine there would be a beautiful picture here.'),
-              ),
-              RaisedButton.icon(
-                onPressed: () {
-                  FeatureDiscovery.clearPreferences(context, const <String>{
-                    feature1,
-                    feature2,
-                    feature3,
-                    feature4,
-                    feature6,
-                    feature5
-                  });
-                },
-                icon: Icon(Icons.clear),
-                label: const Text('Reset Preferences'),
               ),
               Container(
                 width: double.infinity,

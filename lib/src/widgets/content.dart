@@ -77,7 +77,7 @@ class Content extends StatelessWidget {
                   DefaultTextStyle(
                     style: Theme.of(context)
                         .textTheme
-                        .title // TODO(creativecreatorormaybenot): Update to headline6 when Flutter stable deprecates title.
+                        .headline6
                         .copyWith(color: textColor),
                     child: title,
                   ),
@@ -87,7 +87,7 @@ class Content extends StatelessWidget {
                   DefaultTextStyle(
                     style: Theme.of(context)
                         .textTheme
-                        .body1 // TODO(creativecreatorormaybenot): Update to bodyText2 when Flutter stable deprecates body1.
+                        .bodyText2
                         .copyWith(color: textColor.withOpacity(0.9)),
                     child: description,
                   )

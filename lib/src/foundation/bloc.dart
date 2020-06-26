@@ -6,13 +6,23 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class BlocProvider extends StatelessWidget {
   final Widget child;
+  final bool recordInSharedPrefs;
+  final String sharedPrefsPrefix;
 
-  const BlocProvider({Key key, this.child}) : super(key: key);
+  const BlocProvider({
+    Key key,
+    @required this.child,
+    @required this.recordInSharedPrefs,
+    @required this.sharedPrefsPrefix,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) => Provider<Bloc>(
         child: child,
-        create: (BuildContext context) => Bloc._(),
+        create: (BuildContext context) => Bloc._(
+          recordInSharedPrefs: recordInSharedPrefs,
+          sharedPrefsPrefix: sharedPrefsPrefix ?? '',
+        ),
         dispose: (BuildContext context, Bloc bloc) => bloc._dispose(),
       );
 }
@@ -30,25 +40,37 @@ class Bloc {
     }
   }
 
-  Bloc._();
+  final bool recordInSharedPrefs;
+  final String sharedPrefsPrefix;
+
+  Bloc._({
+    @required this.recordInSharedPrefs,
+    @required this.sharedPrefsPrefix,
+  });
 
   /// This [StreamController] allows to send events of type [EventType].
   /// The [DescribedFeatureOverlay]s will be able to handle these events by checking the
   /// [activeFeatureId] against its own feature id or by considering its current [FeatureOverlayState].
-  final StreamController<EventType> _eventsController =
-      StreamController.broadcast();
+  final _eventsController = StreamController<EventType>.broadcast();
 
   Stream<EventType> get eventsOut => _eventsController.stream;
 
   Sink<EventType> get _eventsIn => _eventsController.sink;
 
   /// The steps consist of the feature ids of the features to be discovered.
-  Iterable<String> _steps;
+  List<String> _steps;
+
+  /// Steps that have been previously completed.
+  Set<String> _stepsToIgnore;
 
   int _activeStepIndex;
 
-  String get activeFeatureId =>
-      _activeStepIndex == null ? null : _steps?.elementAt(_activeStepIndex);
+  String get activeFeatureId => _steps == null ||
+          _activeStepIndex == null ||
+          _activeStepIndex >= _steps.length ||
+          _activeStepIndex < 0
+      ? null
+      : _steps[_activeStepIndex];
 
   /// This is used to determine if the active feature is already shown by
   /// another [DescribedFeatureOverlay] as [DescribedFeatureOverlay.allowShowingDuplicate]
@@ -85,84 +107,75 @@ class Bloc {
   void discoverFeatures(Iterable<String> steps) async {
     assert(steps != null && steps.isNotEmpty,
         'You need to pass at least one step to [FeatureDiscovery.discoverFeatures].');
-    final isAllStepCompleted = await _isAllStepCompleted(steps);
-    if (isAllStepCompleted) return;
 
-    _steps = steps;
-    _activeStepIndex = 0;
-    _activeOverlays = 0;
+    _stepsToIgnore = await _alreayCompletedSteps;
+    _steps = steps.where((s) => !_stepsToIgnore.contains(s)).toList();
+    _activeStepIndex = -1;
 
-    if (await _isCurrentStepCompleted()) {
-      await _nextStep();
-    } else {
-      _eventsIn.add(EventType.open);
-    }
+    await _nextStep();
   }
 
   Future<void> completeStep() async {
     if (_steps == null) return;
+    // This will ignore the [onComplete] function of all overlays.
     _eventsIn.add(EventType.complete);
-
-    await _setCurrentStepComplete();
     await _nextStep();
   }
 
   Future<void> _nextStep() async {
+    if (activeFeatureId != null) unawaited(_saveCompletionOf(activeFeatureId));
     _activeStepIndex++;
     _activeOverlays = 0;
 
     if (_activeStepIndex < _steps.length) {
-      if (await _isCurrentStepCompleted()) {
-        await _nextStep();
-      } else {
-        _eventsIn.add(EventType.open);
-      }
-      return;
+      _eventsIn.add(EventType.open);
+    } else {
+      // The last step has been completed, so we need to clear the steps.
+      _steps = null;
+      _activeStepIndex = null;
     }
-
-    // The last step has been completed, so we need to clear the steps.
-    _steps = null;
-    _activeStepIndex = null;
   }
 
   void dismiss() {
+    // This will ignore the [onDismiss] function of all overlays.
     _eventsIn.add(EventType.dismiss);
-
     _steps = null;
     _activeStepIndex = null;
     _activeOverlays = 0;
   }
 
-  Future<void> _setCurrentStepComplete() async =>
-      await (await SharedPreferences.getInstance())
-          .setBool(activeFeatureId, true);
-
-  Future<bool> _isCurrentStepCompleted() async =>
-      await (await SharedPreferences.getInstance()).getBool(activeFeatureId) ??
-      false;
-
-  Future<bool> _isAllStepCompleted(Iterable<String> steps) async {
-    final pref = await SharedPreferences.getInstance();
-    var isCompleted = true;
-    steps.forEach((step) {
-      final isShowed = (pref.getBool(step) ?? false);
-      isCompleted = isCompleted && isShowed;
-    });
-    return isCompleted;
+  /// Will mark [featureId] as completed in the Shared Preferences.
+  Future<void> _saveCompletionOf(String featureId) async {
+    if (!recordInSharedPrefs) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('$sharedPrefsPrefix$featureId', true);
+    _stepsToIgnore?.add(featureId);
   }
 
-  Future<bool> isDisplayed(String featureId) async {
-    final pref = await SharedPreferences.getInstance();
-    final result = pref.getBool(featureId);
-    return (result != null) ? result : false;
+  Future<Set<String>> get _alreayCompletedSteps async {
+    if (!recordInSharedPrefs) return {};
+    final prefs = await SharedPreferences.getInstance();
+    return _steps
+        .where((s) => prefs.getBool('$sharedPrefsPrefix$s') == true)
+        .toSet();
+  }
+
+  /// Returns true iff this step has been previously
+  /// recorded as completed in the Shared Preferences
+  /// with [saveCompletionOf].
+  Future<bool> hasPreviouslyCompleted(String featureId) async {
+    if (!recordInSharedPrefs) return false;
+    _stepsToIgnore ??= await _alreayCompletedSteps;
+    return _stepsToIgnore.contains(featureId);
   }
 
   Future<void> clearPreferences(Iterable<String> steps) async {
-    final pref = await SharedPreferences.getInstance();
-
-    steps.forEach((step) {
-      pref.setBool(step, null);
-    });
+    final prefs = await SharedPreferences.getInstance();
+    await Future.wait(
+      steps.map<Future>(
+        (featureId) => prefs.remove('$sharedPrefsPrefix$featureId'),
+      ),
+    );
   }
 }
 
@@ -187,4 +200,8 @@ class BlocNotFoundError extends Error {
   final String message;
 
   BlocNotFoundError(this.message) : super();
+}
+
+void unawaited(Future future) async {
+  await future;
 }

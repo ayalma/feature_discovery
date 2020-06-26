@@ -31,14 +31,21 @@ class FeatureDiscovery extends StatelessWidget {
   static void discoverFeatures(BuildContext context, Iterable<String> steps) =>
       _blocOf(context).discoverFeatures(steps.toList());
 
-  /// This will schedule completion of the current discovery step and continue
-  /// onto the step after the completion animation of the current overlay if successful.
+  /// This will force the completion of the current step and continue
+  /// onto the next step after the completion animation of the current overlay.
+  ///
+  /// The `onComplete` parameter will be ignored for every active overlay.
   static Future<void> completeCurrentStep(BuildContext context) async =>
       _blocOf(context).completeStep();
 
-  /// This will return the status of provided featureId
-  static Future<bool> isDisplayed(BuildContext context, String featureId) =>
-      _blocOf(context).isDisplayed(featureId);
+  /// This will return true iff
+  /// this [featureId] has been recorded as completed
+  /// in the Shared Preferences.
+  static Future<bool> hasPreviouslyCompleted(
+    BuildContext context,
+    String featureId,
+  ) =>
+      _blocOf(context).hasPreviouslyCompleted(featureId);
 
   static Future<void> clearPreferences(
           BuildContext context, Iterable<String> steps) =>
@@ -51,9 +58,6 @@ class FeatureDiscovery extends StatelessWidget {
   /// call [completeCurrentStep] instead.
   static void dismissAll(BuildContext context) => _blocOf(context).dismiss();
 
-  @Deprecated('Use [dismissAll] instead.')
-  static void dismiss(BuildContext context) => dismissAll(context);
-
   /// This returns the feature id of the current feature discovery step, i.e.
   /// of the [DescribedFeatureOverlay] that is currently supposed to be shown, or `null`.
   ///
@@ -64,14 +68,33 @@ class FeatureDiscovery extends StatelessWidget {
   static String currentFeatureIdOf(BuildContext context) =>
       _blocOf(context).activeFeatureId;
 
-  @Deprecated('Use [currentFeatureIdOf] instead.')
-  static String activeFeatureId(BuildContext context) =>
-      currentFeatureIdOf(context);
-
   final Widget child;
 
-  const FeatureDiscovery({Key key, this.child}) : super(key: key);
+  /// If true, the completion of the steps will be recorded in the Shared Preferences.
+  ///
+  /// The key for each step will be
+  /// ```
+  /// '${sharedPreferencesPrefix}${featureId}'
+  /// ```
+  final bool recordStepsInSharedPreferences;
+
+  /// The prefix to put before the feature ids
+  /// to form the keys for the Shared Preferences.
+  ///
+  /// Will only be used if [recordStepsInSharedPreferences] is true.
+  final String sharedPreferencesPrefix;
+
+  const FeatureDiscovery({
+    Key key,
+    @required this.child,
+    this.recordStepsInSharedPreferences = true,
+    this.sharedPreferencesPrefix = '',
+  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => BlocProvider(child: child);
+  Widget build(BuildContext context) => BlocProvider(
+        child: child,
+        recordInSharedPrefs: recordStepsInSharedPreferences,
+        sharedPrefsPrefix: sharedPreferencesPrefix,
+      );
 }

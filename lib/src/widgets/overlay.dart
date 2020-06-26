@@ -45,8 +45,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// It is intended for this to contain a [Text] widget, however, you can pass
   /// any [Widget].
   /// The overlay uses a [DefaultTextStyle] for the title, which is a combination
-  /// of [TextTheme.title] from [Theme] and the [textColor].
-  // TODO(creativecreatorormaybenot): Update TextTheme.title link to headline6 when Flutter stable deprecates body1.
+  /// of [TextTheme.headline6] from [Theme] and the [textColor].
   final Widget title;
 
   /// This is the second content widget, i.e. it is displayed below [description].
@@ -54,8 +53,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// It is intended for this to contain a [Text] widget, however, you can pass
   /// any [Widget].
   /// The overlay uses a [DefaultTextStyle] for the description, which is a combination
-  /// of [TextTheme.body1] from [Theme] and the [textColor].
-  // TODO(creativecreatorormaybenot): Update TextTheme.body1 link to bodyText2 when Flutter stable deprecates body1.
+  /// of [TextTheme.bodyText2] from [Theme] and the [textColor].
   final Widget description;
 
   /// This is usually an [Icon].
@@ -298,12 +296,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           // This overlay was the active feature before this event if it is either opening or already opened.
           if (_state != FeatureOverlayState.opened &&
               _state != FeatureOverlayState.opening) return;
-
-          if (event == EventType.complete) {
-            await _complete();
-          } else {
-            await _dismiss(force: true);
-          }
+          await _completeOrDismiss(event, force: true);
           break;
         default:
           throw ArgumentError.value(event);
@@ -371,53 +364,35 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     }
   }
 
-  Future<void> _complete() async {
+  Future<void> _complete({bool force = false}) =>
+      _completeOrDismiss(EventType.complete, force: force);
+  Future<void> _dismiss({bool force = false}) =>
+      _completeOrDismiss(EventType.dismiss, force: force);
+
+  Future<void> _completeOrDismiss(EventType event, {bool force = false}) async {
+    assert(event == EventType.complete || event == EventType.dismiss);
+    final isComplete = event == EventType.complete;
+
     // The method might be triggered multiple times.
     if (_awaitingClosure) return;
 
     _awaitingClosure = true;
 
-    if (widget.onComplete != null) {
-      bool shouldComplete;
+    final function = isComplete ? widget.onComplete : widget.onDismiss;
+    if (!force && function != null) {
+      bool shouldMoveOn;
       try {
-        shouldComplete = await widget.onComplete();
+        shouldMoveOn = await function();
       } finally {
         _awaitingClosure = false;
       }
 
-      assert(shouldComplete != null,
-          'You need to return a [Future] that completes with true or false in [onComplete].');
-      if (!shouldComplete) return;
+      assert(shouldMoveOn != null,
+          'You need to return a [Future] that completes with true or false in ${isComplete ? '[onComplete]' : '[onDismiss]'}.');
+      if (!shouldMoveOn) return;
+      _awaitingClosure = true;
     }
-    _openController.stop();
-    _pulseController.stop();
 
-    // setState will be called in the animation listener.
-    _state = FeatureOverlayState.completing;
-    await _completeController.forward(from: 0);
-    // This will be called after the animation is done because the TickerFuture
-    // from forward is completed when the animation is complete.
-    _close();
-  }
-
-  Future<void> _dismiss({bool force = false}) async {
-    // The method might be triggered multiple times, especially when swiping.
-    if (_awaitingClosure) return;
-
-    _awaitingClosure = true;
-
-    if (!force && widget.onDismiss != null) {
-      bool shouldDismiss;
-      try {
-        shouldDismiss = await widget.onDismiss();
-      } finally {
-        _awaitingClosure = false;
-      }
-
-      assert(shouldDismiss != null,
-          'You need to return a [Future] that completes with true or false in [onDismiss].');
-      if (!shouldDismiss) return;
-    }
     _openController.stop();
     _pulseController.stop();
 
@@ -427,7 +402,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     // Otherwise, the overlay would jump from opening to opened and
     // run the dismissal animation from there.
     //
-    // We do not do this in _complete because the completion animation
+    // We do not do this in the event is [complete] because the completion animation
     // does not animate backwards, i.e. the circle just grows when completing.
     // On the flip side, the dismiss animation can be seen as a reversed open animation.
     // This is not perfect because e.g. the curves are different, but it looks
@@ -435,11 +410,15 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     final previousState = _state;
 
     // setState will be called in the animation listener.
-    _state = FeatureOverlayState.dismissing;
-    await _dismissController.forward(
-        from: previousState == FeatureOverlayState.opening
-            ? 1 - _transitionProgress
-            : 0);
+    _state = isComplete
+        ? FeatureOverlayState.completing
+        : FeatureOverlayState.dismissing;
+
+    final from = !isComplete && previousState == FeatureOverlayState.opening
+        ? 1 - _transitionProgress
+        : 0;
+    final controller = isComplete ? _completeController : _dismissController;
+    await controller.forward(from: from.toDouble());
     // This will be called after the animation is done because the TickerFuture
     // from forward is completed when the animation is complete.
     _close();
@@ -603,9 +582,15 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           contentOffsetMultiplier * (44 + 20), // 44 is the tap target's radius.
     );
 
-    // Will try to dismiss this overlay,
-    // then will call the bloc's dismiss function
-    // only if this overlay has been successfully dismissed.
+    Widget background = Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.transparent,
+    );
+
+    /// Will try to dismiss this overlay,
+    /// then will call the bloc's dismiss function
+    /// only if this overlay has been successfully dismissed.
     void tryDismissThisThenAll() async {
       await _dismiss();
       if (_state == FeatureOverlayState.closed) {
@@ -613,17 +598,21 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       }
     }
 
-    Widget background = Container(
-      width: double.infinity,
-      height: double.infinity,
-      color: Colors.transparent,
-    );
+    /// Will try to complete this overlay,
+    /// then will call the bloc's complete function
+    /// only if this overlay has been successfully dismissed.
+    void tryCompleteThis() async {
+      await _complete();
+      if (_state == FeatureOverlayState.closed) {
+        await _bloc.completeStep();
+      }
+    }
 
     if (widget.barrierDismissible) {
       background = GestureDetector(
         onTap: tryDismissThisThenAll,
         // According to the spec, the user should be able to dismiss by swiping.
-        onPanUpdate: (DragUpdateDetails _) => tryDismissThisThenAll(),
+        onPanUpdate: (_) => tryDismissThisThenAll(),
         child: background,
       );
     }
@@ -680,7 +669,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           transitionProgress: _transitionProgress,
           anchor: anchor,
           color: widget.targetColor,
-          onPressed: () => FeatureDiscovery.completeCurrentStep(context),
+          onPressed: tryCompleteThis,
           child: widget.tapTarget,
         ),
       ],
