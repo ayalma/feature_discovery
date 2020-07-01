@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.12.0+1
+
+* Fixes a null pointer exception.
+
 ## 0.12.0
 
 * **Breaking change:** `isDisplayed` is replaced by `hasPreviouslyCompleted`.

@@ -108,8 +108,9 @@ class Bloc {
     assert(steps != null && steps.isNotEmpty,
         'You need to pass at least one step to [FeatureDiscovery.discoverFeatures].');
 
-    _stepsToIgnore = await _alreayCompletedSteps;
-    _steps = steps.where((s) => !_stepsToIgnore.contains(s)).toList();
+    _steps = steps;
+    _stepsToIgnore = await _alreadyCompletedSteps;
+    _steps = _steps.where((s) => !_stepsToIgnore.contains(s)).toList();
     _activeStepIndex = -1;
 
     await _nextStep();
@@ -152,7 +153,7 @@ class Bloc {
     _stepsToIgnore?.add(featureId);
   }
 
-  Future<Set<String>> get _alreayCompletedSteps async {
+  Future<Set<String>> get _alreadyCompletedSteps async {
     if (!recordInSharedPrefs) return {};
     final prefs = await SharedPreferences.getInstance();
     return _steps
@@ -165,7 +166,7 @@ class Bloc {
   /// with [saveCompletionOf].
   Future<bool> hasPreviouslyCompleted(String featureId) async {
     if (!recordInSharedPrefs) return false;
-    _stepsToIgnore ??= await _alreayCompletedSteps;
+    _stepsToIgnore ??= await _alreadyCompletedSteps;
     return _stepsToIgnore.contains(featureId);
   }
 
