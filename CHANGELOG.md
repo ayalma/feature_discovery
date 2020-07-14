@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.12.0+3
+## 0.12.0+2
 
 * Fixes FeatureDiscovery position issue
 
