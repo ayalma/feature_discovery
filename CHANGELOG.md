@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.12.0+3
+
+* Fixes FeatureDiscovery position issue
+
 ## 0.12.0+1
 
 * Fixes a null pointer exception.
