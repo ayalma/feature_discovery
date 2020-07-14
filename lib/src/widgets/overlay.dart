@@ -467,13 +467,17 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
       switch (contentLocation) {
         case ContentLocation.above:
           endingBackgroundPosition = Offset(
-              width / 2.0 + (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
-              anchor.dy - (width / 2.0) + 40.0);
+              anchor.dx -
+                  width / 2.0 +
+                  (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
+              anchor.dy - (width / 2.0) + 80.0);
           break;
         case ContentLocation.below:
           endingBackgroundPosition = Offset(
-              width / 2.0 + (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
-              anchor.dy + (width / 2.0) - 40.0);
+              anchor.dx -
+                  width / 2.0 +
+                  (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
+              anchor.dy + (width / 2.0) - 80.0);
           break;
         case ContentLocation.trivial:
           throw ArgumentError.value(contentLocation);
@@ -526,7 +530,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     } else {
       final startingBackgroundPosition = anchor;
       final endingBackgroundPosition = Offset(
-          width / 2.0 + (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
+          anchor.dx + (_isOnLeftHalfOfScreen(anchor) ? -20.0 : 20.0),
           anchor.dy +
               (_isOnTopHalfOfScreen(anchor)
                   ? -(width / 2) + 40.0
