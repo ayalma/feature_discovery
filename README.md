@@ -163,12 +163,12 @@ If you want to clear feature discovery flag use this command like that
 FeatureDiscovery.clearPreferences(context, <String>{ 'add_item_feature_id', });
 ```
 
-### `FeatureDiscovery.isDisplayed` 
+### `FeatureDiscovery.hasPreviouslyCompleted` 
 
 If you want to findout feature discovery is Displayed or not ? use this command like that
 
 ``` 
-FeatureDiscovery.isDisplayed(context,'desired_feature_id');
+FeatureDiscovery.hasPreviouslyCompleted (context,'desired_feature_id');
 ```
 
 #### Other methods
