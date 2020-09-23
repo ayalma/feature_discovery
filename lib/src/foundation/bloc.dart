@@ -154,9 +154,8 @@ class Bloc {
   }
 
   Future<Set<String>> get _alreadyCompletedSteps async {
-    if (!recordInSharedPrefs) return {};
+    if (!recordInSharedPrefs || _steps == null) return {};
     final prefs = await SharedPreferences.getInstance();
-    if(_steps == null) return <String>{};
     return _steps
         .where((s) => prefs.getBool('$sharedPrefsPrefix$s') == true)
         .toSet();
