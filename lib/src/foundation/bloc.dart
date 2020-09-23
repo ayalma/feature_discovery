@@ -110,7 +110,7 @@ class Bloc {
 
     _steps = steps;
     _stepsToIgnore = await _alreadyCompletedSteps;
-    _steps = _steps.where((s) => !_stepsToIgnore.contains(s)).toList();
+    _steps = _steps!=null?_steps.where((s) => !_stepsToIgnore.contains(s)).toList():[];
     _activeStepIndex = -1;
 
     await _nextStep();
@@ -154,11 +154,11 @@ class Bloc {
   }
 
   Future<Set<String>> get _alreadyCompletedSteps async {
-    if (!recordInSharedPrefs || _steps == null) return {};
+    if (!recordInSharedPrefs) return {};
     final prefs = await SharedPreferences.getInstance();
-    return _steps
+    return _steps!=null?_steps
         .where((s) => prefs.getBool('$sharedPrefsPrefix$s') == true)
-        .toSet();
+        .toSet():{};
   }
 
   /// Returns true iff this step has been previously
