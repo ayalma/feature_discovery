@@ -172,6 +172,11 @@ class DescribedFeatureOverlay extends StatefulWidget {
           'Cannot provide both a barrierDismissible and onDismiss function\n'
           'The onDismiss function will never get executed when barrierDismissible is set to false.',
         ),
+        assert(
+        backgroundDismissible == true || onDismiss == null,
+          'Cannot provide both a backgroundDismissible and onDismiss function\n'
+          'The onDismiss function will never get executed when backgroundDismissible is set to false.',
+        ),
         super(key: key);
 
   @override
