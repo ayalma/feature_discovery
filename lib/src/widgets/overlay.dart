@@ -124,6 +124,11 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// The default value for [barrierDismissible] is `true`.
   final bool barrierDismissible;
 
+  /// Controls whether the overlay should be dismissed on touching the background or not.
+  ///
+  /// The default value for [backgroundDismissible] is `true`.
+  final bool backgroundDismissible;
+
   const DescribedFeatureOverlay({
     Key key,
     @required this.featureId,
@@ -147,6 +152,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.completeDuration = const Duration(milliseconds: 250),
     this.dismissDuration = const Duration(milliseconds: 250),
     this.barrierDismissible = true,
+    this.backgroundDismissible = false,
   })  : assert(featureId != null),
         assert(tapTarget != null),
         assert(child != null),
@@ -160,6 +166,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
         assert(completeDuration != null),
         assert(dismissDuration != null),
         assert(barrierDismissible != null),
+        assert(backgroundDismissible != null),
         assert(
           barrierDismissible == true || onDismiss == null,
           'Cannot provide both a barrierDismissible and onDismiss function\n'
@@ -644,6 +651,8 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
                 defaultOpacity: widget.backgroundOpacity,
                 state: _state,
                 overflowMode: widget.overflowMode,
+                tryDismissThisThenAll: tryDismissThisThenAll,
+                backgroundDismissible: widget.backgroundDismissible,
               ),
             ),
             LayoutId(
@@ -695,6 +704,8 @@ class _Background extends StatelessWidget {
   final Color color;
   final OverflowMode overflowMode;
   final double defaultOpacity;
+  final VoidCallback tryDismissThisThenAll;
+  final bool backgroundDismissible;
 
   const _Background(
       {Key key,
@@ -702,10 +713,14 @@ class _Background extends StatelessWidget {
       @required this.state,
       @required this.transitionProgress,
       @required this.overflowMode,
-      @required this.defaultOpacity})
+      @required this.defaultOpacity,
+      @required this.tryDismissThisThenAll,
+      @required this.backgroundDismissible,
+      })
       : assert(color != null),
         assert(state != null),
         assert(transitionProgress != null),
+        assert(tryDismissThisThenAll != null),
         super(key: key);
 
   double get opacity {
@@ -738,14 +753,25 @@ class _Background extends StatelessWidget {
       return Container();
     }
 
-    return LayoutBuilder(
-        builder: (context, constraints) => Container(
-              // The size is controlled in BackgroundContentLayoutDelegate.
-              width: constraints.biggest.width,
-              height: constraints.biggest.height,
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle, color: color.withOpacity(opacity)),
-            ));
+    Widget result = LayoutBuilder(
+      builder: (context, constraints) => Container(
+        // The size is controlled in BackgroundContentLayoutDelegate.
+        width: constraints.biggest.width,
+        height: constraints.biggest.height,
+        decoration: BoxDecoration(
+            shape: BoxShape.circle, color: color.withOpacity(opacity)),
+      ),
+    );
+
+    if(backgroundDismissible){
+      result = GestureDetector(
+        onTap: tryDismissThisThenAll,
+        onPanUpdate: (_) => tryDismissThisThenAll(),
+        child: result,
+      );
+    }
+
+    return result;
   }
 }
 
