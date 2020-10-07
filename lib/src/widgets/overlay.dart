@@ -63,6 +63,11 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// to this [Widget] instead of as the [Key] of [DescribedFeatureOverlay].
   final Widget tapTarget;
 
+  /// Controls whether the target color should be visible or not.
+  ///
+  /// The default value for [disableTargetColor] is `false`.
+  final bool disableTargetColor;
+
   final Widget child;
   final ContentLocation contentLocation;
   final bool enablePulsingAnimation;
@@ -126,7 +131,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
 
   /// Controls whether the overlay should be dismissed on touching the background or not.
   ///
-  /// The default value for [backgroundDismissible] is `true`.
+  /// The default value for [backgroundDismissible] is `false`.
   final bool backgroundDismissible;
 
   const DescribedFeatureOverlay({
@@ -153,6 +158,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.dismissDuration = const Duration(milliseconds: 250),
     this.barrierDismissible = true,
     this.backgroundDismissible = false,
+    this.disableTargetColor = false,
   })  : assert(featureId != null),
         assert(tapTarget != null),
         assert(child != null),
@@ -167,6 +173,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
         assert(dismissDuration != null),
         assert(barrierDismissible != null),
         assert(backgroundDismissible != null),
+        assert(disableTargetColor != null),
         assert(
           barrierDismissible == true || onDismiss == null,
           'Cannot provide both a barrierDismissible and onDismiss function\n'
@@ -689,6 +696,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
           color: widget.targetColor,
           onPressed: tryCompleteThis,
           child: widget.tapTarget,
+          disableTargetColor: widget.disableTargetColor,
         ),
       ],
     );
@@ -857,6 +865,7 @@ class _TapTarget extends StatelessWidget {
   final Widget child;
   final Color color;
   final VoidCallback onPressed;
+  final bool disableTargetColor;
 
   const _TapTarget({
     Key key,
@@ -866,10 +875,12 @@ class _TapTarget extends StatelessWidget {
     @required this.color,
     @required this.state,
     @required this.transitionProgress,
+    @required this.disableTargetColor,
   })  : assert(anchor != null),
         assert(child != null),
         assert(state != null),
         assert(transitionProgress != null),
+        assert(disableTargetColor != null),
         assert(color != null),
         super(key: key);
 
@@ -915,22 +926,36 @@ class _TapTarget extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => CenterAbout(
-        position: anchor,
-        child: Container(
-          height: 2 * radius,
-          width: 2 * radius,
-          child: Opacity(
-            opacity: opacity,
-            child: RawMaterialButton(
-              fillColor: color,
-              shape: const CircleBorder(),
-              child: child,
-              onPressed: onPressed,
-            ),
-          ),
-        ),
+  Widget build(BuildContext context) {
+    Widget button;
+
+    if(disableTargetColor) {
+      button = RawMaterialButton(
+        shape: const CircleBorder(),
+        child: child,
+        onPressed: onPressed,
       );
+    }else {
+      button = RawMaterialButton(
+        fillColor: color,
+        shape: const CircleBorder(),
+        child: child,
+        onPressed: onPressed,
+      );
+    }
+
+    return CenterAbout(
+      position: anchor,
+      child: Container(
+        height: 2 * radius,
+        width: 2 * radius,
+        child: Opacity(
+          opacity: opacity,
+          child: button,
+        ),
+      ),
+    );
+  }
 }
 
 /// Controls how content that overflows the background should be handled.
