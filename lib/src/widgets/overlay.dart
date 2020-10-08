@@ -129,6 +129,14 @@ class DescribedFeatureOverlay extends StatefulWidget {
   /// The default value for [backgroundDismissible] is `true`.
   final bool backgroundDismissible;
 
+  /// Called whenever the user taps inside the overlay area.
+  /// This function needs to return a [bool], either from an `async` scope
+  /// or as a [Future].
+  ///
+  /// If the function returns `false`, nothing happens. If it returns `true`,
+  /// all of the current steps are dismissed.
+  final Future<bool> Function() onBackgroundTap;
+
   const DescribedFeatureOverlay({
     Key key,
     @required this.featureId,
@@ -153,6 +161,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
     this.dismissDuration = const Duration(milliseconds: 250),
     this.barrierDismissible = true,
     this.backgroundDismissible = false,
+    this.onBackgroundTap,
   })  : assert(featureId != null),
         assert(tapTarget != null),
         assert(child != null),
@@ -171,11 +180,6 @@ class DescribedFeatureOverlay extends StatefulWidget {
           barrierDismissible == true || onDismiss == null,
           'Cannot provide both a barrierDismissible and onDismiss function\n'
           'The onDismiss function will never get executed when barrierDismissible is set to false.',
-        ),
-        assert(
-        backgroundDismissible == true || onDismiss == null,
-          'Cannot provide both a backgroundDismissible and onDismiss function\n'
-          'The onDismiss function will never get executed when backgroundDismissible is set to false.',
         ),
         super(key: key);
 
@@ -378,6 +382,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
 
   Future<void> _complete({bool force = false}) =>
       _completeOrDismiss(EventType.complete, force: force);
+
   Future<void> _dismiss({bool force = false}) =>
       _completeOrDismiss(EventType.dismiss, force: force);
 
@@ -658,6 +663,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
                 overflowMode: widget.overflowMode,
                 tryDismissThisThenAll: tryDismissThisThenAll,
                 backgroundDismissible: widget.backgroundDismissible,
+                onBackgroundTap: widget.onBackgroundTap,
               ),
             ),
             LayoutId(
@@ -711,18 +717,19 @@ class _Background extends StatelessWidget {
   final double defaultOpacity;
   final VoidCallback tryDismissThisThenAll;
   final bool backgroundDismissible;
+  final Future<bool> Function() onBackgroundTap;
 
-  const _Background(
-      {Key key,
-      @required this.color,
-      @required this.state,
-      @required this.transitionProgress,
-      @required this.overflowMode,
-      @required this.defaultOpacity,
-      @required this.tryDismissThisThenAll,
-      @required this.backgroundDismissible,
-      })
-      : assert(color != null),
+  const _Background({
+    Key key,
+    @required this.color,
+    @required this.state,
+    @required this.transitionProgress,
+    @required this.overflowMode,
+    @required this.defaultOpacity,
+    @required this.tryDismissThisThenAll,
+    @required this.backgroundDismissible,
+    @required this.onBackgroundTap,
+  })  : assert(color != null),
         assert(state != null),
         assert(transitionProgress != null),
         assert(tryDismissThisThenAll != null),
@@ -768,13 +775,27 @@ class _Background extends StatelessWidget {
       ),
     );
 
-    if(backgroundDismissible){
-      result = GestureDetector(
-        onTap: tryDismissThisThenAll,
-        onPanUpdate: (_) => tryDismissThisThenAll(),
-        child: result,
-      );
-    }
+    result = GestureDetector(
+      onTap: () {
+        if (backgroundDismissible && tryDismissThisThenAll != null) {
+          tryDismissThisThenAll();
+        }
+
+        if (onBackgroundTap != null) {
+          onBackgroundTap();
+        }
+      },
+      onPanUpdate: (_) {
+        if (backgroundDismissible && tryDismissThisThenAll != null) {
+          tryDismissThisThenAll();
+        }
+
+        if (onBackgroundTap != null) {
+          onBackgroundTap();
+        }
+      },
+      child: result,
+    );
 
     return result;
   }
