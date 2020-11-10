@@ -1,6 +1,7 @@
 import 'package:feature_discovery/src/foundation.dart';
-import 'package:feature_discovery/src/foundation/persistence_provider.dart';
 import 'package:flutter/material.dart';
+
+import 'persistence_provider.dart';
 
 /// Specifies how the content should be positioned relative to the tap target.
 ///
