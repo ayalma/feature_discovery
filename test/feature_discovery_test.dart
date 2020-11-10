@@ -82,16 +82,16 @@ void main() {
   group('Duplicate feature ids', () {
     for (final allowShowingDuplicate in <bool>[true, false]) {
       const featureIds = <String>[
-        'featureIdA',
-        'featureIdB',
-        'featureIdB',
-        'featureIdC',
-      ],
+            'featureIdA',
+            'featureIdB',
+            'featureIdB',
+            'featureIdC',
+          ],
           steps = <String>[
-        'featureIdA',
-        'featureIdB',
-        'featureIdC',
-      ];
+            'featureIdA',
+            'featureIdB',
+            'featureIdC',
+          ];
 
       final texts = textsToMatch(steps);
 

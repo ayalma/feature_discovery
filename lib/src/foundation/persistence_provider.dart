@@ -48,7 +48,8 @@ class SharedPreferencesProvider implements PersistenceProvider {
   Future<Set<String>> completedSteps(Iterable<String> featuresIds) async {
     final prefs = await SharedPreferences.getInstance();
     return featuresIds
-        .where((featureId) => prefs.getBool(_normalizeFeatureId(featureId)) == true)
+        .where((featureId) =>
+            prefs.getBool(_normalizeFeatureId(featureId)) == true)
         .toSet();
   }
 
@@ -67,10 +68,12 @@ class SharedPreferencesProvider implements PersistenceProvider {
   @override
   Future<void> clearSteps(Iterable<String> featuresIds) async {
     final prefs = await SharedPreferences.getInstance();
-    featuresIds.map<Future>((featureId) => prefs.remove(_normalizeFeatureId(featureId)));
+    featuresIds.map<Future>(
+        (featureId) => prefs.remove(_normalizeFeatureId(featureId)));
   }
 
-  String _normalizeFeatureId(String featureId) => '$sharedPrefsPrefix$featureId';
+  String _normalizeFeatureId(String featureId) =>
+      '$sharedPrefsPrefix$featureId';
 }
 
 /// Implementation of [PersistenceProvider] that uses internal memory for persistence.
@@ -86,12 +89,14 @@ class MemoryPersistenceProvider implements PersistenceProvider {
         _steps = steps;
 
   /// Instantiates an empty [MemoryPersistenceProvider] instance.
-  factory MemoryPersistenceProvider.empty() => const MemoryPersistenceProvider(<String>{});
+  factory MemoryPersistenceProvider.empty() =>
+      const MemoryPersistenceProvider(<String>{});
 
   final Set<String> _steps;
 
   @override
-  Future<bool> hasCompletedStep(String featureId) async => _steps.contains(featureId);
+  Future<bool> hasCompletedStep(String featureId) async =>
+      _steps.contains(featureId);
 
   @override
   Future<Set<String>> completedSteps(Iterable<String> featuresIds) async =>
@@ -104,7 +109,8 @@ class MemoryPersistenceProvider implements PersistenceProvider {
   Future<void> clearStep(String featureId) async => _steps.remove(featureId);
 
   @override
-  Future<void> clearSteps(Iterable<String> featuresIds) async => _steps.removeAll(featuresIds);
+  Future<void> clearSteps(Iterable<String> featuresIds) async =>
+      _steps.removeAll(featuresIds);
 }
 
 /// Implementation of [PersistenceProvider] that does absolutely nothing.
@@ -117,7 +123,8 @@ class NoPersistenceProvider implements PersistenceProvider {
   Future<bool> hasCompletedStep(String featureId) async => false;
 
   @override
-  Future<Set<String>> completedSteps(Iterable<String> featuresIds) async => <String>{};
+  Future<Set<String>> completedSteps(Iterable<String> featuresIds) async =>
+      <String>{};
 
   @override
   Future<void> completeStep(String featureId) async {

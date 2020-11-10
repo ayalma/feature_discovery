@@ -12,7 +12,7 @@ class BlocProvider extends StatelessWidget {
     Key key,
     @required this.child,
     @required this.persistenceProvider,
-  }) :  assert(persistenceProvider != null),
+  })  : assert(persistenceProvider != null),
         super(key: key);
 
   @override
@@ -147,7 +147,8 @@ class Bloc {
     _stepsToIgnore?.add(featureId);
   }
 
-  Future<Set<String>> get _alreadyCompletedSteps => persistenceProvider.completedSteps(_steps);
+  Future<Set<String>> get _alreadyCompletedSteps =>
+      persistenceProvider.completedSteps(_steps);
 
   /// Returns true iff this step has been previously
   /// recorded as completed in the Shared Preferences

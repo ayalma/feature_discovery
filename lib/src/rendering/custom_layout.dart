@@ -67,11 +67,11 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
     final backgroundPoint = Point(backgroundCenter.dx, backgroundCenter.dy),
         anchorPoint = Point(anchor.dx, anchor.dy),
         contentPoint = Point(
-      contentPosition.dx,
-      // If the content is rendered above the tap target, it needs to be shifted up.
-      contentPosition.dy +
-          contentOffsetMultiplier.clamp(-1, 0) * contentSize.height,
-    );
+          contentPosition.dx,
+          // If the content is rendered above the tap target, it needs to be shifted up.
+          contentPosition.dy +
+              contentOffsetMultiplier.clamp(-1, 0) * contentSize.height,
+        );
 
     double matchedRadius;
 
