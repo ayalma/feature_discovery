@@ -98,7 +98,7 @@ class MemoryPersistenceProvider implements PersistenceProvider {
   Future<void> clearStep(String featureId) async => _steps.remove(featureId);
 
   @override
-  Future<void> clearSteps(Iterable<String> featuresIds) async => featuresIds.forEach(clearStep);
+  Future<void> clearSteps(Iterable<String> featuresIds) async => _steps.removeAll(featuresIds);
 }
 
 /// Implementation of [PersistenceProvider] that does absolutely nothing.
