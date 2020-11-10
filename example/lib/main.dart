@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
         ),
         // Required: this widget works like an inherited widget.
-        home: const FeatureDiscovery(
+        home: const FeatureDiscovery.withProvider(
           persistenceProvider: NoPersistenceProvider(),
           child: MyHomePage(title: 'Flutter Feature Discovery'),
         ),

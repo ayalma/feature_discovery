@@ -14,7 +14,7 @@ class TestWrapper extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(_) => FeatureDiscovery(
+  Widget build(_) => FeatureDiscovery.withProvider(
         persistenceProvider: const NoPersistenceProvider(),
         child: MaterialApp(
           title: 'FeatureDiscovery Test',
