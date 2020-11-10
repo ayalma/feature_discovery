@@ -9,7 +9,7 @@ homepage: https://github.com/ayalma/feature_discovery
 environment:
   # This should match the Flutter stable SDK constraint.
   # See https://github.com/flutter/flutter/blob/stable/packages/flutter/pubspec.yaml.
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: ">=2.3.0 <3.0.0"
 
 dependencies:
   flutter:
