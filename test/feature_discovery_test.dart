@@ -1,3 +1,5 @@
+// @dart=2.2
+
 import 'package:feature_discovery/feature_discovery.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
