@@ -78,11 +78,44 @@ class FeatureDiscovery extends StatelessWidget {
   /// SharedPreference plugin.
   final PersistenceProvider persistenceProvider;
 
-  const FeatureDiscovery({
-    Key key,
+  /// Instantiates a new [FeatureDiscovery] and stores completion of steps
+  /// through the provided [persistenceProvider][PersistenceProvider].
+  const FeatureDiscovery.withProvider({
     @required this.child,
-    this.persistenceProvider = const SharedPreferencesProvider(),
-  }) : super(key: key);
+    @required this.persistenceProvider,
+    Key key,
+  })  : assert(child != null),
+        assert(persistenceProvider != null),
+        super(key: key);
+
+  /// Instantiates a new [FeatureDiscovery].
+  ///
+  /// If [recordStepsInSharedPreferences] is true, the completion of the steps
+  /// will be recorded in the Shared Preferences.
+  ///
+  /// If [sharedPreferencesPrefix] is provided, it will added before the
+  /// feature ids to form the keys for the Shared Preferences.
+  ///
+  /// The key for each step will be
+  /// ```
+  /// '${sharedPreferencesPrefix}${featureId}'
+  /// ```
+  ///
+  /// [sharedPreferencesPrefix] is used only if [recordStepsInSharedPreferences]
+  /// is true.
+  factory FeatureDiscovery({
+    @required Widget child,
+    bool recordStepsInSharedPreferences = true,
+    String sharedPreferencesPrefix,
+    Key key,
+  }) =>
+      FeatureDiscovery.withProvider(
+        key: key,
+        persistenceProvider: true == recordStepsInSharedPreferences
+            ? SharedPreferencesProvider(sharedPreferencesPrefix)
+            : const NoPersistenceProvider(),
+        child: child,
+      );
 
   @override
   Widget build(BuildContext context) => BlocProvider(
