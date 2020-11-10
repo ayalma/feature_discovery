@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
-
-import 'persistence_provider.dart';
+import 'package:feature_discovery/feature_discovery.dart';
 
 class BlocProvider extends StatelessWidget {
   final Widget child;
