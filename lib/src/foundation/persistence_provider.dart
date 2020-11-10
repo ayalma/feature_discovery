@@ -1,5 +1,3 @@
-// @dart=2.3
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Declares a contract to remember which Feature Discoveries were already viewed by
