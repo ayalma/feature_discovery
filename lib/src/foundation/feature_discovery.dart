@@ -1,4 +1,4 @@
-// @dart=2.2
+// @dart=2.3
 
 import 'package:feature_discovery/src/foundation.dart';
 import 'package:flutter/material.dart';
