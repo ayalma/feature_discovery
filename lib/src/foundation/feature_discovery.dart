@@ -112,7 +112,7 @@ class FeatureDiscovery extends StatelessWidget {
   }) =>
       FeatureDiscovery.withProvider(
         key: key,
-        persistenceProvider: true == recordStepsInSharedPreferences
+        persistenceProvider: recordStepsInSharedPreferences == true
             ? SharedPreferencesProvider(sharedPreferencesPrefix)
             : const NoPersistenceProvider(),
         child: child,
