@@ -1,3 +1,5 @@
+// @dart=2.2
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 

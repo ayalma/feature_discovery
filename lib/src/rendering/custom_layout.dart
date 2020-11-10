@@ -1,3 +1,5 @@
+// @dart=2.2
+
 import 'dart:math';
 import 'package:flutter/animation.dart';
 

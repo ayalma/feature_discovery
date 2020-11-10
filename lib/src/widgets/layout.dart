@@ -1,3 +1,5 @@
+// @dart=2.2
+
 import 'package:flutter/material.dart';
 
 class CenterAbout extends StatelessWidget {

@@ -1,3 +1,5 @@
+// @dart=2.2
+
 library feature_discovery;
 
 // The library files (foundation.dart, widgets.dart, etc.) are in src

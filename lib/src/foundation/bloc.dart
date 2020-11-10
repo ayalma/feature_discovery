@@ -1,3 +1,5 @@
+// @dart=2.2
+
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
