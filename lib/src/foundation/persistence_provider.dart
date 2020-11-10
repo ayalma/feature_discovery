@@ -80,9 +80,15 @@ class SharedPreferencesProvider implements PersistenceProvider {
 ///
 /// This is a great implementation for testing.
 class MemoryPersistenceProvider implements PersistenceProvider {
-  MemoryPersistenceProvider();
+  /// Instantiates a new [MemoryPersistenceProvider] with an initial completed set of steps.
+  const MemoryPersistenceProvider(Set<String> steps)
+      : assert(steps != null),
+        _steps = steps;
 
-  final _steps = <String>{};
+  /// Instantiates an empty [MemoryPersistenceProvider] instance.
+  factory MemoryPersistenceProvider.empty() => const MemoryPersistenceProvider(<String>{});
+
+  final Set<String> _steps;
 
   @override
   Future<bool> hasCompletedStep(String featureId) async => _steps.contains(featureId);
