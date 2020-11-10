@@ -1,4 +1,5 @@
 import 'package:feature_discovery/src/foundation.dart';
+import 'package:feature_discovery/src/foundation/persistence_provider.dart';
 import 'package:flutter/material.dart';
 
 /// Specifies how the content should be positioned relative to the tap target.
@@ -53,7 +54,7 @@ class FeatureDiscovery extends StatelessWidget {
 
   /// A method to dismiss all steps.
   ///
-  /// The `onDimiss` parameter will be ignored for every active overlay.
+  /// The `onDismiss` parameter will be ignored for every active overlay.
   /// If you want to complete the current step and continue the feature discovery,
   /// call [completeCurrentStep] instead.
   static void dismissAll(BuildContext context) => _blocOf(context).dismiss();
@@ -70,31 +71,22 @@ class FeatureDiscovery extends StatelessWidget {
 
   final Widget child;
 
-  /// If true, the completion of the steps will be recorded in the Shared Preferences.
+  /// The [PersistenceProvider] implementation to use for persisting steps that have been
+  /// previously completed.
   ///
-  /// The key for each step will be
-  /// ```
-  /// '${sharedPreferencesPrefix}${featureId}'
-  /// ```
-  final bool recordStepsInSharedPreferences;
-
-  /// The prefix to put before the feature ids
-  /// to form the keys for the Shared Preferences.
-  ///
-  /// Will only be used if [recordStepsInSharedPreferences] is true.
-  final String sharedPreferencesPrefix;
+  /// By default, this uses a [SharedPreferencesProvider] which uses the 3rd party
+  /// SharedPreference plugin.
+  final PersistenceProvider persistenceProvider;
 
   const FeatureDiscovery({
     Key key,
     @required this.child,
-    this.recordStepsInSharedPreferences = true,
-    this.sharedPreferencesPrefix = '',
+    this.persistenceProvider = const SharedPreferencesProvider(),
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) => BlocProvider(
         child: child,
-        recordInSharedPrefs: recordStepsInSharedPreferences,
-        sharedPrefsPrefix: sharedPreferencesPrefix,
+        persistenceProvider: persistenceProvider,
       );
 }

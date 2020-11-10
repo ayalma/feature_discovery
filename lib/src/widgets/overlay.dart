@@ -376,7 +376,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     setState(() => _state = FeatureOverlayState.opened);
 
     if (widget.enablePulsingAnimation == true) {
-      _pulseController.forward(from: 0);
+      unawaited(_pulseController.forward(from: 0));
     }
   }
 

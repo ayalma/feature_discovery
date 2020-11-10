@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.13.0
+
+* Introduce a PersistenceProvider interface for storing step completion in any mechanism the user wants
+* This requires changes in the implementation, but historic steps are honored and will not show again.
+
 ## 0.12.0+2
 
 * Fixes FeatureDiscovery position issue
@@ -38,7 +43,7 @@
 
 ## 0.8.0
 
-* **Breaking change:**  `FeatureDiscovery.completeCurrentStep` is async know.
+* **Breaking change:**  `FeatureDiscovery.completeCurrentStep` is async now.
 * Added preferences for each feature to show is understood by user or not
 * Library will not show understood feature
 * Added method for reset all preferences of features `FeatureDiscovery.clearPreferences`
