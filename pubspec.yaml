@@ -3,7 +3,7 @@ description: >-
   A Flutter package that implements Material Design Feature discovery
   to show a description of specific features to new users.
   See https://tinyurl.com/FeatureDiscovery
-version: 0.12.0+2
+version: 0.12.1+3
 homepage: https://github.com/ayalma/feature_discovery
 
 environment:
