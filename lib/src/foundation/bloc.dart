@@ -111,7 +111,6 @@ class Bloc {
     _steps = steps;
     _stepsToIgnore = await _alreadyCompletedSteps;
     _steps = _steps?.where((s) => !_stepsToIgnore.contains(s))?.toList() ?? [];
-
     _activeStepIndex = -1;
 
     await _nextStep();
