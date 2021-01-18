@@ -1,5 +1,6 @@
 # Changelog
-
+## 0.13.0+1
+* Clear Preferences issue fixed
 ## 0.13.0
 
 * Introduce a PersistenceProvider interface for storing step completion in any mechanism the user wants.

@@ -68,8 +68,10 @@ class SharedPreferencesProvider implements PersistenceProvider {
   @override
   Future<void> clearSteps(Iterable<String> featuresIds) async {
     final prefs = await SharedPreferences.getInstance();
-    featuresIds.map<Future>(
-        (featureId) => prefs.remove(_normalizeFeatureId(featureId)));
+
+    final mapResult = featuresIds.map<Future>((featureId) async =>
+        await prefs.remove(_normalizeFeatureId(featureId)));
+    await Future.wait(mapResult);
   }
 
   String _normalizeFeatureId(String featureId) =>
