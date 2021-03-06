@@ -8,10 +8,10 @@ class Content extends StatelessWidget {
   final double transitionProgress;
 
   /// Can be null.
-  final Widget title;
+  final Widget? title;
 
   /// Can be null.
-  final Widget description;
+  final Widget? description;
 
   final Color textColor;
 
@@ -22,21 +22,17 @@ class Content extends StatelessWidget {
   final double width;
 
   const Content({
-    Key key,
-    @required this.title,
-    @required this.description,
-    @required this.state,
-    @required this.transitionProgress,
-    @required this.textColor,
-    @required this.overflowMode,
-    @required this.backgroundRadius,
-    @required this.backgroundCenter,
-    @required this.width,
-  })  : assert(state != null),
-        assert(width != null),
-        assert(transitionProgress != null),
-        assert(textColor != null),
-        super(key: key);
+    Key? key,
+    required this.title,
+    required this.description,
+    required this.state,
+    required this.transitionProgress,
+    required this.textColor,
+    required this.overflowMode,
+    required this.backgroundRadius,
+    required this.backgroundCenter,
+    required this.width,
+  }) : super(key: key);
 
   double get opacity {
     switch (state) {
@@ -54,7 +50,6 @@ class Content extends StatelessWidget {
       case FeatureOverlayState.opened:
         return 1;
     }
-    throw ArgumentError.value(state);
   }
 
   @override
@@ -77,9 +72,9 @@ class Content extends StatelessWidget {
                   DefaultTextStyle(
                     style: Theme.of(context)
                         .textTheme
-                        .headline6
+                        .headline6!
                         .copyWith(color: textColor),
-                    child: title,
+                    child: title!,
                   ),
                 if (title != null && description != null)
                   const SizedBox(height: 8.0),
@@ -87,9 +82,9 @@ class Content extends StatelessWidget {
                   DefaultTextStyle(
                     style: Theme.of(context)
                         .textTheme
-                        .bodyText2
+                        .bodyText2!
                         .copyWith(color: textColor.withOpacity(0.9)),
-                    child: description,
+                    child: description!,
                   )
               ],
             ),
@@ -120,19 +115,19 @@ class Content extends StatelessWidget {
 // layout.
 // This is the reason why we need to clip in our custom RenderBox.
 class _ClipContent extends SingleChildRenderObjectWidget {
-  final double backgroundRadius;
-  final Offset backgroundCenter;
+  final double? backgroundRadius;
+  final Offset? backgroundCenter;
 
   const _ClipContent({
-    Key key,
-    Widget child,
+    Key? key,
+    Widget? child,
     this.backgroundCenter,
     this.backgroundRadius,
   }) : super(key: key, child: child);
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
-      RenderClipContent(center: backgroundCenter, radius: backgroundRadius);
+      RenderClipContent(center: backgroundCenter!, radius: backgroundRadius!);
 
   @override
   void updateRenderObject(
