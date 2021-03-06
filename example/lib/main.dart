@@ -34,9 +34,9 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, this.title}) : super(key: key);
 
-  final String title;
+  final String? title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title!),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(80),
           child: Column(
@@ -111,7 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Text('Toggle enablePulsingAnimation',
                       style: Theme.of(context)
                           .textTheme
-                          .button
+                          .button!
                           .copyWith(color: Colors.white)),
                 ),
                 const Text(
@@ -126,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Text('Toggle overflowMode',
                       style: Theme.of(context)
                           .textTheme
-                          .button
+                          .button!
                           .copyWith(color: Colors.white)),
                 ),
                 for (int n = 42; n > 0; n--)
@@ -158,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     'Understood',
                     style: Theme.of(context)
                         .textTheme
-                        .button
+                        .button!
                         .copyWith(color: Colors.white),
                   ),
                 ),
@@ -168,7 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     'Dismiss',
                     style: Theme.of(context)
                         .textTheme
-                        .button
+                        .button!
                         .copyWith(color: Colors.white),
                   ),
                 ),
@@ -201,7 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Text('Add another item',
                   style: Theme.of(context)
                       .textTheme
-                      .button
+                      .button!
                       .copyWith(color: Colors.white)),
             ),
             for (int n = feature3ItemCount; n > 0; n--)
@@ -219,22 +219,22 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class Content extends StatefulWidget {
-  const Content({Key key}) : super(key: key);
+  const Content({Key? key}) : super(key: key);
 
   @override
   _ContentState createState() => _ContentState();
 }
 
 class _ContentState extends State<Content> {
-  GlobalKey<EnsureVisibleState> ensureKey;
-  GlobalKey<EnsureVisibleState> ensureKey2;
+  GlobalKey<EnsureVisibleState>? ensureKey;
+  GlobalKey<EnsureVisibleState>? ensureKey2;
 
   @override
   void initState() {
     ensureKey = GlobalKey<EnsureVisibleState>();
     ensureKey2 = GlobalKey<EnsureVisibleState>();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
       FeatureDiscovery.discoverFeatures(
         context,
         const <String>{
@@ -314,8 +314,8 @@ class _ContentState extends State<Content> {
                     return true;
                   },
                   onOpen: () async {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      ensureKey.currentState.ensureVisible(
+                    WidgetsBinding.instance!.addPostFrameCallback((_) {
+                      ensureKey!.currentState!.ensureVisible(
                         preciseAlignment: 0.5,
                         duration: const Duration(milliseconds: 400),
                       );
@@ -364,8 +364,8 @@ class _ContentState extends State<Content> {
                     return true;
                   },
                   onOpen: () async {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      ensureKey2.currentState.ensureVisible(
+                    WidgetsBinding.instance!.addPostFrameCallback((_) {
+                      ensureKey2!.currentState!.ensureVisible(
                           duration: const Duration(milliseconds: 600));
                     });
                     return true;
@@ -380,7 +380,7 @@ class _ContentState extends State<Content> {
                       child: Text('Add item',
                           style: Theme.of(context)
                               .textTheme
-                              .button
+                              .button!
                               .copyWith(color: Colors.white)),
                     ),
                     for (int n = feature6ItemCount; n > 0; n--)
