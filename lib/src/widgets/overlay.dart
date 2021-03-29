@@ -126,7 +126,7 @@ class DescribedFeatureOverlay extends StatefulWidget {
 
   /// Controls whether the overlay should be dismissed on touching the background or not.
   ///
-  /// The default value for [backgroundDismissible] is `true`.
+  /// The default value for [backgroundDismissible] is `false`.
   final bool backgroundDismissible;
 
   /// Called whenever the user taps inside the overlay area.
@@ -376,7 +376,7 @@ class _DescribedFeatureOverlayState extends State<DescribedFeatureOverlay>
     setState(() => _state = FeatureOverlayState.opened);
 
     if (widget.enablePulsingAnimation == true) {
-      _pulseController.forward(from: 0);
+      unawaited(_pulseController.forward(from: 0));
     }
   }
 

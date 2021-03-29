@@ -2,26 +2,25 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'persistence_provider.dart';
 
 class BlocProvider extends StatelessWidget {
   final Widget child;
-  final bool recordInSharedPrefs;
-  final String sharedPrefsPrefix;
+  final PersistenceProvider persistenceProvider;
 
   const BlocProvider({
     Key key,
     @required this.child,
-    @required this.recordInSharedPrefs,
-    @required this.sharedPrefsPrefix,
-  }) : super(key: key);
+    @required this.persistenceProvider,
+  })  : assert(persistenceProvider != null),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) => Provider<Bloc>(
         child: child,
         create: (BuildContext context) => Bloc._(
-          recordInSharedPrefs: recordInSharedPrefs,
-          sharedPrefsPrefix: sharedPrefsPrefix ?? '',
+          persistenceProvider: persistenceProvider,
         ),
         dispose: (BuildContext context, Bloc bloc) => bloc._dispose(),
       );
@@ -40,12 +39,10 @@ class Bloc {
     }
   }
 
-  final bool recordInSharedPrefs;
-  final String sharedPrefsPrefix;
+  final PersistenceProvider persistenceProvider;
 
   Bloc._({
-    @required this.recordInSharedPrefs,
-    @required this.sharedPrefsPrefix,
+    @required this.persistenceProvider,
   });
 
   /// This [StreamController] allows to send events of type [EventType].
@@ -147,37 +144,23 @@ class Bloc {
 
   /// Will mark [featureId] as completed in the Shared Preferences.
   Future<void> _saveCompletionOf(String featureId) async {
-    if (!recordInSharedPrefs) return;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('$sharedPrefsPrefix$featureId', true);
+    await persistenceProvider.completeStep(featureId);
     _stepsToIgnore?.add(featureId);
   }
 
-  Future<Set<String>> get _alreadyCompletedSteps async {
-    if (!recordInSharedPrefs) return {};
-    final prefs = await SharedPreferences.getInstance();
-    return _steps
-        .where((s) => prefs.getBool('$sharedPrefsPrefix$s') == true)
-        .toSet();
-  }
+  Future<Set<String>> get _alreadyCompletedSteps =>
+      persistenceProvider.completedSteps(_steps);
 
   /// Returns true iff this step has been previously
   /// recorded as completed in the Shared Preferences
   /// with [saveCompletionOf].
   Future<bool> hasPreviouslyCompleted(String featureId) async {
-    if (!recordInSharedPrefs) return false;
     _stepsToIgnore ??= await _alreadyCompletedSteps;
     return _stepsToIgnore.contains(featureId);
   }
 
-  Future<void> clearPreferences(Iterable<String> steps) async {
-    final prefs = await SharedPreferences.getInstance();
-    await Future.wait(
-      steps.map<Future>(
-        (featureId) => prefs.remove('$sharedPrefsPrefix$featureId'),
-      ),
-    );
-  }
+  Future<void> clearPreferences(Iterable<String> steps) async =>
+      persistenceProvider.clearSteps(steps);
 }
 
 /// These are the different types of the event that [Bloc]
