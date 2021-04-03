@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 class CenterAbout extends StatelessWidget {
-  final Offset position;
-  final Widget child;
+  final Offset? position;
+  final Widget? child;
 
-  const CenterAbout({Key key, this.position, this.child}) : super(key: key);
+  const CenterAbout({Key? key, this.position, this.child}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => Positioned(
-        top: position.dy,
-        left: position.dx,
+        top: position!.dy,
+        left: position!.dx,
         child: FractionalTranslation(
           translation: const Offset(-0.5, -0.5),
           child: child,
@@ -18,12 +18,12 @@ class CenterAbout extends StatelessWidget {
 }
 
 class AnchoredOverlay extends StatelessWidget {
-  final bool showOverlay;
-  final Widget Function(BuildContext, Offset anchor) overlayBuilder;
-  final Widget child;
+  final bool? showOverlay;
+  final Widget Function(BuildContext, Offset anchor)? overlayBuilder;
+  final Widget? child;
 
   const AnchoredOverlay(
-      {Key key, this.showOverlay, this.overlayBuilder, this.child})
+      {Key? key, this.showOverlay, this.overlayBuilder, this.child})
       : super(key: key);
 
   @override
@@ -36,7 +36,7 @@ class AnchoredOverlay extends StatelessWidget {
             final center = box.size.center(box.localToGlobal(
               const Offset(0.0, 0.0),
             ));
-            return overlayBuilder(context, center);
+            return overlayBuilder!(context, center);
           },
           child: child,
         ),
@@ -44,12 +44,12 @@ class AnchoredOverlay extends StatelessWidget {
 }
 
 class OverlayBuilder extends StatefulWidget {
-  final bool showOverlay;
-  final Function(BuildContext context) overlayBuilder;
-  final Widget child;
+  final bool? showOverlay;
+  final Function(BuildContext context)? overlayBuilder;
+  final Widget? child;
 
   const OverlayBuilder(
-      {Key key, this.showOverlay = false, this.overlayBuilder, this.child})
+      {Key? key, this.showOverlay = false, this.overlayBuilder, this.child})
       : super(key: key);
 
   @override
@@ -57,12 +57,12 @@ class OverlayBuilder extends StatefulWidget {
 }
 
 class _OverlayBuilderState extends State<OverlayBuilder> {
-  OverlayEntry overlayEntry;
+  OverlayEntry? overlayEntry;
 
   @override
   void initState() {
     super.initState();
-    if (widget.showOverlay) showOverlay();
+    if (widget.showOverlay!) showOverlay();
   }
 
   @override
@@ -87,31 +87,31 @@ class _OverlayBuilderState extends State<OverlayBuilder> {
 
   void showOverlay() {
     overlayEntry = OverlayEntry(
-      builder: widget.overlayBuilder,
+      builder: widget.overlayBuilder as Widget Function(BuildContext),
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Overlay.of(context).insert(overlayEntry);
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      Overlay.of(context)!.insert(overlayEntry!);
     });
   }
 
   void hideOverlay() {
-    overlayEntry.remove();
+    overlayEntry!.remove();
     overlayEntry = null;
   }
 
   void syncWidgetAndOverlay() {
-    if (isShowingOverlay() && !widget.showOverlay) {
+    if (isShowingOverlay() && !widget.showOverlay!) {
       hideOverlay();
-    } else if (!isShowingOverlay() && widget.showOverlay) showOverlay();
+    } else if (!isShowingOverlay() && widget.showOverlay!) showOverlay();
   }
 
   void buildOverlay() async => overlayEntry?.markNeedsBuild();
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
       buildOverlay();
     });
-    return widget.child;
+    return widget.child!;
   }
 }

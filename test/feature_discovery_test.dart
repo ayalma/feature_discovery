@@ -5,12 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'widgets.dart';
 
-List<String> textsToMatch(List<String> featureIds) {
-  assert(featureIds != null);
-  return featureIds
-      .map((featureId) => 'Test has passed for $featureId')
-      .toList();
-}
+List<String> textsToMatch(List<String> featureIds) =>
+    featureIds.map((featureId) => 'Test has passed for $featureId').toList();
 
 void main() {
   group('Basic behavior', () {
@@ -192,7 +188,7 @@ void main() {
 
     for (final modeEntry in modes.entries) {
       testWidgets(modeEntry.key.toString(), (WidgetTester tester) async {
-        BuildContext context;
+        late BuildContext context;
 
         var triggered = false;
 
