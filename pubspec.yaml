@@ -3,7 +3,7 @@ description: >-
   A Flutter package that implements Material Design Feature discovery
   to show a description of specific features to new users.
   See https://tinyurl.com/FeatureDiscovery
-version: 0.14.0
+version: 0.14.0+1
 homepage: https://github.com/ayalma/feature_discovery
 
 environment:
@@ -16,14 +16,11 @@ dependencies:
     sdk: flutter
 
   provider: ^5.0.0
-  shared_preferences: ^2.0.3
+  shared_preferences: ^2.0.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  pedantic: 1.9.0
+  pedantic: ^1.11.0
 
-dependency_overrides:
-  # TODO(creativecreatorormaybenot): Remove when Pedantic is updated in flutter_test.
-  pedantic: 1.9.0
