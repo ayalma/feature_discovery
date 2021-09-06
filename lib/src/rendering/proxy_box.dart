@@ -1,33 +1,30 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 /// We use [RenderProxyBox] because we only want to clip and keep
 /// the properties of the _Content children.
 class RenderClipContent extends RenderProxyBox {
-  Offset _center;
-  double _radius;
+  Offset? _center;
+  double? _radius;
 
   RenderClipContent({
-    @required Offset center,
-    @required double radius,
-  })  : assert(center != null),
-        assert(radius != null),
-        _center = center,
+    required Offset center,
+    required double radius,
+  })   : _center = center,
         _radius = radius;
 
   /// The inner area of the DescribedFeatureOverlay.
   Path get innerCircle => Path()
     ..addOval(Rect.fromCircle(
-      center: globalToLocal(_center),
-      radius: _radius,
+      center: globalToLocal(_center!),
+      radius: _radius!,
     ));
 
-  set center(Offset center) {
+  set center(Offset? center) {
     _center = center;
     markNeedsPaint();
   }
 
-  set radius(double radius) {
+  set radius(double? radius) {
     _radius = radius;
     markNeedsPaint();
   }
@@ -37,7 +34,7 @@ class RenderClipContent extends RenderProxyBox {
   /// The reason this is necessary is that the content that might be overflowing will catch
   /// the hit events even when it is clipped out in paint.
   @override
-  bool hitTest(BoxHitTestResult result, {Offset position}) {
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
     // If the hit is inside of the inner area of the DescribedFeatureOverlay,
     // we want to catch the hit event and pass it to the children. Otherwise, we want to ignore it in order
     // to allow the GestureDetector in DescribedFeatureOverlay to catch it.

@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 @visibleForTesting
 class TestWrapper extends StatelessWidget {
   /// This will be passed to [Scaffold.body].
-  final Widget child;
+  final Widget? child;
 
   const TestWrapper({
-    Key key,
+    Key? key,
     this.child,
   }) : super(key: key);
 
@@ -34,8 +34,8 @@ class TestWidget extends StatelessWidget {
   final bool allowShowingDuplicate;
 
   const TestWidget({
-    Key key,
-    @required this.featureIds,
+    Key? key,
+    required this.featureIds,
     this.allowShowingDuplicate = false,
   }) : super(key: key);
 
@@ -60,9 +60,9 @@ class TestIcon extends StatefulWidget {
   final bool allowShowingDuplicate;
 
   const TestIcon({
-    Key key,
-    @required this.featureId,
-    @required this.allowShowingDuplicate,
+    Key? key,
+    required this.featureId,
+    required this.allowShowingDuplicate,
   }) : super(key: key);
 
   @override
@@ -96,16 +96,16 @@ class TestIconState extends State<TestIcon> {
 /// This works properly using [TestWidgetsFlutterBinding.setSurfaceSize] with `Size(3e2, 4e3)`.
 @visibleForTesting
 class OverflowingDescriptionFeature extends StatelessWidget {
-  final String featureId;
-  final IconData icon;
+  final String? featureId;
+  final IconData? icon;
 
-  final void Function(BuildContext context) onContext;
-  final void Function() onDismiss;
+  final void Function(BuildContext context)? onContext;
+  final void Function()? onDismiss;
 
-  final OverflowMode mode;
+  final OverflowMode? mode;
 
   const OverflowingDescriptionFeature({
-    Key key,
+    Key? key,
     this.onContext,
     this.featureId,
     this.icon,
@@ -117,14 +117,14 @@ class OverflowingDescriptionFeature extends StatelessWidget {
   Widget build(_) => TestWrapper(
         child: Builder(
           builder: (context) {
-            onContext(context);
+            onContext!(context);
 
             return Stack(
               children: <Widget>[
                 Align(
                   alignment: Alignment.topCenter,
                   child: DescribedFeatureOverlay(
-                    featureId: featureId,
+                    featureId: featureId!,
                     tapTarget: const Icon(Icons.arrow_drop_down_circle),
                     description: Container(
                       width: double.infinity,
@@ -133,7 +133,7 @@ class OverflowingDescriptionFeature extends StatelessWidget {
                     ),
                     contentLocation: ContentLocation.below,
                     enablePulsingAnimation: false,
-                    overflowMode: mode,
+                    overflowMode: mode!,
                     onDismiss: () async {
                       onDismiss?.call();
                       return true;
@@ -170,11 +170,11 @@ class WidgetWithDisposableFeature extends StatefulWidget {
   final String staticFeatureTitle, disposableFeatureTitle;
 
   const WidgetWithDisposableFeature({
-    Key key,
-    @required this.featureId,
-    @required this.featureIcon,
-    @required this.staticFeatureTitle,
-    @required this.disposableFeatureTitle,
+    Key? key,
+    required this.featureId,
+    required this.featureIcon,
+    required this.staticFeatureTitle,
+    required this.disposableFeatureTitle,
   }) : super(key: key);
 
   @override
@@ -184,7 +184,7 @@ class WidgetWithDisposableFeature extends StatefulWidget {
 @visibleForTesting
 class WidgetWithDisposableFeatureState
     extends State<WidgetWithDisposableFeature> {
-  bool _showDisposableFeature;
+  late bool _showDisposableFeature;
 
   @override
   void initState() {

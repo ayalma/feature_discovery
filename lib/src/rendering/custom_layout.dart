@@ -1,8 +1,7 @@
 import 'dart:math';
-import 'package:flutter/animation.dart';
 
 import 'package:feature_discovery/src/widgets.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 
 enum BackgroundContentLayout {
@@ -37,23 +36,18 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
   final Offset anchor;
 
   final FeatureOverlayState state;
-  final double transitionProgress;
+  final double? transitionProgress;
 
   BackgroundContentLayoutDelegate({
-    @required this.overflowMode,
-    @required this.contentPosition,
-    @required this.backgroundCenter,
-    @required this.backgroundRadius,
-    @required this.anchor,
-    @required this.contentOffsetMultiplier,
-    @required this.state,
-    @required this.transitionProgress,
-  })  : assert(overflowMode != null),
-        assert(contentPosition != null),
-        assert(backgroundCenter != null),
-        assert(backgroundRadius != null),
-        assert(state != null),
-        assert(anchor != null);
+    required this.overflowMode,
+    required this.contentPosition,
+    required this.backgroundCenter,
+    required this.backgroundRadius,
+    required this.anchor,
+    required this.contentOffsetMultiplier,
+    required this.state,
+    required this.transitionProgress,
+  });
 
   @override
   void performLayout(Size size) {
@@ -126,13 +120,13 @@ class BackgroundContentLayoutDelegate extends MultiChildLayoutDelegate {
     switch (state) {
       case FeatureOverlayState.opening:
         matchedRadius *= const Interval(0, 0.8, curve: Curves.easeOut)
-            .transform(transitionProgress);
+            .transform(transitionProgress!);
         break;
       case FeatureOverlayState.completing:
-        matchedRadius += transitionProgress * 40;
+        matchedRadius += transitionProgress! * 40;
         break;
       case FeatureOverlayState.dismissing:
-        matchedRadius *= 1 - transitionProgress;
+        matchedRadius *= 1 - transitionProgress!;
         break;
       case FeatureOverlayState.opened:
         break;
