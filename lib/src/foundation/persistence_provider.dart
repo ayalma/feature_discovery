@@ -47,7 +47,10 @@ class SharedPreferencesProvider implements PersistenceProvider {
   @override
   Future<Set<String?>> completedSteps(Iterable<String?>? featuresIds) async {
     final prefs = await SharedPreferences.getInstance();
-    return featuresIds!
+    if (featuresIds == null) {
+      return Set();
+    }
+    return featuresIds
         .where((featureId) =>
             prefs.getBool(_normalizeFeatureId(featureId)) == true)
         .toSet();
