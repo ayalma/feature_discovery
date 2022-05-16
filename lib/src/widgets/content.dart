@@ -1,7 +1,6 @@
 import 'package:feature_discovery/src/rendering.dart';
 import 'package:feature_discovery/src/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class Content extends StatelessWidget {
   final FeatureOverlayState state;
