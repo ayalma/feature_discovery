@@ -234,7 +234,7 @@ class _ContentState extends State<Content> {
     ensureKey = GlobalKey<EnsureVisibleState>();
     ensureKey2 = GlobalKey<EnsureVisibleState>();
 
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       FeatureDiscovery.discoverFeatures(
         context,
         const <String>{
@@ -314,7 +314,7 @@ class _ContentState extends State<Content> {
                     return true;
                   },
                   onOpen: () async {
-                    WidgetsBinding.instance!.addPostFrameCallback((_) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
                       ensureKey!.currentState!.ensureVisible(
                         preciseAlignment: 0.5,
                         duration: const Duration(milliseconds: 400),
@@ -364,7 +364,7 @@ class _ContentState extends State<Content> {
                     return true;
                   },
                   onOpen: () async {
-                    WidgetsBinding.instance!.addPostFrameCallback((_) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
                       ensureKey2!.currentState!.ensureVisible(
                           duration: const Duration(milliseconds: 600));
                     });
