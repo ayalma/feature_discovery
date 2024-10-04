@@ -111,7 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Text('Toggle enablePulsingAnimation',
                       style: Theme.of(context)
                           .textTheme
-                          .button!
+                          .labelLarge!
                           .copyWith(color: Colors.white)),
                 ),
                 const Text(
@@ -126,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Text('Toggle overflowMode',
                       style: Theme.of(context)
                           .textTheme
-                          .button!
+                          .labelLarge!
                           .copyWith(color: Colors.white)),
                 ),
                 for (int n = 42; n > 0; n--)
@@ -158,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     'Understood',
                     style: Theme.of(context)
                         .textTheme
-                        .button!
+                        .labelLarge!
                         .copyWith(color: Colors.white),
                   ),
                 ),
@@ -168,7 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     'Dismiss',
                     style: Theme.of(context)
                         .textTheme
-                        .button!
+                        .labelLarge!
                         .copyWith(color: Colors.white),
                   ),
                 ),
@@ -201,7 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Text('Add another item',
                   style: Theme.of(context)
                       .textTheme
-                      .button!
+                      .labelLarge!
                       .copyWith(color: Colors.white)),
             ),
             for (int n = feature3ItemCount; n > 0; n--)
@@ -234,7 +234,7 @@ class _ContentState extends State<Content> {
     ensureKey = GlobalKey<EnsureVisibleState>();
     ensureKey2 = GlobalKey<EnsureVisibleState>();
 
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       FeatureDiscovery.discoverFeatures(
         context,
         const <String>{
@@ -275,10 +275,10 @@ class _ContentState extends State<Content> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16.0),
                 color: Colors.blue,
-                child: Column(
+                child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.only(bottom: 8.0),
                       child: Text(
                         'DISH REPUBLIC',
@@ -288,7 +288,7 @@ class _ContentState extends State<Content> {
                         ),
                       ),
                     ),
-                    const Text(
+                    Text(
                       'Eat',
                       style: TextStyle(
                         color: Colors.white,
@@ -314,7 +314,7 @@ class _ContentState extends State<Content> {
                     return true;
                   },
                   onOpen: () async {
-                    WidgetsBinding.instance!.addPostFrameCallback((_) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
                       ensureKey!.currentState!.ensureVisible(
                         preciseAlignment: 0.5,
                         duration: const Duration(milliseconds: 400),
@@ -364,7 +364,7 @@ class _ContentState extends State<Content> {
                     return true;
                   },
                   onOpen: () async {
-                    WidgetsBinding.instance!.addPostFrameCallback((_) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
                       ensureKey2!.currentState!.ensureVisible(
                           duration: const Duration(milliseconds: 600));
                     });
@@ -380,7 +380,7 @@ class _ContentState extends State<Content> {
                       child: Text('Add item',
                           style: Theme.of(context)
                               .textTheme
-                              .button!
+                              .labelLarge!
                               .copyWith(color: Colors.white)),
                     ),
                     for (int n = feature6ItemCount; n > 0; n--)

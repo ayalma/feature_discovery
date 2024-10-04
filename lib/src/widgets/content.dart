@@ -1,7 +1,6 @@
 import 'package:feature_discovery/src/rendering.dart';
 import 'package:feature_discovery/src/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class Content extends StatelessWidget {
   final FeatureOverlayState state;
@@ -72,7 +71,7 @@ class Content extends StatelessWidget {
                   DefaultTextStyle(
                     style: Theme.of(context)
                         .textTheme
-                        .headline6!
+                        .titleLarge!
                         .copyWith(color: textColor),
                     child: title!,
                   ),
@@ -82,7 +81,7 @@ class Content extends StatelessWidget {
                   DefaultTextStyle(
                     style: Theme.of(context)
                         .textTheme
-                        .bodyText2!
+                        .bodyMedium!
                         .copyWith(color: textColor.withOpacity(0.9)),
                     child: description!,
                   )
