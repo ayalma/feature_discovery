@@ -1,4 +1,8 @@
 # Changelog
+## 0.14.2
+* Updated All Dependencies versions
+* Updated To Flutter version 3.24.3
+# Changelog
 ## 0.14.1
 * Updated Provider version
 
