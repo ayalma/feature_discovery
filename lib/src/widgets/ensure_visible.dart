@@ -41,9 +41,9 @@ class EnsureVisibleState extends State<EnsureVisible> {
         'The alignment needs to be null or between 0 and 1.');
 
     final renderObject = context.findRenderObject();
-    final viewport = RenderAbstractViewport.of(renderObject)!;
+    final viewport = RenderAbstractViewport.of(renderObject);
 
-    final scrollableState = Scrollable.of(context)!;
+    final scrollableState = Scrollable.of(context);
 
     final position = scrollableState.position;
     double alignment;
